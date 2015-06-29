@@ -11,6 +11,7 @@ use Carp;
 use Log::Log4perl;
 use CLGTextTools::Logging;
 use CLGTextTools::Observations::WordObsFamily;
+use CLGTextTools::Observations::CharObsFamily;
 use Data::Dumper::Simple;
 
 use base 'Exporter';
@@ -117,7 +118,7 @@ sub writeCountFiles {
 	open($fh, ">:encoding(utf-8)", $f) or logConfess("Cannot open file '$f' for writing");
 	my ($uniqueNGrams, $totalNGrams) = $self->writeObsTypeCount($fh, $obsType);
 	close($fh);
-	$f = "$prefix.total";
+	$f = "$prefix.$obsType.total";
 	open($fh, ">:encoding(utf-8)", $f) or logConfess("Cannot open file '$f' for writing");
 	printf $fh "%d\t%d\n", $uniqueNGrams, $totalNGrams;
 	close($fh);

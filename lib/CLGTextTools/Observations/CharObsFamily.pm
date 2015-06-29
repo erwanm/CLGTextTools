@@ -1,4 +1,4 @@
-package CLGTextTools::Observations::WordObsFamily;
+package CLGTextTools::Observations::CharObsFamily;
 
 # EM June 2015
 # 
@@ -28,7 +28,7 @@ our @ISA=qw/CLGTextTools::Observations::ObsFamily/;
 
 our $startLimitChar = "§";
 our $endLimitChar = "§";
-
+our $lineBreakChar="¤";
 
 sub new {
     my ($class, $params) = @_;
@@ -45,7 +45,7 @@ sub addObsType {
 	warnLog($self->{logger}, "Ignoring observation type '$obsType', already initialized.");
     } else {
 	$self->{observs}->{$obsType} = {};
-	my ($patternStr, $lc) = ($obsType =~ m/^CHAR\.([CS]+)\.lc([01])\.sl([01])$/);
+	my ($patternStr, $lc, $sl) = ($obsType =~ m/^CHAR\.([CS]+)\.lc([01])\.sl([01])$/);
 	confessLog($self->{logger}, "Invalid obs type '$obsType'") if (!length($patternStr) || !length($lc) || !length($sl));
 	$self->{logger}->debug("Adding obs type '$obsType': pattern='$patternStr', lc='$lc', sl='$sl'") if ($self->{logger});
 	$self->{params}->{$obsType}->{lc} = (defined($lc) && ($lc eq "1"));
@@ -91,11 +91,13 @@ sub addText {
     my $self = shift;
     my $text = shift;
 
-    my $lcText,
+    $text =~ s/\n/$lineBreakChar/g;
+    my $lcText;
     $lcText = lc($text) if ($self->{lc});
     my @textCase = ($text, $lcText);
 
     foreach my $obsType (keys %{$self->{observs}}) {
+	my $lc =  $self->{params}->{$obsType}->{lc};
 	$self->addStartEndNGrams(\@textCase, $obsType) if ($self->{params}->{$obsType}->{sl});
 	$self->addNGramsObsType($textCase[$lc], $obsType);
     }
@@ -109,7 +111,6 @@ sub addNGramsObsType {
 
     my $textLength = length($text);
     my $p = $self->{params}->{$obsType}->{pattern};
-    my $lc =  $self->{params}->{$obsType}->{lc};
     my $length = $self->{params}->{$obsType}->{length};
     for (my $i=0; $i<$textLength; $i++) {
 	if ($i + $length < $textLength) {
@@ -130,7 +131,7 @@ sub addNGramsObsType {
 sub addStartEndNGrams {
     my $self = shift;
     my $textCase = shift;
-    my $obsType;
+    my $obsType = shift;
     $self->{logger}->debug("Adding sentence limits ngrams for obsType '$obsType'") if ($self->{logger});
     my $p = $self->{params}->{$obsType}->{pattern};
     my $lc =  $self->{params}->{$obsType}->{lc};

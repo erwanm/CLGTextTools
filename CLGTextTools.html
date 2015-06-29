@@ -131,6 +131,10 @@ Error message and password prompt
 
 <li>$:/state/sidebar</li>
 
+<li>$:/state/tab/moresidebar-401116514</li>
+
+<li>$:/state/tab/sidebar--1835078512</li>
+
 <li>$:/StoryList</li>
 
 <li>$:/temp/info-plugin</li>
@@ -140,6 +144,18 @@ Error message and password prompt
 <li>$:/themes/tiddlywiki/vanilla</li>
 
 <li>CLGTextTools</li>
+
+<li>LineBreaks</li>
+
+<li>LowerCased</li>
+
+<li>NGramPatterns</li>
+
+<li>ObservationType</li>
+
+<li>OverlappingNGrams</li>
+
+<li>SentenceLimits</li>
 
 </ul>
 </p>
@@ -5643,10 +5659,16 @@ Error message and password prompt
 <div modified="20150616143520992" title="$:/state/showeditpreview">
 <pre>yes</pre>
 </div>
-<div modified="20150616143554233" title="$:/state/sidebar">
-<pre>yes</pre>
+<div modified="20150629183749277" title="$:/state/sidebar">
+<pre>no</pre>
 </div>
-<div list="CLGTextTools" title="$:/StoryList">
+<div modified="20150629173344183" title="$:/state/tab/moresidebar-401116514">
+<pre>$:/core/ui/MoreSideBar/All</pre>
+</div>
+<div modified="20150629173342807" title="$:/state/tab/sidebar--1835078512">
+<pre>$:/core/ui/SideBar/More</pre>
+</div>
+<div list="ObservationType NGramPatterns LineBreaks OverlappingNGrams LowerCased SentenceLimits CLGTextTools" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -5771,6 +5793,76 @@ Error message and password prompt
 * Relatively efficient implementation
 ** Intended to extract n-grams features from text files quite fast, rather than extracting features once and storing them as text files (so as to reduce the time spent in i/o operations).
 * Logging possible with ``Log::Log4Perl``, but (fully) disabled by default because it can be very costly in crucial program parts.</pre>
+</div>
+<div created="20150629172648960" modified="20150629173215955" tags="" title="LineBreaks">
+<pre>Some ObsFamily instances can take line breaks into account (currently only in CharObsFamily). This possibility should be used only if line breaks are meaningful (see OverlappingNGrams and SentenceLimits); otherwise, its is best for the calling program to remove them first.
+
+Because it must be possible to write or read the list of n-grams to a file, to avoid any confusion the line break characters are actually replaced with a special character (``¤`` by default) in ``addText``.
+</pre>
+</div>
+<div created="20150629165102454" modified="20150629165421152" tags="" title="LowerCased">
+<pre>The ``lc`` option, available currently with CharObsFamily and WordObsFamily, causes the input text to be lowercased. This way, words/characters are matched independently from their case. It is usually recommended for (word) token-based n-grams, but not particularly with character n-grams.</pre>
+</div>
+<div created="20150629180551784" modified="20150629183808324" title="NGramPatterns">
+<pre>
+Several [[bservation families|ObsFamily]] share a common parameter //&quot;pattern&quot;//:
+
+* WordObsFamily: ``[TS]+``
+** ``T`` is for //token// and ``S`` for //skip//.
+** Examples:
+*** ''T'' = simple tokens
+*** ''TT'' = tokens bigrams
+*** ''TTT'' = tokens trigrams
+*** ''TST'' = skip-gram of length 3 where the middle token is skipped; the result is a bigram which contains the 1st and 3rd token.
+** remark: the first and last character must not be ''S''.
+* CharObsFamily: ``[CS]+``
+** ``C`` is for //character// and ``S`` for //skip//.
+** Examples:
+*** ''CC'' = character bigram
+*** ''CSSCC'' = skip-gram of length 5 where the 2nd and 3rd chars are skipped; the result is a trigram which contains the 1st, 4th and 5th token.
+** remark: the first and last character must not be ''S''.
+</pre>
+</div>
+<div created="20150629173317523" modified="20150629174900587" tags="" title="ObservationType">
+<pre>
+An ''observation'' can be any observable feature in a text. The most common kind is an n-gram (but observations are not restricted to n-grams). n-grams are stored as bag-of-words (or bag-of-characters), i.e. sequential order between distinct n-grams is not preserved (it is of course preserved //inside the n-gram//, by definition).
+
+Different kinds of observations can be taken into account (e.g. words bigrams, character 5-grams, POS trigrams, etc.).
+The different kinds of observations are distributed among different categories called [[observations families|ObsFamily]]. Each family can contain itself different sub-types. For example, words n-grams correspond to one family (WordObsFamily), and inside this family there can be multiple types of words n-grams, including length, skip-grams (see NGramPatterns) and other options like lowercasing.
+
+Each //observation type// has a unique id, which must start with the prefix corresponding to its family). For example words n-grams types follow this pattern (see NGramPatterns, LowerCased and SentenceLimits for details):
+
+```
+WORD.&lt;pattern&gt;.lc[01].sl[01]
+```
+
+The connection between an id and the family is done in ObsCollection. The encoding of the part after the prefix is defined individually by the family (e.g. in WordObsFamily for the example above).
+
+</pre>
+</div>
+<div created="20150629165443298" modified="20150629172002462" tags="" title="OverlappingNGrams">
+<pre>If the input text is provided in a form which supports the separation into multiple meaningful units (e.g. one sentence by line, or an additional line break between distinct paragraphs), it is best not to include n-grams which span over two distinct &quot;units&quot;
+
+This can be done using multiple calls to ObsFamily ``addText``. This way the specific instance ``addText`` function (for instance in CharObsFamily and WordObsFamily) cannot take such spanning n-grams into account. It is the calling program responsibility to deal with that, since it depends on the input format. For instance, if the line breaks are not meaningful (simple text justification), the input text should be passed all at once to ``addText``.
+
+See also SentenceLimits.</pre>
+</div>
+<div created="20150629164530497" modified="20150629172610219" tags="" title="SentenceLimits">
+<pre>The ``sl`` option, available currently in with CharObsFamily and WordObsFamily, adds &quot;special n-grams&quot; at the beginning and end of the text provided as input. This is typically used for sentence limits, that is, when the sentences are provided one at a time as input; but it can also be used with any other meaningful unit of text (e.g. paragraph, document). Of course, it should not be used for lines of text which do not correspond to sentences or any other meaningful separation.
+
+For example,  with this option the tokens-trigrams extracted from sentence &quot;Hello there !&quot; are: 
+
+* ``# # Hello`` 
+* ``# Hello there``
+* ``Hello there !``
+* ``there ! #``
+* ``! # #``
+
+Without the option the only trigram would be ``Hello there !``.
+
+
+//Remark: check that the character or token used as special symbol does not interfere with the input text (ideally the input text should never contain it).//
+</pre>
 </div>
 
 </div>

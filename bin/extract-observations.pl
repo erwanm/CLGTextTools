@@ -10,7 +10,7 @@ use warnings;
 use Carp;
 use Log::Log4perl;
 use Getopt::Std;
-use CLGTextTools::Observations;
+use CLGTextTools::ObsCollection;
 use CLGTextTools::Logging qw/@possibleLogLevels/;
 use CLGTextTools::Commons qw/readTextFileLines readLines/;
 
@@ -87,7 +87,7 @@ foreach my $file (@files) {
     my $textLines = ($file eq "-") ? readLines(*STDIN,0,$logger) : readTextFileLines($file,0,$logger);
     my $text = join("", @$textLines);
     $logger->debug("file '$file': content = '$text'") if ($logger);
-    my $data = CLGTextTools::Observations->new(\%params);
+    my $data = CLGTextTools::ObsCollection->new(\%params);
     $data->addText($text);
     if ($file eq "-") { 
 	foreach my $obsType (@obsTypes) {
