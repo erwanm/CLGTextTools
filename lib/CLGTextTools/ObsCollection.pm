@@ -1,4 +1,4 @@
-package CLGTextTools::Observations;
+package CLGTextTools::ObsCollection;
 
 # EM June 2015
 # 

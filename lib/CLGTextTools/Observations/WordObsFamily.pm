@@ -2,7 +2,6 @@ package CLGTextTools::Observations::WordObsFamily;
 
 # EM June 2015
 # 
-# addText expects an array of tokens: 
 #
 # * to avoid n-grams which span over two two sentences or documents,
 # use two distinct calls to addText: ``addText(sentence1);
@@ -48,12 +47,12 @@ sub addObsType {
 	warnLog($self->{logger}, "Ignoring observation type '$obsType', already initialized.");
     } else {
 	$self->{observs}->{$obsType} = {};
-	my ($patternStr, $lc, $sl) = ($obsType =~ m/WORD\.([TS]+)\.lc([01])\.sl([01])/);
-	confessLog($self->{logger}, "Invalid obs type '$obsType'") if (!length($lc) || !length($lc) || !length($sl));
+	my ($patternStr, $lc, $sl) = ($obsType =~ m/^WORD\.([TS]+)\.lc([01])\.sl([01])$/);
+	confessLog($self->{logger}, "Invalid obs type '$obsType'") if (!length($patternStr) || !length($lc) || !length($sl));
 	$self->{logger}->debug("Adding obs type '$obsType': pattern='$patternStr', lc='$lc', sl='$sl'") if ($self->{logger});
 	$self->{params}->{$obsType}->{lc} = (defined($lc) && ($lc eq "1"));
 	$self->{params}->{$obsType}->{sl} = (defined($sl) && ($sl eq "1"));
-	$self->{lc} = (defined($lc) && ($lc eq "1")) ? 1 : 0;
+	$self->{lc} = $self->{lc} || $self->{params}->{$obsType}->{lc};
 	my @pattern;
 	for (my $i=0; $i<length($patternStr); $i++) {
 	    $pattern[$i] = (substr($patternStr, $i,1) eq "T");
@@ -94,11 +93,11 @@ sub addText {
     @lcTokens = map {lc} (@tokens) if ($self->{lc});
     my @tokensCase = (\@tokens, \@lcTokens); # tokensCase[1] not initialized if lc not needed
 
-    $self->addStartEndNGrams(\@tokensCase);
-    for (my $i=0; $i<$nbTokens; $i++) {
-	foreach my $obsType (keys %{$self->{observs}}) {
-	    my $p = $self->{params}->{$obsType}->{pattern};
-	    my $lc =  $self->{params}->{$obsType}->{lc};
+    foreach my $obsType (keys %{$self->{observs}}) {
+	$self->addStartEndNGrams(\@tokensCase, $obsType) if ($self->{params}->{$obsType}->{sl});
+	my $p = $self->{params}->{$obsType}->{pattern};
+	my $lc =  $self->{params}->{$obsType}->{lc};
+	for (my $i=0; $i<$nbTokens; $i++) {
 	    if ($i + scalar(@$p) < $nbTokens) {
 		my @ngram;
 		for (my $j=0; $j<scalar(@$p); $j++) {
@@ -131,28 +130,29 @@ sub _addNGram {
 sub addStartEndNGrams {
     my $self = shift;
     my $tokensCase = shift;
-    foreach my $obsType (keys %{$self->{observs}}) {
-	if ($self->{params}->{$obsType}->{sl}) {
-	    $self->{logger}->debug("Adding sentence limits ngrams for obsType '$obsType'") if ($self->{logger});
-	    my $p = $self->{params}->{$obsType}->{pattern};
-	    my $lc =  $self->{params}->{$obsType}->{lc};
-	    my $length = scalar(@$p);
-	    my $n = scalar(@{$tokensCase->[0]});
-	    for (my $i=1; $i<$length; $i++) {
-		my @ngramStart;
-		my @ngramEnd;
-		for (my $j=0; $j < $i; $j++) {
-		    push(@ngramStart, $tokensCase->[$lc]->[$j]);
-		    unshift(@ngramEnd, $tokensCase->[$lc]->[$n -$j -1]);
-		}
-		for (my $j=$i; $j<$length; $j++) {
-		    unshift(@ngramStart, $startLimitToken);
-		    push(@ngramEnd, $endLimitToken);
-		}
-		$self->_addNGram(\@ngramStart, $obsType);
-		$self->_addNGram(\@ngramEnd, $obsType);
+    my $obsType = shift;
+    $self->{logger}->debug("Adding sentence limits ngrams for obsType '$obsType'") if ($self->{logger});
+    my $p = $self->{params}->{$obsType}->{pattern};
+    my $lc =  $self->{params}->{$obsType}->{lc};
+    my $length = scalar(@$p);
+    my $n = scalar(@{$tokensCase->[0]});
+    for (my $nbPart1=1; $nbPart1<$length; $nbPart1++) {
+	my @ngramStart;
+	my @ngramEnd;
+	for (my $i=0; $i< $nbPart1; $i++) {
+	    if ($p->[$i]) {
+		push(@ngramStart, $startLimitToken);
+		push(@ngramEnd, $tokensCase->[$lc]->[$n -$nbPart1 +$i]) if ($n -$nbPart1 +$i >0);
 	    }
 	}
+	for (my $i=$nbPart1; $i< $length; $i++) {
+	    if ($p->[$i]) {
+		push(@ngramStart, $tokensCase->[$lc]->[$i -$nbPart1]) if ($i - $nbPart1 < $n);
+		push(@ngramEnd, $endLimitToken);
+	    }
+	}
+	$self->_addNGram(\@ngramStart, $obsType) if ($length-$nbPart1 < $n);
+	$self->_addNGram(\@ngramEnd, $obsType) if ($nbPart1 < $n);
     }
 }
 
