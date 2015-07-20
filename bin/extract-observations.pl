@@ -36,6 +36,8 @@ sub usage {
 	print $fh "  If <file1> is '-', then STDIN is used and the output is printed\n";
 	print $fh "  to STDOUT (no other input file is accepted).\n";
 	print $fh "\n";
+	print $fh "  Remark: This program cannot deal with POS obs types.\n";
+	print $fh "\n";
 	print $fh "  Main options:\n";
 #	print $fh "     -c <config file> TODO\n";
 	print $fh "     -i read a list of input filenames from STDIN. These are processed\n";
@@ -49,13 +51,15 @@ sub usage {
 	print $fh "        the text in a file together).\n";
 	print $fh "     -t pre-tokenized text, do not perform default tokenization (applies only\n";
 	print $fh "        to WORD observations).\n";
+	print $fh "     -r <resourceId1:filename2[;resourceId2:filename2;...]> vocab resouces files\n";
+	print $fh "        with their ids.\n";
 	print $fh "\n";
 }
 
 
 # PARSING OPTIONS
 my %opt;
-getopts('ihl:L:t:', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
+getopts('ihl:L:t:r:', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
 usage(*STDOUT) && exit 0 if $opt{h};
 print STDERR "at least 1 argument expected but ".scalar(@ARGV)." found: ".join(" ; ", @ARGV)  && usage(*STDERR) && exit 1 if (scalar(@ARGV) < 1);
 my $obsTypesList = shift(@ARGV);
@@ -70,6 +74,17 @@ if ($opt{l} || $opt{L}) {
 my $readFilesFromSTDIN = $opt{i};
 my $sentenceByLine = $opt{s};
 my $performTokenization = 0 if ($opt{t});
+my $resourcesStr = $opt{r};
+my $vocabResources;
+if ($opt{r}) {
+    $vocabResources ={};
+    my @resourcesPairs = split (";", $resourcesStr);
+    foreach my $pair (@resourcesPairs) {
+	my ($id, $file) = split (":", $pair);
+#	print STDERR "DEBUG pair = $pair ; id,file = $id,$file\n";
+	$vocabResources->{$id} = $file;
+    }
+}
 
 if ($files[0] eq "-") {
     confessLog($logger, "Error: using '-' as input file is not compatible with additional input files") if (scalar(@files)>1);
@@ -82,6 +97,7 @@ $params{logging} = 1 if ($logger);
 my @obsTypes = split(":", $obsTypesList);
 $params{obsTypes} = \@obsTypes;
 $params{wordTokenization} = $performTokenization;
+$params{wordVocab} = $vocabResources if (defined($vocabResources));
 
 foreach my $file (@files) {
     my $textLines = ($file eq "-") ? readLines(*STDIN,0,$logger) : readTextFileLines($file,0,$logger);

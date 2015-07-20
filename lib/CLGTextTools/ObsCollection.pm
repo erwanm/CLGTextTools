@@ -21,10 +21,17 @@ our $decimalDigits = 10;
 
 
 #
+# an ObsCollection may contain more obsTypes than the ones asked as input, because of dependencies.
+#
+#
+#
+
+#
 # $params:
 # - logging
 # - obsTypes (list)
 # - wordTokenization = 1 by default; set to 0 if the text is already tokenized (with spaces); applies only to WordFamily observations (POSFamily uses pre-tokenized input, one token by line)
+# - wordVocab
 #
 sub new {
 	my ($class, $params) = @_;
@@ -33,6 +40,7 @@ sub new {
 	$self->{wordTokenization} = 1 unless (defined($params->{wordTokenization}) && ($params->{wordTokenization} == 0));
 	$self->{families} = {};
 	$self->{mapObsTypeToFamily} = {};
+	$self->{wordVocab} = $params->{wordVocab} if (defined($params->{wordVocab}));
 	bless($self, $class);
 	if (defined($params->{obsTypes})) {
 	    foreach my $obsType (@{$params->{obsTypes}}) {
@@ -49,22 +57,23 @@ sub addObsType {
     my $obsType = shift;
 
     my ($family) = ($obsType =~ m/^([^.]+)\./);
+    $self->{logger}->debug("Adding obs type '$obsType'; family = '$family'") if ($self->{logger});
+    
     if (!defined($self->{families}->{$family})) {
-	my $p = {logging => defined($self->{logger}), wordTokenization => $self->{wordTokenization} };
 	if ($family eq "WORD") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::WordObsFamily->new($p);
+	    $self->{families}->{$family} = CLGTextTools::Observations::WordObsFamily->new( {logging => defined($self->{logger}), wordTokenization => $self->{wordTokenization}, vocab => $self->{wordVocab} } );
 	} elsif ($family eq "CHAR") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::CharObsFamily->new($p);
+	    $self->{families}->{$family} = CLGTextTools::Observations::CharObsFamily->new( {logging => defined($self->{logger})} );
 	} elsif ($family eq "POS") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::POSObsFamily->new($p);
+	    $self->{families}->{$family} = CLGTextTools::Observations::POSObsFamily->new({logging => defined($self->{logger})});
 	} elsif ($family eq "TTR") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::TTRObsFamily->new($p);
+	    $self->{families}->{$family} = CLGTextTools::Observations::TTRObsFamily->new({logging => defined($self->{logger})});
 	} elsif ($family eq "LENGTH") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::LengthObsFamily->new($p);
+	    $self->{families}->{$family} = CLGTextTools::Observations::LengthObsFamily->new({logging => defined($self->{logger})});
 	} elsif ($family eq "MORPH") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::MorphObsFamily->new($p);
+	    $self->{families}->{$family} = CLGTextTools::Observations::MorphObsFamily->new({logging => defined($self->{logger})});
 	} elsif ($family eq "STOP") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::StopObsFamily->new($p);
+	    $self->{families}->{$family} = CLGTextTools::Observations::StopObsFamily->new({logging => defined($self->{logger})});
 	}
     }
     $self->{mapObsTypeToFamily}->{$obsType} = $family;
@@ -72,8 +81,31 @@ sub addObsType {
 }
 
 
-sub addText {
+#
+# * Reads raw text files with no specific formatting (e.g. for sentences or paragraphs).
+# * Should be called only after the obs types have been initialized (with new or addObsTypes)
+# * Suitable for PAN15 text files.
+# * If POS observations are used, expects a file $filePrefix.POS containing the output in TreeTagger default format: <token> <POS tag>
+# * If resources files are used (e.g. vocabulary for stop-words), these are read in $params->{resources}
+# ** $params->{resources}->{<id>}->{<filename>} associates the resource id <id> with the content from <filename>
+# * Other parameters are passed by value in $params: $params->{values}->{<id>}->{<value>}
+#
+sub extractObsFromUnformattedText {
     my $self = shift;
+    my $filePrefix = shift;
+    my $params = shift;
+
+#    TODO
+
+
+}
+
+#
+# TODO
+# I don't know how to make it work the same way with POS (and maybe other obs types)?
+#
+sub addText {
+   my $self = shift;
     my $text = shift;
 
     foreach my $family (keys ($self->{families})) {

@@ -3,7 +3,7 @@ package CLGTextTools::Observations::WordObsFamily;
 # EM June 2015
 # 
 #
-# * to avoid n-grams which span over two two sentences or documents,
+# * to avoid n-grams which span over two sentences or documents,
 # use two distinct calls to addText: ``addText(sentence1);
 # addText(sentence2);``
 #
@@ -20,8 +20,10 @@ use strict;
 use warnings;
 use Carp;
 use Log::Log4perl;
-use CLGTextTools::Logging qw/confessLog/;
+use CLGTextTools::Logging qw/confessLog cluckLog/;
+use CLGTextTools::Commons qw/readTextFileLines arrayToHash/;
 use CLGTextTools::Observations::ObsFamily;
+use Data::Dumper::Simple;
 
 our @ISA=qw/CLGTextTools::Observations::ObsFamily/;
 
@@ -29,12 +31,20 @@ our @ISA=qw/CLGTextTools::Observations::ObsFamily/;
 our $gramSeparator = " ";
 our $startLimitToken = "#START_SENTENCE#";
 our $endLimitToken = "#END_SENTENCE#";
-
+our $unknownToken = "_";
 
 sub new {
     my ($class, $params) = @_;
     my $self = $class->SUPER::new($params);
     $self->{wordTokenization} = 1 unless (defined($params->{wordTokenization}) && ($params->{wordTokenization} == 0));
+    if (defined($params->{vocab})) {
+	$self->{logger}->debug("vocab resources parameter found: ".$params->{vocab}) if ($self->{logger});
+	$self->{logger}->trace("Vocab hash content = ".Dumper($params->{vocab})) if ($self->{logger});
+	foreach my $vocabId (keys %{$params->{vocab}}) {
+	    $self->{logger}->trace("calling addVocab for key:'$vocabId', value:'".$params->{vocab}->{$vocabId}."'") if ($self->{logger});
+	    $self->addVocab($vocabId, $params->{vocab}->{$vocabId});
+	}
+    }
     return $self;
 }
 
@@ -44,14 +54,18 @@ sub addObsType {
     my $obsType = shift;
 
     if (defined($self->{observs}->{$obsType})) {
-	warnLog($self->{logger}, "Ignoring observation type '$obsType', already initialized.");
+	cluckLog($self->{logger}, "Ignoring observation type '$obsType', already initialized.");
     } else {
 	$self->{observs}->{$obsType} = {};
-	my ($patternStr, $lc, $sl) = ($obsType =~ m/^WORD\.([TS]+)\.lc([01])\.sl([01])$/);
+	my ($patternStr, $lc, $sl, $vocabId) = ($obsType =~ m/^WORD\.([TS]+)\.lc([01])\.sl([01])(?:\.(.+))?$/);
 	confessLog($self->{logger}, "Invalid obs type '$obsType'") if (!length($patternStr) || !length($lc) || !length($sl));
 	$self->{logger}->debug("Adding obs type '$obsType': pattern='$patternStr', lc='$lc', sl='$sl'") if ($self->{logger});
 	$self->{params}->{$obsType}->{lc} = (defined($lc) && ($lc eq "1"));
 	$self->{params}->{$obsType}->{sl} = (defined($sl) && ($sl eq "1"));
+	if (defined($vocabId)) {
+	    $self->{logger}->debug("Obs type '$obsType' requires vocab id '$vocabId'") if ($self->{logger});
+	    $self->{params}->{$obsType}->{vocabId} = $vocabId;
+	}
 	$self->{lc} = $self->{lc} || $self->{params}->{$obsType}->{lc};
 	my @pattern;
 	for (my $i=0; $i<length($patternStr); $i++) {
@@ -61,6 +75,21 @@ sub addObsType {
 	$self->{nbNGrams}->{$obsType} = 0;
     }
 
+}
+
+
+#
+# A vocab file contains exactly one token by line.
+#
+#
+sub addVocab {
+    my $self = shift;
+    my $vocabId = shift;
+    my $vocabFile = shift;
+
+    $self->{logger}->debug("loading vocabulary '$vocabId' from file '$vocabFile'") if ($self->{logger});
+    my $vocab = arrayToHash( readTextFileLines($vocabFile,1,$self->{logger}) );
+    $self->{vocab}->{$vocabId} = $vocab;
 }
 
 
@@ -92,16 +121,26 @@ sub addText {
     my @lcTokens;
     @lcTokens = map {lc} (@tokens) if ($self->{lc});
     my @tokensCase = (\@tokens, \@lcTokens); # tokensCase[1] not initialized if lc not needed
+    my %vocabTokens;
 
     foreach my $obsType (keys %{$self->{observs}}) {
-	$self->addStartEndNGrams(\@tokensCase, $obsType) if ($self->{params}->{$obsType}->{sl});
 	my $p = $self->{params}->{$obsType}->{pattern};
 	my $lc =  $self->{params}->{$obsType}->{lc};
+	my $selectedTokens = $tokensCase[$lc];
+	my $vocabId = $self->{params}->{$obsType}->{vocabId};
+	if (defined($vocabId)) {
+	    $self->{logger}->debug("looking for vocab '$vocabId' (addText, type $obsType)") if ($self->{logger});
+	    my $vocab = $self->{vocab}->{$vocabId};
+	    confessLog($self->{logger}, "Error for obs type $obsType: no vocabulary found for vocab id '$vocabId'") if (!defined($vocab));
+	    my @tokensVocab = map { defined($vocab->{$_}) ? $_ : $unknownToken } @$selectedTokens;
+	    $selectedTokens = \@tokensVocab;
+	}
+	$self->addStartEndNGrams($selectedTokens, $obsType) if ($self->{params}->{$obsType}->{sl});
 	for (my $i=0; $i<$nbTokens; $i++) {
 	    if ($i + scalar(@$p) < $nbTokens) {
 		my @ngram;
 		for (my $j=0; $j<scalar(@$p); $j++) {
-		    push(@ngram, $tokensCase[$lc]->[$i+$j]) if ($p->[$j]);
+		    push(@ngram, $selectedTokens->[$i+$j]) if ($p->[$j]);
 		}
 		$self->_addNGram(\@ngram, $obsType);
 
@@ -129,25 +168,25 @@ sub _addNGram {
 
 sub addStartEndNGrams {
     my $self = shift;
-    my $tokensCase = shift;
+    my $tokens = shift;
     my $obsType = shift;
     $self->{logger}->debug("Adding sentence limits ngrams for obsType '$obsType'") if ($self->{logger});
     my $p = $self->{params}->{$obsType}->{pattern};
     my $lc =  $self->{params}->{$obsType}->{lc};
     my $length = scalar(@$p);
-    my $n = scalar(@{$tokensCase->[0]});
+    my $n = scalar(@$tokens);
     for (my $nbPart1=1; $nbPart1<$length; $nbPart1++) {
 	my @ngramStart;
 	my @ngramEnd;
 	for (my $i=0; $i< $nbPart1; $i++) {
 	    if ($p->[$i]) {
 		push(@ngramStart, $startLimitToken);
-		push(@ngramEnd, $tokensCase->[$lc]->[$n -$nbPart1 +$i]) if ($n -$nbPart1 +$i >0);
+		push(@ngramEnd, $tokens->[$n -$nbPart1 +$i]) if ($n -$nbPart1 +$i >0);
 	    }
 	}
 	for (my $i=$nbPart1; $i< $length; $i++) {
 	    if ($p->[$i]) {
-		push(@ngramStart, $tokensCase->[$lc]->[$i -$nbPart1]) if ($i - $nbPart1 < $n);
+		push(@ngramStart, $tokens->[$i -$nbPart1]) if ($i - $nbPart1 < $n);
 		push(@ngramEnd, $endLimitToken);
 	    }
 	}

@@ -20,8 +20,10 @@ use strict;
 use warnings;
 use Carp;
 use Log::Log4perl;
-use CLGTextTools::Logging qw/confessLog/;
+use CLGTextTools::Logging qw/confessLog cluckLog/;
 use CLGTextTools::Observations::ObsFamily;
+use utf8; # IMPORTANT, otherwise string constants are messed up
+
 
 our @ISA=qw/CLGTextTools::Observations::ObsFamily/;
 
@@ -42,7 +44,7 @@ sub addObsType {
     my $obsType = shift;
 
     if (defined($self->{observs}->{$obsType})) {
-	warnLog($self->{logger}, "Ignoring observation type '$obsType', already initialized.");
+	cluckLog($self->{logger}, "Ignoring observation type '$obsType', already initialized.");
     } else {
 	$self->{observs}->{$obsType} = {};
 	my ($patternStr, $lc, $sl) = ($obsType =~ m/^CHAR\.([CS]+)\.lc([01])\.sl([01])$/);
@@ -112,8 +114,9 @@ sub addNGramsObsType {
     my $textLength = length($text);
     my $p = $self->{params}->{$obsType}->{pattern};
     my $length = $self->{params}->{$obsType}->{length};
-    for (my $i=0; $i<$textLength; $i++) {
-	if ($i + $length < $textLength) {
+    for (my $i=0; $i<=$textLength-$length; $i++) {
+#	$self->{logger}->trace("i=$i; textLength=$textLength; length=$length") if ($self->{logger});
+#	if ($i + $length <= $textLength) {
 	    my $ngram="";
 	    for (my $j=0; $j<scalar(@$p); $j++) {
 		$ngram .=  substr($text, $i + $p->[$j]->[0], $p->[$j]->[1]);
@@ -121,7 +124,7 @@ sub addNGramsObsType {
 	    $self->{logger}->trace("Adding ngram '$ngram' for obsType '$obsType'") if ($self->{logger});
 	    $self->{observs}->{$obsType}->{$ngram}++;
 	    $self->{nbNGrams}->{$obsType}++;
-	}
+#	}
     }
 
 }
@@ -139,6 +142,7 @@ sub addStartEndNGrams {
     my $n = length($textCase->[0]);
     my $startText = "".($startLimitChar x ($length-1)).substr($textCase->[$lc], 0, $length -1);
     my $endText = substr($textCase->[$lc], $n -$length+1 , $length -1).($endLimitChar x ($length-1));
+    $self->{logger}->trace("startLimitChar='$startLimitChar' ; startText = '$startText' ; endText = '$endText'") if ($self->{logger});
     $self->addNGramsObsType($startText, $obsType);
     $self->addNGramsObsType($endText, $obsType);
 }

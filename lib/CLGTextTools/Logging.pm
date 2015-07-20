@@ -6,7 +6,7 @@ use Log::Log4perl;
 use Carp;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/initLogging @possibleLogLevels confessLog warnLog/;
+our @EXPORT_OK = qw/initLogging @possibleLogLevels confessLog warnLog cluckLog/;
 
 our @possibleLogLevels = qw/TRACE DEBUG INFO WARN ERROR FATAL OFF/;
 
@@ -105,6 +105,16 @@ sub warnLog {
     my ($logger, $msg) = @_;
     if (defined($logger)) {
 	$logger->logwarn($msg);
+    } else {
+	warn($msg);
+    }
+
+}
+
+sub cluckLog {
+    my ($logger, $msg) = @_;
+    if (defined($logger)) {
+	$logger->logcluck($msg);
     } else {
 	warn($msg);
     }
