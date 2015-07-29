@@ -42,13 +42,14 @@ sub addObsType {
     $self->{logger}->logconfess("__PACKAGE__: cannot execute abstract method 'addObsTypes'.");
 }
 
+# OBSOLETE, gave up on this.
 #
 # a subclass which requires some other obs types must return their ids in this method.
 #
-sub requiresObsTypes {
-    my $self = shift;
-    $self->{logger}->logconfess("__PACKAGE__: cannot execute abstract method 'requiresObsTypes'.");
-}
+#sub requiresObsTypes {
+#    my $self = shift;
+#    $self->{logger}->logconfess("__PACKAGE__: cannot execute abstract method 'requiresObsTypes'.");
+#}
 
 
 #

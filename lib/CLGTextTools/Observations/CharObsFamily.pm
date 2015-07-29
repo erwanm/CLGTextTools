@@ -76,13 +76,6 @@ sub addObsType {
 }
 
 
-#
-# a subclass which requires some other obs types must return their ids in this method.
-#
-sub requiresObsTypes {
-    my $self = shift;
-    return [];
-}
 
 
 

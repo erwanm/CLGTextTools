@@ -8,7 +8,7 @@ use File::BOM qw/open_bom/;
 use CLGTextTools::Logging qw/confessLog/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash/;
+our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash hashKeysToArray readTSVByLine readTSVFileLinesAsArray readTSVLinesAsArray/;
 
 
 
@@ -42,6 +42,14 @@ sub arrayToHash {
 }
 
 
+
+sub hashKeysToArray {
+    my $hash = shift;
+    my @keys = keys %$hash;
+    return \@keys;
+}
+
+
 sub readTextFileLines {
     my $file = shift;
     my $removeLineBreaks = shift;
@@ -69,6 +77,48 @@ sub readLines {
     return \@content;
 }
 
+
+
+#
+# $checkNbCols: if >0, checks that every line contains this number of columns.
+#
+#
+sub readTSVFileLinesAsArray {
+    my $file = shift;
+    my $checkNbCols = shift;
+    my $logger = shift; # optional
+
+    my $fh;
+    open($fh, '<:encoding(UTF-8)', $file) or confessLog($logger, "Cannot open '$file' for reading");
+    $logger->debug("Reading text file '$file'") if ($logger);
+    my $content = readTSVLinesAsArray($fh, $file, $checkNbCols, $logger);
+    close($fh);
+    return $content;
+}
+
+
+#
+# $checkNbCols: if >0, checks that every line contains this number of columns.
+# return value: array->[$row]->[$column]
+#
+sub readTSVLinesAsArray {
+    my $fh = shift;
+    my $filename = shift; # set to undef if not a file or doesn't matter - used ony for error mesg
+    my $checkNbCols = shift;
+    my $logger = shift; # optional
+
+    my @lines;
+    my $index = 0;
+    while (<$fh>) {
+	chomp;
+	my @columns = split(/\t/);
+#	$logger->trace("Reading line '$_'") if ($logger);
+	confessLog($logger, "Error: wrong number of columns: expected $checkNbCols but found ".scalar(@columns)." in '$filename', line ".($index+1)."") if (($checkNbCols > 0) && (scalar(@columns) != $checkNbCols));
+	push(@lines, \@columns);
+	$index++;
+    }
+    return \@lines;
+}
 
 
 1;

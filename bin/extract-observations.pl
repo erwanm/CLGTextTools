@@ -33,10 +33,10 @@ sub usage {
 	print $fh "  documentation for a comprehensive list of obs types codes).\n";
 	print $fh "  The output is written to separate files named after each\n";
 	print $fh "  input file: <file1>.<obs-type>.count and <file1>.<obs-type>.total\n";
-	print $fh "  If <file1> is '-', then STDIN is used and the output is printed\n";
-	print $fh "  to STDOUT (no other input file is accepted).\n";
-	print $fh "\n";
-	print $fh "  Remark: This program cannot deal with POS obs types.\n";
+#	print $fh "  If <file1> is '-', then STDIN is used and the output is printed\n";
+#	print $fh "  to STDOUT (no other input file is accepted).\n";
+#	print $fh "\n";
+#	print $fh "  Remark: This program cannot deal with POS obs types.\n";
 	print $fh "\n";
 	print $fh "  Main options:\n";
 #	print $fh "     -c <config file> TODO\n";
@@ -49,8 +49,9 @@ sub usage {
 	print $fh "     -L <Log output file> log filename (useless if a log config file is given).\n";
 	print $fh "     -s interpret line breaks as sentence ends (default: collate all\n";
 	print $fh "        the text in a file together).\n";
-	print $fh "     -t pre-tokenized text, do not perform default tokenization (applies only\n";
-	print $fh "        to WORD observations).\n";
+	print $fh "        (applies only to CHAR and WORD observations).\n";
+	print $fh "     -t pre-tokenized text, do not perform default tokenization\n";
+	print $fh "        (applies only to WORD observations).\n";
 	print $fh "     -r <resourceId1:filename2[;resourceId2:filename2;...]> vocab resouces files\n";
 	print $fh "        with their ids.\n";
 	print $fh "\n";
@@ -86,10 +87,10 @@ if ($opt{r}) {
     }
 }
 
-if ($files[0] eq "-") {
-    confessLog($logger, "Error: using '-' as input file is not compatible with additional input files") if (scalar(@files)>1);
-    confessLog($logger, "Error: using '-' as input file is not compatible with option '-i'") if ($readFilesFromSTDIN);
-}
+#if ($files[0] eq "-") {
+#    confessLog($logger, "Error: using '-' as input file is not compatible with additional input files") if (scalar(@files)>1);
+#    confessLog($logger, "Error: using '-' as input file is not compatible with option '-i'") if ($readFilesFromSTDIN);
+#}
 
 my %params;
 $params{logging} = 1 if ($logger);
@@ -100,16 +101,12 @@ $params{wordTokenization} = $performTokenization;
 $params{wordVocab} = $vocabResources if (defined($vocabResources));
 
 foreach my $file (@files) {
-    my $textLines = ($file eq "-") ? readLines(*STDIN,0,$logger) : readTextFileLines($file,0,$logger);
-    my $text = join("", @$textLines);
-    $logger->debug("file '$file': content = '$text'") if ($logger);
+#    my $textLines = ($file eq "-") ? readLines(*STDIN,0,$logger) : readTextFileLines($file,0,$logger);
     my $data = CLGTextTools::ObsCollection->new(\%params);
-    $data->addText($text);
-    if ($file eq "-") { 
-	foreach my $obsType (@obsTypes) {
-	    $data->writeObsTypeCount(*STDOUT, $obsType, 1) ;
-	}
-    } else {
-	$data->writeCountFiles($file);
-    }
+#    my $textLines = readTextFileLines($file,0,$logger);
+#    my $text = join("", @$textLines);
+#    $logger->debug("file '$file': content = '$text'") if ($logger);
+#    $data->addText($text);
+    $data->extractObsFromUnformattedText($file);
+    $data->writeCountFiles($file);
 }

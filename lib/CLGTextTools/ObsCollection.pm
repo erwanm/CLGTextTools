@@ -9,10 +9,13 @@ use strict;
 use warnings;
 use Carp;
 use Log::Log4perl;
-use CLGTextTools::Logging;
+use CLGTextTools::Logging qw/confessLog/;
 use CLGTextTools::Observations::WordObsFamily;
 use CLGTextTools::Observations::CharObsFamily;
+use CLGTextTools::Observations::POSObsFamily;
+use CLGTextTools::Observations::VocabClassObsFamily;;
 use Data::Dumper::Simple;
+use CLGTextTools::Commons qw/hashKeysToArray readTSVFileLinesAsArray readTextFileLines/;
 
 use base 'Exporter';
 our @EXPORT_OK = qw//;
@@ -66,14 +69,12 @@ sub addObsType {
 	    $self->{families}->{$family} = CLGTextTools::Observations::CharObsFamily->new( {logging => defined($self->{logger})} );
 	} elsif ($family eq "POS") {
 	    $self->{families}->{$family} = CLGTextTools::Observations::POSObsFamily->new({logging => defined($self->{logger})});
+	} elsif ($family eq "VOCABCLASS") {
+	    $self->{families}->{$family} = CLGTextTools::Observations::VocabClassObsFamily->new({logging => defined($self->{logger}), wordTokenization => $self->{wordTokenization} });
 	} elsif ($family eq "TTR") {
 	    $self->{families}->{$family} = CLGTextTools::Observations::TTRObsFamily->new({logging => defined($self->{logger})});
-	} elsif ($family eq "LENGTH") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::LengthObsFamily->new({logging => defined($self->{logger})});
-	} elsif ($family eq "MORPH") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::MorphObsFamily->new({logging => defined($self->{logger})});
-	} elsif ($family eq "STOP") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::StopObsFamily->new({logging => defined($self->{logger})});
+	} else {
+	    confessLog($self->{logger}, "Obs types family '$family' not recognized.");
 	}
     }
     $self->{mapObsTypeToFamily}->{$obsType} = $family;
@@ -83,20 +84,38 @@ sub addObsType {
 
 #
 # * Reads raw text files with no specific formatting (e.g. for sentences or paragraphs).
-# * Should be called only after the obs types have been initialized (with new or addObsTypes)
+# * Should be called only after:
+# ** the obs types have been initialized (with new or addObsTypes)
+# ** resources (e.g. vocabulary) have been initialized (with new)
 # * Suitable for PAN15 text files.
-# * If POS observations are used, expects a file $filePrefix.POS containing the output in TreeTagger default format: <token> <POS tag>
-# * If resources files are used (e.g. vocabulary for stop-words), these are read in $params->{resources}
-# ** $params->{resources}->{<id>}->{<filename>} associates the resource id <id> with the content from <filename>
+# * If POS observations are used, expects a file $filePrefix.POS containing the output in TreeTagger format (with lemma): <token> <POS tag> <lemma>
+#
+# TODO if actually needed?
 # * Other parameters are passed by value in $params: $params->{values}->{<id>}->{<value>}
 #
 sub extractObsFromUnformattedText {
     my $self = shift;
     my $filePrefix = shift;
-    my $params = shift;
+#    my $params = shift;
 
-#    TODO
-
+    my $text;
+    foreach my $family (keys %{$self->{families}}) {
+	$self->{logger}->debug("Extracting observations for family '$family'") if ($self->{logger});
+	if ( ($family eq "WORD") || ($family eq "CHAR") || ($family eq "VOCABCLASS") ) {
+	    if (!defined($text)) { # avoid reading text for every family
+		$self->{logger}->debug("reading file '$filePrefix'") if ($self->{logger});
+		my $textLines = readTextFileLines($filePrefix,1,$self->{logger});
+		$text = join(" ", @$textLines);
+	    }
+	    $self->{families}->{$family}->addText($text);
+	} elsif ($family eq "POS") {
+	    $self->{logger}->debug("reading file '$filePrefix.POS'") if ($self->{logger});
+	    my $textLines = readTSVFileLinesAsArray("$filePrefix.POS", 3, $self->{logger});
+	    $self->{families}->{$family}->addText($textLines);
+	} else {
+	    confesLog($self->{logger}, "Bug: missing code for family '$family' ");
+	}
+    }
 
 }
 
@@ -147,11 +166,11 @@ sub writeCountFiles {
     foreach my $obsType (@$obsTypesList) {
 	my $f = "$prefix.$obsType.count";
 	my $fh;
-	open($fh, ">:encoding(utf-8)", $f) or logConfess("Cannot open file '$f' for writing");
+	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
 	my ($uniqueNGrams, $totalNGrams) = $self->writeObsTypeCount($fh, $obsType);
 	close($fh);
 	$f = "$prefix.$obsType.total";
-	open($fh, ">:encoding(utf-8)", $f) or logConfess("Cannot open file '$f' for writing");
+	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
 	printf $fh "%d\t%d\n", $uniqueNGrams, $totalNGrams;
 	close($fh);
     }
