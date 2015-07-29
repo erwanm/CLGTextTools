@@ -71,8 +71,6 @@ sub addObsType {
 	    $self->{families}->{$family} = CLGTextTools::Observations::POSObsFamily->new({logging => defined($self->{logger})});
 	} elsif ($family eq "VOCABCLASS") {
 	    $self->{families}->{$family} = CLGTextTools::Observations::VocabClassObsFamily->new({logging => defined($self->{logger}), wordTokenization => $self->{wordTokenization} });
-	} elsif ($family eq "TTR") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::TTRObsFamily->new({logging => defined($self->{logger})});
 	} else {
 	    confessLog($self->{logger}, "Obs types family '$family' not recognized.");
 	}

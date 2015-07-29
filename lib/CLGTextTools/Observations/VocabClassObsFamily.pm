@@ -60,6 +60,9 @@ sub addObsType {
 	if ($obsType =~ m/^VOCABCLASS\.MORPHO$/) {
 	    $self->{params}->{$obsType}->{type} = "morpho";
 	    $self->{logger}->debug("Adding obs type '$obsType': morpho") if ($self->{logger});
+	} elsif ($obsType =~ m/^VOCABCLASS\.TTR$/) {
+	    $self->{params}->{$obsType}->{type} = "TTR";
+	    $self->{logger}->debug("Adding obs type '$obsType': TTR") if ($self->{logger});
 	} elsif ($obsType =~ m/^VOCABCLASS\.LENGTH/) {
 	    my ($classId) = ($obsType =~ m/^VOCABCLASS\.LENGTH(?:\.(.+))?$/); # $classId can be undefined (default class = simple word length)
 	    $self->{params}->{$obsType}->{type} = "length";
@@ -101,29 +104,30 @@ sub addText {
 
     foreach my $obsType (keys %{$self->{observs}}) {
 	my $type = $self->{params}->{$obsType}->{type};
-	my $lengthClasses;
-	if ($type eq "length") {
-	    $lengthClasses = $self->{params}->{$obsType}->{lengthClasses};
-	}
-	foreach my $word (keys %bag) {
-	    my $class;
-	    if ($type eq "morpho") {
-		$class = getMorphClass($word);
-	    } elsif ($type eq "length") {
-		my $l = length($word); # default class (no length classes supplied)
-		if (defined($lengthClasses)) {
-		    $class = 0;
-		    while ( ($class < scalar(@$lengthClasses)) && ($lengthClasses->[$class] < $l) ) {
-			$class++;
+	if ($type eq "TTR") { # remark: case not standardized, which would be better in this case
+	    $self->{observs}->{$obsType}->{TTR} = scalar(keys %bag); # = nb distinct tokens
+	} else {
+	    my $lengthClasses = $self->{params}->{$obsType}->{lengthClasses} if ($type eq "length");
+	    foreach my $word (keys %bag) {
+		my $class;
+		if ($type eq "morpho") {
+		    $class = getMorphClass($word);
+		} elsif ($type eq "length") {
+		    my $l = length($word); # default class (no length classes supplied)
+		    if (defined($lengthClasses)) {
+			$class = 0;
+			while ( ($class < scalar(@$lengthClasses)) && ($lengthClasses->[$class] < $l) ) {
+			    $class++;
+			}
+		    } else {
+			$class = $l;
 		    }
 		} else {
-		    $class = $l;
+		    confessLog($self->{logger}, "BUG");
+		}
+		$self->{logger}->trace("Adding $bag{$word} occurrences of class '$class' for token '$word' (obsType '$obsType')") if ($self->{logger});
+		$self->{observs}->{$obsType}->{$class} += $bag{$word};
 	    }
-	    } else {
-		confessLog($self->{logger}, "BUG");
-	    }
-	    $self->{logger}->trace("Adding $bag{$word} occurrences of class '$class' for token '$word' (obsType '$obsType')") if ($self->{logger});
-	    $self->{observs}->{$obsType}->{$class} += $bag{$word};
 	}
 	$self->{nbNGrams}->{$obsType} = $nbTokens;
     }
