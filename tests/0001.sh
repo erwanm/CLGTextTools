@@ -9,7 +9,7 @@ resources="eng-stop1:tests/resources/english.stop-words;eng-stop2:tests/resource
 if [ -z "$1" ]; then
     d=$(mktemp -d)
 else
-    dieIfNiSuchDir "$1" "$0,$LINENO: "
+    dieIfNoSuchDir "$1" "$0,$LINENO: "
     d="$1"
 fi
 echo "$0. work dir: '$d'"
