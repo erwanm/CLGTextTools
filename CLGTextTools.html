@@ -5659,8 +5659,8 @@ Error message and password prompt
 <div modified="20150616143520992" title="$:/state/showeditpreview">
 <pre>yes</pre>
 </div>
-<div modified="20150629183749277" title="$:/state/sidebar">
-<pre>no</pre>
+<div modified="20150921160057835" title="$:/state/sidebar">
+<pre>yes</pre>
 </div>
 <div modified="20150629173344183" title="$:/state/tab/moresidebar-401116514">
 <pre>$:/core/ui/MoreSideBar/All</pre>
@@ -5668,7 +5668,7 @@ Error message and password prompt
 <div modified="20150629173342807" title="$:/state/tab/sidebar--1835078512">
 <pre>$:/core/ui/SideBar/More</pre>
 </div>
-<div list="ObservationType NGramPatterns LineBreaks OverlappingNGrams LowerCased SentenceLimits CLGTextTools" title="$:/StoryList">
+<div list="NGramPatterns LowerCased LineBreaks CLGTextTools" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -5803,9 +5803,8 @@ Because it must be possible to write or read the list of n-grams to a file, to a
 <div created="20150629165102454" modified="20150629165421152" tags="" title="LowerCased">
 <pre>The ``lc`` option, available currently with CharObsFamily and WordObsFamily, causes the input text to be lowercased. This way, words/characters are matched independently from their case. It is usually recommended for (word) token-based n-grams, but not particularly with character n-grams.</pre>
 </div>
-<div created="20150629180551784" modified="20150629183808324" title="NGramPatterns">
-<pre>
-Several [[bservation families|ObsFamily]] share a common parameter //&quot;pattern&quot;//:
+<div created="20150629180551784" modified="20150921160218108" title="NGramPatterns">
+<pre>Several [[observation families|ObsFamily]] share a common parameter //&quot;pattern&quot;//:
 
 * WordObsFamily: ``[TS]+``
 ** ``T`` is for //token// and ``S`` for //skip//.
@@ -5824,8 +5823,7 @@ Several [[bservation families|ObsFamily]] share a common parameter //&quot;patte
 </pre>
 </div>
 <div created="20150629173317523" modified="20150629174900587" tags="" title="ObservationType">
-<pre>
-An ''observation'' can be any observable feature in a text. The most common kind is an n-gram (but observations are not restricted to n-grams). n-grams are stored as bag-of-words (or bag-of-characters), i.e. sequential order between distinct n-grams is not preserved (it is of course preserved //inside the n-gram//, by definition).
+<pre>An ''observation'' can be any observable feature in a text. The most common kind is an n-gram (but observations are not restricted to n-grams). n-grams are stored as bag-of-words (or bag-of-characters), i.e. sequential order between distinct n-grams is not preserved (it is of course preserved //inside the n-gram//, by definition).
 
 Different kinds of observations can be taken into account (e.g. words bigrams, character 5-grams, POS trigrams, etc.).
 The different kinds of observations are distributed among different categories called [[observations families|ObsFamily]]. Each family can contain itself different sub-types. For example, words n-grams correspond to one family (WordObsFamily), and inside this family there can be multiple types of words n-grams, including length, skip-grams (see NGramPatterns) and other options like lowercasing.
