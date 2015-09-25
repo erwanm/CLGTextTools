@@ -29,8 +29,8 @@ our @ISA=qw/CLGTextTools::Observations::ObsFamily/;
 
 
 our $gramSeparator = " ";
-our $startLimitToken = "#START_SENTENCE#";
-our $endLimitToken = "#END_SENTENCE#";
+our $startLimitToken = "#UNIT_START#";
+our $endLimitToken = "#UNIT_END#";
 our $unknownToken = "_";
 
 sub new {
@@ -106,11 +106,15 @@ sub addText {
     if ($self->{wordTokenization}) {
 	$self->{logger}->debug("Tokenizing input text") if ($self->{logger});
 	$text =~ s/([^\w\s]+)/ $1 /g;
+	$text =~ s/^\s+//; # remove possible whitespaces at the start and end of the text
+	$text =~ s/\s+$//;
     }
     $self->{logger}->debug("Computing list of tokens") if ($self->{logger});
+#    $self->{logger}->trace("TEXT='$text'") if ($self->{logger});
     my @tokens = split(/\s+/, $text);
     my $nbTokens = scalar(@tokens);
     $self->{logger}->debug("Adding text: $nbTokens tokens.") if ($self->{logger});
+#    $self->{logger}->trace(join("||", @tokens)) if ($self->{logger});
     my @lcTokens;
     @lcTokens = map {lc} (@tokens) if ($self->{lc});
     my @tokensCase = (\@tokens, \@lcTokens); # tokensCase[1] not initialized if lc not needed
@@ -153,6 +157,8 @@ sub _addNGram {
     my $obsType = shift;
 
     my $ngramStr = join($gramSeparator, @$ngramArray);
+    
+    confessLog($self->{logger}, "Bug: empty ngram!") if (length($ngramStr)==0);
     $self->{logger}->trace("Adding ngram '$ngramStr' for obsType '$obsType'") if ($self->{logger});
     $self->{observs}->{$obsType}->{$ngramStr}++;
     $self->{nbNGrams}->{$obsType}++;

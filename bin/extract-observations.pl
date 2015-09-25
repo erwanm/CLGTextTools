@@ -33,10 +33,12 @@ sub usage {
 	print $fh "  documentation for a comprehensive list of obs types codes).\n";
 	print $fh "  The output is written to separate files named after each\n";
 	print $fh "  input file: <file1>.<obs-type>.count and <file1>.<obs-type>.total\n";
+	print $fh "  If POS observations are used, expects a file <file>.POS containing\n";
+	print $fh "  the output in TreeTagger format (with lemma): \n";
+	print $fh "   <token> <POS tag> <lemma>\n";
 #	print $fh "  If <file1> is '-', then STDIN is used and the output is printed\n";
 #	print $fh "  to STDOUT (no other input file is accepted).\n";
 #	print $fh "\n";
-#	print $fh "  Remark: This program cannot deal with POS obs types.\n";
 	print $fh "\n";
 	print $fh "  Main options:\n";
 #	print $fh "     -c <config file> TODO\n";
@@ -47,8 +49,9 @@ sub usage {
 	print $fh "        or a log level (".join(",", @possibleLogLevels)."). \n";
 	print $fh "        By default there is no logging at all.\n";
 	print $fh "     -L <Log output file> log filename (useless if a log config file is given).\n";
-	print $fh "     -s interpret line breaks as sentence ends (default: collate all\n";
-	print $fh "        the text in a file together).\n";
+	print $fh "     -s <singleLineBreak|doubleLineBreak> by default all the text is collated\n";
+	print $fh "        togenther; this option allows to specify a separator for meaningful units,\n";
+	print $fh "        typically sentences or paragraphs.";
 	print $fh "        (applies only to CHAR and WORD observations).\n";
 	print $fh "     -t pre-tokenized text, do not perform default tokenization\n";
 	print $fh "        (applies only to WORD observations).\n";
@@ -60,7 +63,7 @@ sub usage {
 
 # PARSING OPTIONS
 my %opt;
-getopts('ihl:L:t:r:', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
+getopts('ihl:L:t:r:s:', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
 usage(*STDOUT) && exit 0 if $opt{h};
 print STDERR "at least 1 argument expected but ".scalar(@ARGV)." found: ".join(" ; ", @ARGV)  && usage(*STDERR) && exit 1 if (scalar(@ARGV) < 1);
 my $obsTypesList = shift(@ARGV);
@@ -73,7 +76,7 @@ if ($opt{l} || $opt{L}) {
 }
 
 my $readFilesFromSTDIN = $opt{i};
-my $sentenceByLine = $opt{s};
+my $formattingSeparator = $opt{s};
 my $performTokenization = 0 if ($opt{t});
 my $resourcesStr = $opt{r};
 my $vocabResources;
@@ -98,6 +101,7 @@ $params{logging} = 1 if ($logger);
 my @obsTypes = split(":", $obsTypesList);
 $params{obsTypes} = \@obsTypes;
 $params{wordTokenization} = $performTokenization;
+$params{formatting} = $formattingSeparator;
 $params{wordVocab} = $vocabResources if (defined($vocabResources));
 
 foreach my $file (@files) {
@@ -107,6 +111,6 @@ foreach my $file (@files) {
 #    my $text = join("", @$textLines);
 #    $logger->debug("file '$file': content = '$text'") if ($logger);
 #    $data->addText($text);
-    $data->extractObsFromUnformattedText($file);
+    $data->extractObsFromText($file);
     $data->writeCountFiles($file);
 }

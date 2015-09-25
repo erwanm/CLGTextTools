@@ -8,7 +8,7 @@ use File::BOM qw/open_bom/;
 use CLGTextTools::Logging qw/confessLog/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash hashKeysToArray readTSVByLine readTSVFileLinesAsArray readTSVLinesAsArray/;
+our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash hashKeysToArray readTSVByLine readTSVFileLinesAsArray readTSVLinesAsArray readConfigFile/;
 
 
 
@@ -118,6 +118,34 @@ sub readTSVLinesAsArray {
 	$index++;
     }
     return \@lines;
+}
+
+
+#
+# format: variableName=value
+# comments (starting with #) and empty lines allowed
+# returns a hash res->{variableName} = value
+#
+sub readConfigFile {
+    my $filename=shift;
+    open( FILE, '<:encoding(UTF-8)', $filename ) or die "Cannot read config file '$filename'.";
+    my %res;
+    while (<FILE>) {
+	    #print "debug: $_";
+	chomp;
+	if (m/#/) {
+	    s/#.*$//;  # remove comments
+	}
+	s/^\s+//; # remove spaces
+	s/\s+$//; 
+	if ($_) {
+	    my ($name, $value) = ( $_ =~ m/([^=]+)=(.*)/);
+	    $res{$name} = $value;
+            #print "debug: '$name'->'$value'\n";
+	}
+    }
+    close(FILE);
+    return \%res;
 }
 
 

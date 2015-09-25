@@ -31,19 +31,28 @@ our $decimalDigits = 10;
 
 #
 # $params:
-# - logging
-# - obsTypes (list)
-# - wordTokenization = 1 by default; set to 0 if the text is already tokenized (with spaces); applies only to WordFamily observations (POSFamily uses pre-tokenized input, one token by line)
-# - wordVocab
+# * logging
+# * obsTypes (list)
+# * wordTokenization = 1 by default; set to 0 if the text is already tokenized (with spaces); applies only to WordFamily observations (POSFamily uses pre-tokenized input, one token by line)
+# * wordVocab
+# * formatting
+# ** no formatting at all: formatting = 0 or undef or empty string
+# ** line breaks as meaningful units (e.g. sentences): formatting = singleLineBreak
+# ** empty lines (i.e. at least two consecutive line breaks) as meaningful separators (e.g. paragraphs): formatting = doubleLineBreak
+# * the formatting does not apply to POS observations
+#
+#
 #
 sub new {
 	my ($class, $params) = @_;
 	my $self;
 	$self->{logger} = Log::Log4perl->get_logger(__PACKAGE__) if ($params->{logging});
 	$self->{wordTokenization} = 1 unless (defined($params->{wordTokenization}) && ($params->{wordTokenization} == 0));
+	$self->{formatting} = $params->{formatting};
+	confessLog($self->{logger}, "Invalid value '".$self->{formatting}."' for parameter 'formatting'") if ($self->{formatting} && ($self->{formatting} ne "singleLineBreak") && ($self->{formatting} ne "doubleLineBreak"));
 	$self->{families} = {};
 	$self->{mapObsTypeToFamily} = {};
-	$self->{wordVocab} = $params->{wordVocab} if (defined($params->{wordVocab}));
+	$self->{wordVocab} = $params->{wordVocab};
 	bless($self, $class);
 	if (defined($params->{obsTypes})) {
 	    foreach my $obsType (@{$params->{obsTypes}}) {
@@ -80,32 +89,60 @@ sub addObsType {
 }
 
 
+
 #
-# * Reads raw text files with no specific formatting (e.g. for sentences or paragraphs).
+# * Reads raw text files with one of the following types of formatting:
+# ** no formatting at all: $formattingOption = 0 or undef or empty string
+# ** line breaks as meaningful units (e.g. sentences): $formattingOption = singleLineBreak
+# ** empty lines (i.e. at least two consecutive line breaks) as meaningful separators (e.g. paragraphs): $formattingOption = doubleLineBreak
+# * the formatting does not apply to POS observations
+#
 # * Should be called only after:
 # ** the obs types have been initialized (with new or addObsTypes)
 # ** resources (e.g. vocabulary) have been initialized (with new)
-# * Suitable for PAN15 text files.
+# * 
 # * If POS observations are used, expects a file $filePrefix.POS containing the output in TreeTagger format (with lemma): <token> <POS tag> <lemma>
 #
-# TODO if actually needed?
-# * Other parameters are passed by value in $params: $params->{values}->{<id>}->{<value>}
 #
-sub extractObsFromUnformattedText {
+sub extractObsFromText {
     my $self = shift;
     my $filePrefix = shift;
-#    my $params = shift;
 
-    my $text;
+    my $textUnits;
     foreach my $family (keys %{$self->{families}}) {
 	$self->{logger}->debug("Extracting observations for family '$family'") if ($self->{logger});
 	if ( ($family eq "WORD") || ($family eq "CHAR") || ($family eq "VOCABCLASS") ) {
-	    if (!defined($text)) { # avoid reading text for every family
+	    if (!defined($textUnits)) { # avoid reading text for every family
 		$self->{logger}->debug("reading file '$filePrefix'") if ($self->{logger});
-		my $textLines = readTextFileLines($filePrefix,1,$self->{logger});
-		$text = join(" ", @$textLines);
+		my $textLines = readTextFileLines($filePrefix,1,$self->{logger}); # remark: removing EOL characters
+		if ($self->{formatting}) {
+		    if ($self->{formatting} eq "singleLineBreak") {
+			$self->{logger}->debug("formatting: separator = single line break") if ($self->{logger});
+			$textUnits = $textLines;
+		    } elsif ($self->{formatting} eq "doubleLineBreak") {
+			$self->{logger}->debug("formatting: separator = double line break") if ($self->{logger});
+			my $currentUnit = "";
+			for (my $i = 0; $i < scalar(@$textLines); $i++) {
+			    if (length($textLines->[$i])>0) {
+				$currentUnit .= $textLines->[$i];
+			    } else {
+				push(@$textUnits, $currentUnit) if (length($currentUnit)>0);
+				$self->{logger}->trace(" new unit (double line break): '$currentUnit'") if ($self->{logger});
+				$currentUnit = "";
+			    }
+			}
+			push(@$textUnits, $currentUnit) if (length($currentUnit)>0);
+		    } else {
+			confessLog($self->{logger}, "Bug: invalid value '".$self->{formatting}."' for parameter 'formatting'");			
+		    }		    
+		} else {
+		    $self->{logger}->debug("raw text, no formatting") if ($self->{logger});
+		    $textUnits = [ join(" ", @$textLines) ];
+		}
 	    }
-	    $self->{families}->{$family}->addText($text);
+	    foreach my $unit (@$textUnits) {
+		$self->{families}->{$family}->addText($unit);
+	    }
 	} elsif ($family eq "POS") {
 	    $self->{logger}->debug("reading file '$filePrefix.POS'") if ($self->{logger});
 	    my $textLines = readTSVFileLinesAsArray("$filePrefix.POS", 3, $self->{logger});
@@ -116,6 +153,7 @@ sub extractObsFromUnformattedText {
     }
 
 }
+
 
 #
 # TODO
