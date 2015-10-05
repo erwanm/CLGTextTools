@@ -112,5 +112,5 @@ foreach my $file (@files) {
 #    $logger->debug("file '$file': content = '$text'") if ($logger);
 #    $data->addText($text);
     $data->extractObsFromText($file);
-    $data->writeCountFiles($file);
+    $data->writeCountFiles($file, \@obsTypes);
 }

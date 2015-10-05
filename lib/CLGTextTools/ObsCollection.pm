@@ -39,7 +39,7 @@ our $decimalDigits = 10;
 # ** no formatting at all: formatting = 0 or undef or empty string
 # ** line breaks as meaningful units (e.g. sentences): formatting = singleLineBreak
 # ** empty lines (i.e. at least two consecutive line breaks) as meaningful separators (e.g. paragraphs): formatting = doubleLineBreak
-# * the formatting does not apply to POS observations
+# ** the formatting does not apply to POS observations
 #
 #
 #
@@ -176,13 +176,23 @@ sub getNbNGrams {
     return $self->{families}->{$family}->getNbNGrams($obsType);
 }
 
-
+#
+# Returns the observations for a list of obs types as a hash ref:
+# h->{obsType}->{ngram} = frequency
+# (should be called only after extractObsFromText)
+#
 sub getObservations {
     my $self = shift;
-    my $obsType = shift;
-    my $family = $self->{mapObsTypeToFamily}->{$obsType};
-    return $self->{families}->{$family}->getObservations($obsType);
+    my $obsTypesList = shift;
+
+    my %res;
+    foreach my $obsType (@$obsTypesList) {
+	my $family = $self->{mapObsTypeToFamily}->{$obsType};
+	$res{$obsType} = $self->{families}->{$family}->getObservations($obsType);
+    }
+    return \%res;
 }
+
 
 #
 # writes <prefix>.<obs>.count and <prefix>.<obs>.total for every obs
@@ -193,13 +203,11 @@ sub getObservations {
 sub writeCountFiles {
     my $self = shift;
     my $prefix = shift;
-    my $obsTypesList = shift; # optional
+    my $obsTypesList = shift;
 
-    if (!defined($obsTypesList)) {
-	my @obsTypesList = (keys %{$self->{mapObsTypeToFamily}}) ;
-	$obsTypesList = \@obsTypesList;
-    }
+    $self->{logger}->debug("Writing count files to '$prefix.<obsType>.count'") if ($self->{logger});
     foreach my $obsType (@$obsTypesList) {
+	$self->{logger}->debug("Writing count file: '$prefix.$obsType.count'") if ($self->{logger});
 	my $f = "$prefix.$obsType.count";
 	my $fh;
 	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
@@ -222,6 +230,7 @@ sub writeObsTypeCount {
     my $family = $self->{mapObsTypeToFamily}->{$obsType};
     my $observs = $self->{families}->{$family}->getObservations($obsType);
     my $total = $self->{families}->{$family}->getNbNGrams($obsType);
+    $self->{logger}->debug("Writing $total observations for obs type '$obsType'") if ($self->{logger});
 #    while (my ($key, $nb) = each %$observs) {
     foreach my $key (sort keys %$observs) {
 	my $nb = $observs->{$key};
@@ -232,6 +241,62 @@ sub writeObsTypeCount {
 }
 
 
+#
+# Deletes n-grams whose frequency is strictly lower than $minFreq.
+# (should be called only after extractObsFromText)
+# Remark: the total number of n-grams is not modified.
+#
+sub filterMinFreq {
+    my $self = shift;
+    my $obsTypesList = shift;
+    my $minFreq = shift;
+
+    foreach my $obsType (@$obsTypesList) {
+	my $family = $self->{mapObsTypeToFamily}->{$obsType};
+	$family->filterMinFreq($obsType, $minFreq);
+    }
+}
+
+
+#
+#
+#
+#
+sub convertToRelativeFreq {
+    my $self = shift;
+    my $obsTypesList = shift;
+
+    foreach my $obsType (@$obsTypesList) {
+	my $family = $self->{mapObsTypeToFamily}->{$obsType};
+	$family->convertToRelativeFreq($obsType);
+    }
+}
+
+
+
+#
+# Static sub: wraps up all the extraction process and returns a hash ref:
+# h->{obsType}->{ngram} = frequency
+#
+# The extraction process consists in initializing, extracting and filtering on the min frequency
+#
+# Args:
+# - $obsTypesList
+# - $params: hash ref transmitted to new()
+# - $docFile: filename of the text document
+# - $minFreq: if > 1, filter out ngrams with lower frequency
+# - $relativeFreq: if not undef or zero or the empty string, the frequencies are divided by the total number of ngrams for each obs type.
+#
+sub extractObservsWrapper {
+    my ($params, $docFile, $minFreq, $relativeFreq) = @_;
+
+    my $obsColl = CLGTextTools::ObsCollection->new($params);
+    $obsColl->extractObsFromText($docFile);
+    $obsColl->filterMinFreq($params->{obsTypes}, $minFreq) if (defined($minFreq) && ($minFreq > 1));
+    $obsColl->convertToRelativeFreq($params->{obsTypes}) if ($relativeFreq);
+    return $obsColl->getObservations($params->{obsTypes});
+
+}
 
 
 1;

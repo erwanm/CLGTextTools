@@ -38,4 +38,4 @@ if [ $nb1 -ne $nb2 ]; then
     echo "$0: test failed" 1>&2
     exit 1
 fi
-rm -rf "$d"
+#rm -rf "$d"

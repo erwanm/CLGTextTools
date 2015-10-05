@@ -75,6 +75,35 @@ sub getObservations {
 }
 
 
+sub filterMinFreq {
+    my $self = shift;
+    my $obsType = shift;
+    my $minFreq = shift;
+
+    my $observs = $self->{observs}->{$obsType};
+    my $nbRemoved = 0;
+    while (my ($ngram, $freq) = each(%$observs)) {
+	if ($freq < $minFreq) {
+	    delete $observs->{$ngram};
+	    $nbRemoved++;
+	}
+    }
+    $self->{logger}->debug("Obs type '$obsType': removed $nbRemoved ngrams with freq<$minFreq from observations") if ($self->{logger});
+
+}
+
+
+sub convertToRelativeFreq {
+    my $self = shift;
+    my $obsType = shift;
+
+    $self->{logger}->debug("Obs type '$obsType': converting to relative frequencies") if ($self->{logger});
+    my $observs = $self->{observs}->{$obsType};
+    my $total = $self->{nbNGrams}->{$obsType};
+    foreach my $ngram (keys %$observs) {
+	$observs->{$ngram} /= $total;
+    }
+}
 
 
 1;
