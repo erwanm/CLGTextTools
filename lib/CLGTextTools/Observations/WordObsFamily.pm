@@ -31,7 +31,7 @@ our @ISA=qw/CLGTextTools::Observations::ObsFamily/;
 our $gramSeparator = " ";
 our $startLimitToken = "#UNIT_START#";
 our $endLimitToken = "#UNIT_END#";
-our $unknownToken = "_";
+our $unknownToken = "___";
 
 sub new {
     my ($class, $params) = @_;
