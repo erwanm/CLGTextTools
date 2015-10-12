@@ -213,7 +213,7 @@ sub writeCountFiles {
 	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
 	my ($uniqueNGrams, $totalNGrams) = $self->writeObsTypeCount($fh, $obsType);
 	close($fh);
-	$f = "$prefix.$obsType.total";
+	$f = "$prefix.$obsType.count.total";
 	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
 	printf $fh "%d\t%d\n", $uniqueNGrams, $totalNGrams;
 	close($fh);
@@ -251,9 +251,11 @@ sub filterMinFreq {
     my $obsTypesList = shift;
     my $minFreq = shift;
 
+    $self->{logger}->debug("Filtering out frequencies < $minFreq") if ($self->{logger});
     foreach my $obsType (@$obsTypesList) {
+	$self->{logger}->trace("Filtering out frequencies < $minFreq for obs type '$obsType'") if ($self->{logger});
 	my $family = $self->{mapObsTypeToFamily}->{$obsType};
-	$family->filterMinFreq($obsType, $minFreq);
+	$self->{families}->{$family}->filterMinFreq($obsType, $minFreq);
     }
 }
 

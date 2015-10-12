@@ -80,6 +80,7 @@ sub filterMinFreq {
     my $obsType = shift;
     my $minFreq = shift;
 
+    $self->{logger}->trace("Obs type '$obsType': filtering out ngrams with freq<$minFreq") if ($self->{logger});
     my $observs = $self->{observs}->{$obsType};
     my $nbRemoved = 0;
     while (my ($ngram, $freq) = each(%$observs)) {
