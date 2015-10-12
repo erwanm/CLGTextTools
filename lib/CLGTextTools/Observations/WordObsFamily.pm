@@ -134,7 +134,7 @@ sub addText {
 	}
 	$self->addStartEndNGrams($selectedTokens, $obsType) if ($self->{params}->{$obsType}->{sl});
 	for (my $i=0; $i<$nbTokens; $i++) {
-	    if ($i + scalar(@$p) < $nbTokens) {
+	    if ($i + scalar(@$p) <= $nbTokens) {
 		my @ngram;
 		for (my $j=0; $j<scalar(@$p); $j++) {
 		    push(@ngram, $selectedTokens->[$i+$j]) if ($p->[$j]);
