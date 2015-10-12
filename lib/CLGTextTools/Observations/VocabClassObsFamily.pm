@@ -91,6 +91,9 @@ sub addText {
     if ($self->{wordTokenization}) {
 	$self->{logger}->debug("Tokenizing input text") if ($self->{logger});
 	$text =~ s/([^\w\s]+)/ $1 /g;
+        $text =~ s/^\s+//; # remove possible whitespaces at the start and end of the text
+	$text =~ s/\s+$//;
+ 
     }
     $self->{logger}->debug("Computing list of tokens") if ($self->{logger});
     my @tokens = split(/\s+/, $text);
@@ -104,8 +107,12 @@ sub addText {
 
     foreach my $obsType (keys %{$self->{observs}}) {
 	my $type = $self->{params}->{$obsType}->{type};
-	if ($type eq "TTR") { # remark: case not standardized, which would be better in this case
-	    $self->{observs}->{$obsType}->{TTR} = scalar(keys %bag); # = nb distinct tokens
+	if ($type eq "TTR") {
+	    my %lcBag; # standardizing case (remark: not the most efficient way, but this way avoids complications with different cases above)
+	    foreach my $word (keys %bag) {
+		$lcBag{lc($word)} = 1; # the actual number does not matter
+	    }
+	    $self->{observs}->{$obsType}->{TTR} = scalar(keys %lcBag); # = nb distinct tokens
 	} else {
 	    my $lengthClasses = $self->{params}->{$obsType}->{lengthClasses} if ($type eq "length");
 	    foreach my $word (keys %bag) {
