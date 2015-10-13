@@ -74,7 +74,8 @@ sub addObsType {
 	} else {
 	    confessLog($self->{logger}, "Invalid obs type '$obsType'");
 	}
-	$self->{nbNGrams}->{$obsType} = 0;
+	$self->{nbDistinctNGrams}->{$obsType} = 0;
+	$self->{nbTotalNGrams}->{$obsType} = 0;
     }
 
 }
@@ -136,7 +137,8 @@ sub addText {
 		$self->{observs}->{$obsType}->{$class} += $bag{$word};
 	    }
 	}
-	$self->{nbNGrams}->{$obsType} = $nbTokens;
+	$self->{nbDistinctNGrams}->{$obsType} = scalar(keys %{$self->{observs}->{$obsType}});
+	$self->{nbTotalNGrams}->{$obsType} = $nbTokens;
     }
 }
 

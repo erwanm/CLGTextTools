@@ -70,7 +70,8 @@ sub addObsType {
 	    }
 	}
 	$self->{params}->{$obsType}->{pattern} = \@pattern;
-	$self->{nbNGrams}->{$obsType} = 0;
+	$self->{nbDistinctNGrams}->{$obsType} = 0;
+	$self->{nbTotalNGrams}->{$obsType} = 0;
     }
 
 }
@@ -115,8 +116,9 @@ sub addNGramsObsType {
 		$ngram .=  substr($text, $i + $p->[$j]->[0], $p->[$j]->[1]);
 	    }
 	    $self->{logger}->trace("Adding ngram '$ngram' for obsType '$obsType'") if ($self->{logger});
+	    $self->{nbDistinctNGrams}->{$obsType}++ if (!defined($self->{observs}->{$obsType}->{$ngram}));
 	    $self->{observs}->{$obsType}->{$ngram}++;
-	    $self->{nbNGrams}->{$obsType}++;
+	    $self->{nbTotalNGrams}->{$obsType}++;
 #	}
     }
 

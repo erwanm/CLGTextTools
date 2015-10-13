@@ -156,8 +156,6 @@ sub extractObsFromText {
 
 
 #
-# TODO
-# I don't know how to make it work the same way with POS (and maybe other obs types)?
 #
 sub addText {
    my $self = shift;
@@ -169,12 +167,20 @@ sub addText {
 }
 
 
-sub getNbNGrams {
+sub getNbDistinctNGrams {
     my $self = shift;
     my $obsType = shift;
     my $family = $self->{mapObsTypeToFamily}->{$obsType};
-    return $self->{families}->{$family}->getNbNGrams($obsType);
+    return $self->{families}->{$family}->getNbDistinctNGrams($obsType);
 }
+
+sub getNbTotalNGrams {
+    my $self = shift;
+    my $obsType = shift;
+    my $family = $self->{mapObsTypeToFamily}->{$obsType};
+    return $self->{families}->{$family}->getNbTotalNGrams($obsType);
+}
+
 
 #
 # Returns the observations for a list of obs types as a hash ref:
@@ -229,7 +235,7 @@ sub writeObsTypeCount {
 
     my $family = $self->{mapObsTypeToFamily}->{$obsType};
     my $observs = $self->{families}->{$family}->getObservations($obsType);
-    my $total = $self->{families}->{$family}->getNbNGrams($obsType);
+    my $total = $self->{families}->{$family}->getNbTotalNGrams($obsType);
     $self->{logger}->debug("Writing $total observations for obs type '$obsType'") if ($self->{logger});
 #    while (my ($key, $nb) = each %$observs) {
     foreach my $key (sort keys %$observs) {
@@ -237,7 +243,7 @@ sub writeObsTypeCount {
 	print $fh "%\t" if ($columnObsType);
 	printf $fh "%s\t%d\t%.${decimalDigits}f\n", $key, $nb, ($nb/$total) ;
     }
-    return (scalar(keys %$observs), $total );
+    return ($self->{families}->{$family}->getNbDistinctNGrams($obsType), $total );
 }
 
 

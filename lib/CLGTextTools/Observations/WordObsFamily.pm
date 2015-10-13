@@ -72,7 +72,8 @@ sub addObsType {
 	    $pattern[$i] = (substr($patternStr, $i,1) eq "T");
 	}
 	$self->{params}->{$obsType}->{pattern} = \@pattern;
-	$self->{nbNGrams}->{$obsType} = 0;
+	$self->{nbDistinctNGrams}->{$obsType} = 0;
+	$self->{nbTotalNGrams}->{$obsType} = 0;
     }
 
 }
@@ -160,8 +161,9 @@ sub _addNGram {
     
     confessLog($self->{logger}, "Bug: empty ngram!") if (length($ngramStr)==0);
     $self->{logger}->trace("Adding ngram '$ngramStr' for obsType '$obsType'") if ($self->{logger});
+    $self->{nbDistinctNGrams}->{$obsType}++ if (!defined($self->{observs}->{$obsType}->{$ngramStr}));
     $self->{observs}->{$obsType}->{$ngramStr}++;
-    $self->{nbNGrams}->{$obsType}++;
+    $self->{nbTotalNGrams}->{$obsType}++;
 }
 
 

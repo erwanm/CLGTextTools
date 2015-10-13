@@ -61,7 +61,8 @@ sub addObsType {
 	}
 	$self->{params}->{$obsType}->{pattern} = \@pattern;
 	$self->{params}->{$obsType}->{length} = scalar(@pattern);
-	$self->{nbNGrams}->{$obsType} = 0;
+	$self->{nbDistinctNGrams}->{$obsType} = 0;
+	$self->{nbTotalNGrams}->{$obsType} = 0;
     }
 
 }
@@ -132,8 +133,9 @@ sub addNGramsObsType {
 	}
 	my $ngramStr = join($gramSeparator, @ngramArray);
 	$self->{logger}->trace("Adding ngram '$ngramStr' for obsType '$obsType'") if ($self->{logger});
+	$self->{nbDistinctNGrams}->{$obsType}++ if (!defined($self->{observs}->{$obsType}->{$ngramStr}));
 	$self->{observs}->{$obsType}->{$ngramStr}++;
-	$self->{nbNGrams}->{$obsType}++;
+	$self->{nbTotalNGrams}->{$obsType}++;
     }
 
 }

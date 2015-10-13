@@ -61,10 +61,16 @@ sub addText {
 }
 
 
-sub getNbNGrams {
+sub getNbDistinctNGrams {
     my $self = shift;
     my $obsType = shift;
-    return $self->{nbNGrams}->{$obsType};
+    return $self->{nbDistinctNGrams}->{$obsType};
+}
+
+sub getNbTotalNGrams {
+    my $self = shift;
+    my $obsType = shift;
+    return $self->{nbTotalNGrams}->{$obsType};
 }
 
 
@@ -100,7 +106,7 @@ sub convertToRelativeFreq {
 
     $self->{logger}->debug("Obs type '$obsType': converting to relative frequencies") if ($self->{logger});
     my $observs = $self->{observs}->{$obsType};
-    my $total = $self->{nbNGrams}->{$obsType};
+    my $total = $self->{nbTotalNGrams}->{$obsType};
     foreach my $ngram (keys %$observs) {
 	$observs->{$ngram} /= $total;
     }
