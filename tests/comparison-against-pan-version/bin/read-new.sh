@@ -19,23 +19,16 @@ function writeConfig {
 }
 
 
-if [ $# -ne 3 ]; then
-    echo "Usage: <input doc prefix> <from count file (0|1)> <target dir>" 1>&2
+if [ $# -ne 4 ]; then
+    echo "Usage: <input doc prefix> <from count file (0|1)> <input dir> <target dir>" 1>&2
     echo 1>&2
     echo "  expects file stop-words.N.list for N in '$nbStopWords' in the same dir as the input file." 1>&2
     exit 1
 fi
 docPrefix="$1"
 readFromCountFile="$2"
-targetDir="$3"
-
-if [ ! -d "$pan15binDir" ]; then
-    echo "Warning: no dir '$pan15binDir', the script seems not to be running from CLGTextTools root dir" 1>&2
-    echo "  Either run from CLGTextTools root dir or make the PAN 15 scripts accessible in the PATH env var." 1>&2
-else
-    export PATH="$PATH:$pan15binDir"
-fi
-
+inputDir="$3"
+targetDir="$4"
 
 
 [ -d "$targetDir" ] || mkdir "$targetDir"
@@ -44,8 +37,13 @@ for minFreq in $minIndivFreqs; do
     configFile=$(writeConfig "$minFreq" "$stopPrefix")
     echo "minFreq=$minFreq; config file=$configFile"
     tmpErr=$(mktemp)
-    { time load-ngrams-counts.pl "$configFile" "$docPrefix" 2>$tmpErr ; } 2>"$targetDir/time.$minFreq.out"
+    if [ "$readFromCountFile" == "0" ]; then
+	{ time load-ngrams-counts.pl "$configFile" "$docPrefix" 2>$tmpErr ; } 2>"$targetDir/time.$minFreq.out"
+    else
+	countPrefix="$inputDir/$minFreq/$(basename "$docPrefix")"
+	{ time load-ngrams-counts.pl -c "$configFile" "$countPrefix" 2>$tmpErr ; } 2>"$targetDir/time.$minFreq.out"
+    fi
     cat $tmpErr 1>&2
-#    rm -f $tmpErr $configFile
+    rm -f $tmpErr $configFile
  #   done
 done

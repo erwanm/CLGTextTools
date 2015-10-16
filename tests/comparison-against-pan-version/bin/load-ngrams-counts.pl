@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use Getopt::Std;
 use Carp;
-use CLGTextTools::ObsCollection;
+use CLGTextTools::ObsCollection qw/extractObservsWrapper/;
 use CLGTextTools::Commons qw/readConfigFile/;
 
 my $progName="load-ngrams-counts.pl";
@@ -53,8 +53,6 @@ sub readCountFile {
 
 
 
-
-
 sub readDocDataWrapper {
     my ($docFile, $obsTypesList, $config, $configFile) = @_;
 
@@ -66,14 +64,22 @@ sub readDocDataWrapper {
     } else {
 	checkParam("minFreqObsIndiv", $config, $configFile);
 	checkParam("performWordTokenization", $config, $configFile);
-	checkParam("InputSegmentationFormat", $config, $configFile);
+	checkParam("inputSegmentationFormat", $config, $configFile);
 	# optional, so no check
 	#checkParam("wordObsVocabResources", $config, $configFile);
 	my %params;
 	$params{obsTypes} = $obsTypesList;
 	$params{wordTokenization} = $config->{performWordTokenization};
-	$params{formatting} = $config->{InputSegmentationFormat};
-	$params{wordVocab} = $config->{wordObsVocabResources}; # optional, might be undef
+	$params{formatting} = $config->{inputSegmentationFormat};
+	if (defined($config->{wordObsVocabResources})) {
+	    my $vocabResources ={};
+	    my @resourcesPairs = split (";", $config->{wordObsVocabResources});
+	    foreach my $pair (@resourcesPairs) {
+		my ($id, $file) = split (":", $pair);
+		$vocabResources->{$id} = $file;
+	    }
+	    $params{wordVocab} = $vocabResources;
+	}
 	$data = extractObservsWrapper(\%params, $docFile, $config->{minFreqObsIndiv}, 0);
     }
     return $data;

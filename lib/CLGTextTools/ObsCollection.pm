@@ -18,7 +18,7 @@ use Data::Dumper::Simple;
 use CLGTextTools::Commons qw/hashKeysToArray readTSVFileLinesAsArray readTextFileLines/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw//;
+our @EXPORT_OK = qw/extractObservsWrapper/;
 
 our $decimalDigits = 10;
 
