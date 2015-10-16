@@ -1,4 +1,12 @@
 
+Usage
+-----
+
+Source setup.sh from the directory where it is located:
+source ./setup.sh
+
+
+
 Differences between PAN15 and new version
 -----------------------------------------
 
