@@ -30,6 +30,8 @@ for minFreq in $minIndivFreqs; do
 	cat "$docPrefix.POS" >"$targetPrefix.POS"
 
 	tmpErr=$(mktemp)
-	{ time extract-observations.pl -m $minFreq -l TRACE -r "stop50:$stopPrefix.50.list;stop200:$stopPrefix.200.list" "$obsTypes" "$targetPrefix" 2>$tmpErr ; } 2>"$targetDir/time.out"
+	{ time extract-observations.pl -m $minFreq -r "stop50:$stopPrefix.50.list;stop200:$stopPrefix.200.list" "$obsTypes" "$targetPrefix" 2>$tmpErr ; } 2>"$targetDir/time.out"
+	cat "$tmpErr" 1>&2
+	rm -f $tmpErr
  #   done
 done
