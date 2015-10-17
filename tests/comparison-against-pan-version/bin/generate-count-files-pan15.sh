@@ -18,20 +18,6 @@ fi
 docPrefix="$1"
 outputDir="$2"
 
-if [ ! -d "$pan15binDir" ]; then
-    echo "Warning: no dir '$pan15binDir', the script seems not to be running from CLGTextTools root dir" 1>&2
-    echo "  Either run from CLGTextTools root dir or make the PAN 15 scripts accessible in the PATH env var." 1>&2
-else
-    export PATH="$PATH:$pan15binDir"
-fi
-
-if [ ! -d "$TAPerlLib" ]; then
-    echo "Warning: no dir '$TAPerlLib', the script seems not to be running from CLGTextTools root dir" 1>&2
-    echo "  Either run from CLGTextTools root dir or make the Text-TextAnalytics lib accessible in the PERL5LIB env var." 1>&2
-else
-    export PATH="$PATH:$pan15binDir"
-    export PERL5LIB="$PERL5LIB:$TAPerlLib"
-fi
 
 lang="unused"
 [ -d "$outputDir" ] || mkdir "$outputDir"
