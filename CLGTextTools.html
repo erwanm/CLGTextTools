@@ -139,11 +139,15 @@ Error message and password prompt
 
 <li>$:/temp/info-plugin</li>
 
+<li>$:/temp/NewTagName</li>
+
 <li>$:/themes/tiddlywiki/snowwhite</li>
 
 <li>$:/themes/tiddlywiki/vanilla</li>
 
 <li>CLGTextTools</li>
+
+<li>ComparisonAgainstPAN15Version</li>
 
 <li>LineBreaks</li>
 
@@ -156,6 +160,8 @@ Error message and password prompt
 <li>OverlappingNGrams</li>
 
 <li>SentenceLimits</li>
+
+<li>SpeedTest</li>
 
 </ul>
 </p>
@@ -5659,8 +5665,8 @@ Error message and password prompt
 <div modified="20150616143520992" title="$:/state/showeditpreview">
 <pre>yes</pre>
 </div>
-<div modified="20150921160057835" title="$:/state/sidebar">
-<pre>yes</pre>
+<div modified="20151020151230226" title="$:/state/sidebar">
+<pre>no</pre>
 </div>
 <div modified="20150629173344183" title="$:/state/tab/moresidebar-401116514">
 <pre>$:/core/ui/MoreSideBar/All</pre>
@@ -5668,7 +5674,7 @@ Error message and password prompt
 <div modified="20150629173342807" title="$:/state/tab/sidebar--1835078512">
 <pre>$:/core/ui/SideBar/More</pre>
 </div>
-<div list="NGramPatterns LowerCased LineBreaks CLGTextTools" title="$:/StoryList">
+<div list="ComparisonAgainstPAN15Version CLGTextTools SpeedTest" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -5684,6 +5690,9 @@ Error message and password prompt
         }
     }
 }</pre>
+</div>
+<div created="20151019150324332" modified="20151019150333828" title="$:/temp/NewTagName">
+<pre></pre>
 </div>
 <div author="JeremyRuston" core-version="&gt;=5.0.0" dependents="$:/themes/tiddlywiki/vanilla" description="Emphasises individual tiddlers" name="Snow White" plugin-type="theme" title="$:/themes/tiddlywiki/snowwhite" type="application/json" version="5.1.8">
 <pre>{
@@ -5782,7 +5791,7 @@ Error message and password prompt
     }
 }</pre>
 </div>
-<div created="20150616143308071" modified="20150616144300076" tags="" title="CLGTextTools">
+<div created="20150616143308071" modified="20151019151412442" tags="" title="CLGTextTools">
 <pre>! Overview
 
 ''CLGTextTools'' is a Perl library containing functions to analyze text documents and especially extract text features.
@@ -5790,9 +5799,31 @@ Error message and password prompt
 ! Main features
 
 * Intended for rather small text documents: the full document is loaded in memory and many different kinds of features for the whole document can be stored in memory.
-* Relatively efficient implementation
-** Intended to extract n-grams features from text files quite fast, rather than extracting features once and storing them as text files (so as to reduce the time spent in i/o operations).
+* Designed to minimize disk access operations, to the extent possible in a context where independent scripts (i.e., not sharing memory space) access the data.
+* Much more efficient than previous prototype scripts used in PAN'14 and PAN'15 competitions.
+* Allows loading observations (i.e. features, usually n-grams counts) from count files as well as parsing the documents directly.
+** This feature can be used to extract n-grams features from text files even if the process is repeated multiple times, rather than storing them as text files (so as to reduce the time spent in i/o operations). See SpeedTest.
 * Logging possible with ``Log::Log4Perl``, but (fully) disabled by default because it can be very costly in crucial program parts.</pre>
+</div>
+<div created="20151019150357610" modified="20151019151355611" title="ComparisonAgainstPAN15Version">
+<pre>The library aims to improve on the clearly suboptimal prototype used in PAN'14 and PAN'15. To this end a test suite is provided in the directory `tests/comparison-against-pan-version`. 
+
+* The directory includes the implementation used in the old prototype.
+* To run the tests, first source `setup.sh` from the directory:
+
+```
+cd tests/comparison-against-pan-version
+source setup.sh
+```
+
+* Some sample data is provided in `tests/comparison-against-pan-version/pan15-documents`.
+* In short,  the scripts in `tests/comparison-against-pan-version/bin` allow: 
+** reading the documents and generating a set of observations count files, from either version.
+** loading the data either from count files or directly from the documents
+* Additionally there are two high-level scripts which allow:
+** comparing the observations counts from the two different versions.
+** measuring the duration of either version and of the either loading from count files or reading the documents. See also SpeedTest.
+</pre>
 </div>
 <div created="20150629172648960" modified="20150629173215955" tags="" title="LineBreaks">
 <pre>Some ObsFamily instances can take line breaks into account (currently only in CharObsFamily). This possibility should be used only if line breaks are meaningful (see OverlappingNGrams and SentenceLimits); otherwise, its is best for the calling program to remove them first.
@@ -5860,6 +5891,67 @@ Without the option the only trigram would be ``Hello there !``.
 
 
 //Remark: check that the character or token used as special symbol does not interfere with the input text (ideally the input text should never contain it).//
+</pre>
+</div>
+<div created="20151019150343980" modified="20151020174431329" tags="ComparisonAgainstPAN15Version" title="SpeedTest">
+<pre>
+! Generating count files
+
+The process of reading the documents and generating the count files is dramatically improved compared to the PAN'15 version: with the 3 sample documents and the predefined set of obs types, the new version took less than 4.6s against 20s for the PAN'15 version.
+
+One of the reasons why the new version is faster is that for the &quot;stop-words&quot; obs types, it requires only one stage to process the different lists of stop-words (2 in the sample used), as opposed to the PAN'15 version which was going through the whole process for each list.
+
+However this applies only to a few obs types and cannot account for more than doubling the duration. The detailed duration by min frequency shows that even when considering only one list of stop words in the PAN'15 version, the new version is twice faster: from 1.4 to 1.7 seconds (individual min freq) against 3.0 to 3.6s for the PAN'15 version.
+
+
+! Loading obs counts from count file or directly from documents
+
+Here we compare two cases using only the new version:
+
+* reading counts files
+* reading original documents and extracting n-grams.
+
+Remark: obviously, the first option requires the count files to have been generated before, whereas the second one doesn't require anything. This analysis is interesting only in the scenario where the same document(s) (and the same obs types) are going to be used multiple times (and cannot be stored in memory): is it worth storing them on the disk or not?
+
+The test is done with N times with parallel processing, because this standard setting can have an impact due to multiple accesses to the disk. Here we tested with N=20 on a 24-cores machine.
+
+The rationale for this test is that reading all the count files might even be more costly than re-analyzing the documents, because it requires more file access (the different obs types files, whereas the full analysis reads the original document only once for each family).
+
+Nevertheless, with the &quot;standard&quot; list of obs types, results show that the former is faster in general.
+
+!! impact of the doc size
+
+The Larger the document, the longer it takes to analyze. Therefore the difference between reading the count files and analyzing the document increases with the size of the document. Detailed results for the sample:
+
+* 714 chars, 125 words
+** real time: from count file = 4.9s vs original doc = 4.8s
+** cpu time: from count file = 1'19 vs original doc = 1'21
+* 3300 chars, 636 words
+** real time: from count file = 4.8s vs original doc = 5.6s
+** cpu time: from count file = 1'18 vs original doc = 1'35
+* 15036 chars, 2417 words
+** real time: from count file = 5.0s vs original doc = 7.5s
+** cpu time: from count file = 1'24 vs original doc = 2'10
+
+It is worth noticing that for really small documents, analyzing the input doc doesn't take more time than reading the count files.
+
+!! impact of the min frequency
+
+The higher the minimum frequency threshold is, the lower the number of distinct observations in a count file. Since re-analyzing the document always requires reading the full document, one expects the &quot;reading from count files&quot; version to run faster with a higher min frequency. These detailed results is for a single case (big doc) and a single process (so not very representative):
+
+* min freq=1
+** real time: from count file = 2.0s vs original doc = 2.8s
+** cpu time: from count file = 1.6s vs original doc = 2.2s
+* min freq=3
+** real time: from count file = 2.0s vs original doc = 2.2s
+** cpu time: from count file = 1.3s vs original doc = 2.2s
+* min freq=5
+** real time: from count file = 1.1s vs original doc = 2.4s
+** cpu time: from count file = 1.0s vs original doc = 1.8s
+
+!! number of observations types
+
+It is possible that a significantly higher number of observations types would make the &quot;read from count files&quot; version take comparatively more time than the &quot;analyze input docs&quot; version (assuming the most favorable setting for the other parameters, e.g. low min frequency): in this case there would be many counts files to read, whereas the new implementation is optimized by family of obs types. However it is not sure that this would be the case, and more importantly the usefulness of a high number of different obs types is dubious.
 </pre>
 </div>
 
