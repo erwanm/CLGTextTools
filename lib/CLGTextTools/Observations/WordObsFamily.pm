@@ -41,8 +41,8 @@ sub new {
 	$self->{logger}->debug("vocab resources parameter found: ".$params->{vocab}) if ($self->{logger});
 	$self->{logger}->trace("Vocab hash content = ".Dumper($params->{vocab})) if ($self->{logger});
 	foreach my $vocabId (keys %{$params->{vocab}}) {
-	    $self->{logger}->trace("calling addVocab for key:'$vocabId', value:'".$params->{vocab}->{$vocabId}."'") if ($self->{logger});
-	    $self->addVocab($vocabId, $params->{vocab}->{$vocabId});
+	    $self->{logger}->trace("adding vocab entry for key:'$vocabId', file:'".$params->{vocab}->{$vocabId}."'") if ($self->{logger});
+	    $self->{vocab}->{$vocabId}->{filename} = $params->{vocab}->{$vocabId};
 	}
     }
     return $self;
@@ -79,18 +79,23 @@ sub addObsType {
 }
 
 
+
+
 #
+# Vocabulary file loaded at first use (to avoid reading the file if not used).
 # A vocab file contains exactly one token by line.
 #
-#
-sub addVocab {
-    my $self = shift;
+sub getVocab {
+    my $self=  shift;
     my $vocabId = shift;
-    my $vocabFile = shift;
 
-    $self->{logger}->debug("loading vocabulary '$vocabId' from file '$vocabFile'") if ($self->{logger});
-    my $vocab = arrayToHash( readTextFileLines($vocabFile,1,$self->{logger}) );
-    $self->{vocab}->{$vocabId} = $vocab;
+    my $vocab = $self->{vocab}->{$vocabId}->{data};
+    if (!defined($vocab)) {
+	$self->{logger}->debug("loading vocabulary '$vocabId' from file '$vocabFile'") if ($self->{logger});
+	$vocab = arrayToHash( readTextFileLines($self->{vocab}->{$vocabId}->{filename},1,$self->{logger}) );
+	$self->{vocab}->{$vocabId}->{data} = $vocab;
+    }
+    return $vocab;
 }
 
 
@@ -128,7 +133,7 @@ sub addText {
 	my $vocabId = $self->{params}->{$obsType}->{vocabId};
 	if (defined($vocabId)) {
 	    $self->{logger}->debug("looking for vocab '$vocabId' (addText, type $obsType)") if ($self->{logger});
-	    my $vocab = $self->{vocab}->{$vocabId};
+	    my $vocab = $self->getVocab($vocabId);
 	    confessLog($self->{logger}, "Error for obs type $obsType: no vocabulary found for vocab id '$vocabId'") if (!defined($vocab));
 	    my @tokensVocab = map { defined($vocab->{$_}) ? $_ : $unknownToken } @$selectedTokens;
 	    $selectedTokens = \@tokensVocab;
