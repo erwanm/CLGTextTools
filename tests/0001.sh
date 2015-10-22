@@ -2,7 +2,7 @@
 
 sourceDir="tests/resources"
 prefix="article.txt"
-obsTypes="WORD.T.lc0.sl0:WORD.T.lc1.sl0:WORD.TT.lc1.sl0:WORD.TTT.lc1.sl0:WORD.TTT.lc1.sl1:CHAR.CCCC.lc0.sl0:CHAR.CCCC.lc1.sl0:CHAR.CCCC.lc0.sl1:CHAR.CSC.lc0.sl0:WORD.T.lc1.sl0.eng-stop1:WORD.T.lc1.sl0.eng-stop2:WORD.TTT.lc1.sl0.eng-stop1:WORD.TTT.lc1.sl0.eng-stop2:POS.TST.sl0:POS.TTT.sl1:POS.PPPP.sl1:POS.LLL.sl1:POS.TSPL.sl1:VOCABCLASS.MORPHO:VOCABCLASS.LENGTH:VOCABCLASS.LENGTH.2,4,6,9,14:VOCABCLASS.TTR"
+obsTypes="WORD.T.mf2.lc0.sl0:WORD.T.mf2.lc1.sl0:WORD.TT.mf2.lc1.sl0:WORD.TTT.mf2.lc1.sl0:WORD.TTT.mf2.lc1.sl1:CHAR.CCCC.mf2.lc0.sl0:CHAR.CCCC.mf2.lc1.sl0:CHAR.CCCC.mf2.lc0.sl1:CHAR.CSC.mf2.lc0.sl0:WORD.T.mf2.lc1.sl0.eng-stop1:WORD.T.mf2.lc1.sl0.eng-stop2:WORD.TTT.mf2.lc1.sl0.eng-stop1:WORD.TTT.mf2.lc1.sl0.eng-stop2:POS.TST.mf2.sl0:POS.TTT.mf2.sl1:POS.PPPP.mf2.sl1:POS.LLL.mf2.sl1:POS.TSPL.mf2.sl1:VOCABCLASS.MORPHO.mf2:VOCABCLASS.LENGTH.mf2:VOCABCLASS.LENGTH.2,4,6,9,14.mf2:VOCABCLASS.TTR"
 #obsTypes="VOCABCLASS.TTR"
 resources="eng-stop1:tests/resources/english.stop-words;eng-stop2:tests/resources/english.stop-words.50"
 

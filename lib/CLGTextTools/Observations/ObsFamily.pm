@@ -84,18 +84,21 @@ sub getObservations {
 sub filterMinFreq {
     my $self = shift;
     my $obsType = shift;
-    my $minFreq = shift;
+#    my $minFreq = shift;
 
-    $self->{logger}->trace("Obs type '$obsType': filtering out ngrams with freq<$minFreq") if ($self->{logger});
     my $observs = $self->{observs}->{$obsType};
-    my $nbRemoved = 0;
-    while (my ($ngram, $freq) = each(%$observs)) {
-	if ($freq < $minFreq) {
-	    delete $observs->{$ngram};
-	    $nbRemoved++;
+    my $minFreq = $self->$self->{params}->{$obsType}->{mf};
+    if (defined($minFreq) && ($minFreq>1)) {
+	$self->{logger}->trace("Obs type '$obsType': filtering out ngrams with freq<$minFreq") if ($self->{logger});
+	my $nbRemoved = 0;
+	while (my ($ngram, $freq) = each(%$observs)) {
+	    if ($freq < $minFreq) {
+		delete $observs->{$ngram};
+		$nbRemoved++;
+	    }
 	}
+	$self->{logger}->debug("Obs type '$obsType': removed $nbRemoved ngrams with freq<$minFreq from observations") if ($self->{logger});
     }
-    $self->{logger}->debug("Obs type '$obsType': removed $nbRemoved ngrams with freq<$minFreq from observations") if ($self->{logger});
 
 }
 

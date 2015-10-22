@@ -57,14 +57,17 @@ sub addObsType {
 	cluckLog($self->{logger}, "Ignoring observation type '$obsType', already initialized.");
     } else {
 	$self->{observs}->{$obsType} = {};
-	if ($obsType =~ m/^VOCABCLASS\.MORPHO$/) {
+	if ($obsType =~ m/^VOCABCLASS\.MORPHO\.mf\d+$/) {
+	    my ($mf) = ($obsType =~ m/^VOCABCLASS\.MORPHO\.mf(\d+)$/);
+	    $self->{params}->{$obsType}->{mf} = $mf;
 	    $self->{params}->{$obsType}->{type} = "morpho";
 	    $self->{logger}->debug("Adding obs type '$obsType': morpho") if ($self->{logger});
-	} elsif ($obsType =~ m/^VOCABCLASS\.TTR$/) {
+	} elsif ($obsType =~ m/^VOCABCLASS\.TTR$/) { # no min freq
 	    $self->{params}->{$obsType}->{type} = "TTR";
 	    $self->{logger}->debug("Adding obs type '$obsType': TTR") if ($self->{logger});
 	} elsif ($obsType =~ m/^VOCABCLASS\.LENGTH/) {
-	    my ($classId) = ($obsType =~ m/^VOCABCLASS\.LENGTH(?:\.(.+))?$/); # $classId can be undefined (default class = simple word length)
+	    my ($classId, $mf) = ($obsType =~ m/^VOCABCLASS\.LENGTH(?:\.(.+))?\.mf(\d+)$/); # $classId can be undefined (default class = simple word length)
+	    $self->{params}->{$obsType}->{mf} = $mf;
 	    $self->{params}->{$obsType}->{type} = "length";
 	    if (defined($classId)) {
 		my @classes = split(",", $classId) ;
