@@ -7,7 +7,7 @@ use Carp;
 use CLGTextTools::Logging qw/confessLog/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/sum min max mean median stdDev geomMean HarmoMean means aggregateVector pickInList pickInListProbas/;
+our @EXPORT_OK = qw/sum min max mean median stdDev geomMean HarmoMean means aggregateVector pickInList pickInListProbas pickNSloppy/;
 
 
 
@@ -264,6 +264,39 @@ sub pickInListProbas {
     }
     die "BUG should never have arrived here";
 }
+
+
+# pickNSloppy($n, $list)
+#
+# randomly picks N elements from the list, but not exactly. 
+# In fact, the method returns a list of "statistical size $n": every element in the list
+# has a chance $n / size($list) to be picked.
+# Remark: if $n>=size(list), returns all elements from the list.
+#
+sub pickNSloppy {
+    my $n= shift;
+    my $list = shift;
+    my @res;
+    my $proba = $n / scalar(@$list);
+    foreach my $e (@$list) {
+	push(@res, $e) if (rand() <= $proba);
+    }
+    return \@res;
+}
+
+
+
+sub pickNIndexesAmongMSloppy {
+    my $n = shift;
+    my $m = shift;
+    my $proba = $n / $m;
+    my @res;
+    for (my $i=0;$i<$m; $i++) {
+	push(@res, $i) if (rand() <= $proba);
+    }
+    return \@res;
+}
+
 
 
 1;
