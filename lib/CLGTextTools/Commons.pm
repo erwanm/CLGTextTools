@@ -8,7 +8,7 @@ use File::BOM qw/open_bom/;
 use CLGTextTools::Logging qw/confessLog/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash hashKeysToArray readTSVByLine readTSVFileLinesAsArray readTSVLinesAsArray readConfigFile/;
+our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash hashKeysToArray readTSVByLine readTSVFileLinesAsArray readTSVLinesAsArray readConfigFile readTSVFileLinesAsHash readTSVLinesAsHash/;
 
 
 
@@ -119,6 +119,47 @@ sub readTSVLinesAsArray {
     }
     return \@lines;
 }
+
+
+#
+# 
+#
+#
+sub readTSVFileLinesAsHash {
+    my $file = shift;
+    my $logger = shift; # optional
+
+    my $fh;
+    open($fh, '<:encoding(UTF-8)', $file) or confessLog($logger, "Cannot open '$file' for reading");
+    $logger->debug("Reading text file '$file'") if ($logger);
+    my $content = readTSVLinesAsHash($fh, $file, $logger);
+    close($fh);
+    return $content;
+}
+
+
+#
+# return value: hash->{col1} = col2
+# checks that there are exactly two columns on every line. The first column must not contain any duplicate.
+#
+sub readTSVLinesAsHash {
+    my $fh = shift;
+    my $filename = shift; # set to undef if not a file or doesn't matter - used ony for error mesg
+    my $logger = shift; # optional
+
+    my %res;
+    my $index = 0;
+    while (<$fh>) {
+	chomp;
+	my @columns = split(/\t/);
+#	$logger->trace("Reading line '$_'") if ($logger);
+	confessLog($logger, "Error: wrong number of columns: expected 2 but found ".scalar(@columns)." in '$filename', line ".($index+1)."") if (scalar(@columns) != 2);
+	$res{$columns[0]} = $columns[1];
+	$index++;
+    }
+    return \%res;
+}
+
 
 
 #

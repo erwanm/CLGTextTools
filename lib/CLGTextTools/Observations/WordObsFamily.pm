@@ -57,12 +57,11 @@ sub addObsType {
 	cluckLog($self->{logger}, "Ignoring observation type '$obsType', already initialized.");
     } else {
 	$self->{observs}->{$obsType} = {};
-	my ($patternStr, $mf, $lc, $sl, $vocabId) = ($obsType =~ m/^WORD\.([TS]+)\.mf(\d+)\.lc([01])\.sl([01])(?:\.(.+))?$/);
+	my ($patternStr, $lc, $sl, $vocabId) = ($obsType =~ m/^WORD\.([TS]+)\.lc([01])\.sl([01])(?:\.(.+))?$/);
 	confessLog($self->{logger}, "Invalid obs type '$obsType'") if (!length($patternStr) || !length($lc) || !length($sl));
 	$self->{logger}->debug("Adding obs type '$obsType': pattern='$patternStr', lc='$lc', sl='$sl'") if ($self->{logger});
 	$self->{params}->{$obsType}->{lc} = (defined($lc) && ($lc eq "1"));
 	$self->{params}->{$obsType}->{sl} = (defined($sl) && ($sl eq "1"));
-	$self->{params}->{$obsType}->{mf} = $mf;
 	if (defined($vocabId)) {
 	    $self->{logger}->debug("Obs type '$obsType' requires vocab id '$vocabId'") if ($self->{logger});
 	    $self->{params}->{$obsType}->{vocabId} = $vocabId;

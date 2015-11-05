@@ -26,7 +26,7 @@ our $decimalDigits = 10;
 #
 # an ObsCollection may contain more obsTypes than the ones asked as input, because of dependencies.
 #
-#
+# implementation remark: the min freq paramters is dealt with in this class; the obs type id transmitted to the actual family class is stripped from the 'mf<x>' part.
 #
 
 #
@@ -51,7 +51,8 @@ sub new {
 	$self->{formatting} = $params->{formatting};
 	confessLog($self->{logger}, "Invalid value '".$self->{formatting}."' for parameter 'formatting'") if ($self->{formatting} && ($self->{formatting} ne "singleLineBreak") && ($self->{formatting} ne "doubleLineBreak"));
 	$self->{families} = {};
-	$self->{mapObsTypeToFamily} = {};
+	$self->{typesByFamily} = {};
+	$self->{mapObsTypeToFamilyId} = {};
 	$self->{wordVocab} = $params->{wordVocab};
 	bless($self, $class);
 	if (defined($params->{obsTypes})) {
@@ -68,24 +69,38 @@ sub addObsType {
     my $self= shift;
     my $obsType = shift;
 
-    my ($family) = ($obsType =~ m/^([^.]+)\./);
-    $self->{logger}->debug("Adding obs type '$obsType'; family = '$family'") if ($self->{logger});
-    
-    if (!defined($self->{families}->{$family})) {
-	if ($family eq "WORD") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::WordObsFamily->new( {logging => defined($self->{logger}), wordTokenization => $self->{wordTokenization}, vocab => $self->{wordVocab} } );
-	} elsif ($family eq "CHAR") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::CharObsFamily->new( {logging => defined($self->{logger})} );
-	} elsif ($family eq "POS") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::POSObsFamily->new({logging => defined($self->{logger})});
-	} elsif ($family eq "VOCABCLASS") {
-	    $self->{families}->{$family} = CLGTextTools::Observations::VocabClassObsFamily->new({logging => defined($self->{logger}), wordTokenization => $self->{wordTokenization} });
+    my ($familyId, $params, $minFreq) = ($obsType =~ m/^([^.]+)\.(.*)\.mf(\d+)$/);
+    $self->{logger}->debug("Adding obs type '$obsType'; familyId = '$familyId', minFreq='$minFreq', params='$params'") if ($self->{logger});
+    if (!defined($self->{families}->{$familyId})) {
+	if ($familyId eq "WORD") {
+	    $self->{families}->{$familyId} = CLGTextTools::Observations::WordObsFamily->new( {logging => defined($self->{logger}), wordTokenization => $self->{wordTokenization}, vocab => $self->{wordVocab} } );
+	} elsif ($familyId eq "CHAR") {
+	    $self->{families}->{$familyId} = CLGTextTools::Observations::CharObsFamily->new( {logging => defined($self->{logger})} );
+	} elsif ($familyId eq "POS") {
+	    $self->{families}->{$familyId} = CLGTextTools::Observations::POSObsFamily->new({logging => defined($self->{logger})});
+	} elsif ($familyId eq "VOCABCLASS") {
+	    $self->{families}->{$familyId} = CLGTextTools::Observations::VocabClassObsFamily->new({logging => defined($self->{logger}), wordTokenization => $self->{wordTokenization} });
 	} else {
-	    confessLog($self->{logger}, "Obs types family '$family' not recognized.");
+	    confessLog($self->{logger}, "Obs types family id '$familyId' not recognized.");
 	}
     }
-    $self->{mapObsTypeToFamily}->{$obsType} = $family;
-    $self->{families}->{$family}->addObsType($obsType);
+
+    my $familyType = "$familyId.$params";
+    if (!defined($self->{typesByFamily}->{$familyId}->{$familyType})) {
+	$self->{families}->{$familyId}->addObsType($familyType);
+	$self->{typesByFamily}->{$familyId}->{$familyType}->{$obsType} = $minFreq;
+    }
+    $self->{mapObsTypeToFamilyId}->{$obsType} = $familyId;
+}
+
+
+#
+# must be called after all data has been populated, in order to initialize
+# 'finalized data' (e.g. apply frequency minima)
+#
+sub finalize {
+    my $self = shift;
+    $self->filterMinFreq();
 }
 
 
@@ -151,6 +166,7 @@ sub extractObsFromText {
 	    confesLog($self->{logger}, "Bug: missing code for family '$family' ");
 	}
     }
+    $self->finalize();
 
 }
 
@@ -167,17 +183,23 @@ sub addText {
 }
 
 
+#
+# remark: the number reported is always the original one, no matter the min frequency
+#
 sub getNbDistinctNGrams {
     my $self = shift;
     my $obsType = shift;
-    my $family = $self->{mapObsTypeToFamily}->{$obsType};
+    my $family = $self->{mapObsTypeToFamilyId}->{$obsType};
     return $self->{families}->{$family}->getNbDistinctNGrams($obsType);
 }
 
+#
+# remark: the number reported is always the original one, no matter the min frequency
+#
 sub getNbTotalNGrams {
     my $self = shift;
     my $obsType = shift;
-    my $family = $self->{mapObsTypeToFamily}->{$obsType};
+    my $family = $self->{mapObsTypeToFamilyId}->{$obsType};
     return $self->{families}->{$family}->getNbTotalNGrams($obsType);
 }
 
@@ -192,119 +214,39 @@ sub getObservations {
     my $obsTypesList = shift;
 
     my %res;
+    confessLog($self->{logger}, "Error: obs collection has not been finalized yet.") if (!defined($self->{finalizedData}));
     foreach my $obsType (@$obsTypesList) {
-	my $family = $self->{mapObsTypeToFamily}->{$obsType};
-	$res{$obsType} = $self->{families}->{$family}->getObservations($obsType);
+	$res{$obsType} = $self->{finalizedData}->{$obsType};
     }
     return \%res;
 }
 
 
-#
-# writes <prefix>.<obs>.count and <prefix>.<obs>.total for every obs
-# type <obs> in $obstypesList if supplied, or every obs type in the
-# objet if not (might include more types in this case, due to
-# dependencies).
-#
-sub writeCountFiles {
-    my $self = shift;
-    my $prefix = shift;
-    my $obsTypesList = shift;
 
-    $self->{logger}->debug("Writing count files to '$prefix.<obsType>.count'") if ($self->{logger});
-    foreach my $obsType (@$obsTypesList) {
-	$self->{logger}->debug("Writing count file: '$prefix.$obsType.count'") if ($self->{logger});
-	my $f = "$prefix.$obsType.count";
-	my $fh;
-	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
-	my ($uniqueNGrams, $totalNGrams) = $self->writeObsTypeCount($fh, $obsType);
-	close($fh);
-	$f = "$prefix.$obsType.count.total";
-	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
-	printf $fh "%d\t%d\n", $uniqueNGrams, $totalNGrams;
-	close($fh);
-    }
-}
-
-
-sub writeObsTypeCount {
-    my $self = shift;
-    my $fh = shift;
-    my $obsType = shift;
-    my $columnObsType = shift; # optional: if not undef or 0, adds first column with obs type id
-
-    my $family = $self->{mapObsTypeToFamily}->{$obsType};
-    my $observs = $self->{families}->{$family}->getObservations($obsType);
-    my $total = $self->{families}->{$family}->getNbTotalNGrams($obsType);
-    $self->{logger}->debug("Writing $total observations for obs type '$obsType'") if ($self->{logger});
-#    while (my ($key, $nb) = each %$observs) {
-    foreach my $key (sort keys %$observs) {
-	my $nb = $observs->{$key};
-	print $fh "%\t" if ($columnObsType);
-	printf $fh "%s\t%d\t%.${decimalDigits}f\n", $key, $nb, ($nb/$total) ;
-    }
-    return ($self->{families}->{$family}->getNbDistinctNGrams($obsType), $total );
-}
-
-
-#
-# Deletes n-grams whose frequency is strictly lower than $minFreq.
-# (should be called only after extractObsFromText)
-# Remark: the total number of n-grams is not modified.
-#
 sub filterMinFreq {
     my $self = shift;
-    my $obsTypesList = shift;
-    my $minFreq = shift;
-
-    $self->{logger}->debug("Filtering out frequencies < $minFreq") if ($self->{logger});
-    foreach my $obsType (@$obsTypesList) {
-	$self->{logger}->trace("Filtering out frequencies < $minFreq for obs type '$obsType'") if ($self->{logger});
-	my $family = $self->{mapObsTypeToFamily}->{$obsType};
-	$self->{families}->{$family}->filterMinFreq($obsType, $minFreq);
+    
+    foreach my $familyId (keys %{$self->{families}}) {
+	foreach my $familyType (keys %{$self->{typesByFamily}->{$familyId}}) {
+	    my $observs1 = $self->{families}->{$familyId}->getObservations($familyType);
+	    foreach my $obsType (keys %{$self->{typesByFamily}->{$familyId}->{$familyType}}) {
+		my $minFreq = $self->{typesByFamily}->{$familyId}->{$familyType}->{$obsType};
+		if ($minFreq <= 1) {
+		$self->{finalizedData}->{$obsType} = $observs1;
+		} else {
+		    my ($key, $freq, %res);
+		    while (($key, $freq) = each (%$observs1)) {
+			$res{$key} = $freq if ($freq >= $minFreq);
+		    }
+		    $self->{finalizedData}->{$obsType} = \%res;
+		    
+		}
+	    }
+	}
     }
 }
 
 
-#
-#
-#
-#
-sub convertToRelativeFreq {
-    my $self = shift;
-    my $obsTypesList = shift;
-
-    foreach my $obsType (@$obsTypesList) {
-	my $family = $self->{mapObsTypeToFamily}->{$obsType};
-	$family->convertToRelativeFreq($obsType);
-    }
-}
-
-
-
-#
-# Static sub: wraps up all the extraction process and returns a hash ref:
-# h->{obsType}->{ngram} = frequency
-#
-# The extraction process consists in initializing, extracting and filtering on the min frequency
-#
-# Args:
-# - $obsTypesList
-# - $params: hash ref transmitted to new()
-# - $docFile: filename of the text document
-# - $minFreq: if > 1, filter out ngrams with lower frequency
-# - $relativeFreq: if not undef or zero or the empty string, the frequencies are divided by the total number of ngrams for each obs type.
-#
-sub extractObservsWrapper {
-    my ($params, $docFile, $minFreq, $relativeFreq) = @_;
-
-    my $obsColl = CLGTextTools::ObsCollection->new($params);
-    $obsColl->extractObsFromText($docFile);
-    $obsColl->filterMinFreq($params->{obsTypes}, $minFreq) if (defined($minFreq) && ($minFreq > 1));
-    $obsColl->convertToRelativeFreq($params->{obsTypes}) if ($relativeFreq);
-    return $obsColl->getObservations($params->{obsTypes});
-
-}
 
 
 1;

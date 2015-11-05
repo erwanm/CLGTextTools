@@ -12,7 +12,7 @@ use Log::Log4perl;
 use Getopt::Std;
 use CLGTextTools::ObsCollection;
 use CLGTextTools::Logging qw/@possibleLogLevels/;
-use CLGTextTools::Commons qw/readTextFileLines readLines/;
+use CLGTextTools::DocProvider;
 
 my $progNamePrefix = "extract-observations"; 
 my $progname = "$progNamePrefix.pl";
@@ -57,7 +57,6 @@ sub usage {
 	print $fh "        (applies only to WORD observations).\n";
 	print $fh "     -r <resourceId1:filename2[;resourceId2:filename2;...]> vocab resouces files\n";
 	print $fh "        with their ids.\n";
-	print $fh "     -m <ngram min freq> \n";
 	print $fh "\n";
 	print $fh "\n";
 	print $fh "\n";
@@ -66,7 +65,7 @@ sub usage {
 
 # PARSING OPTIONS
 my %opt;
-getopts('ihl:L:t:r:s:m:', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
+getopts('ihl:L:t:r:s:', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
 usage(*STDOUT) && exit 0 if $opt{h};
 print STDERR "at least 1 argument expected but ".scalar(@ARGV)." found: ".join(" ; ", @ARGV)  && usage(*STDERR) && exit 1 if (scalar(@ARGV) < 1);
 my $obsTypesList = shift(@ARGV);
@@ -82,7 +81,6 @@ my $readFilesFromSTDIN = $opt{i};
 my $formattingSeparator = $opt{s};
 my $performTokenization = 0 if ($opt{t});
 my $resourcesStr = $opt{r};
-my $minFreq = $opt{m};
 my $vocabResources;
 if ($opt{r}) {
     $vocabResources ={};
@@ -111,11 +109,6 @@ $params{wordVocab} = $vocabResources if (defined($vocabResources));
 foreach my $file (@files) {
 #    my $textLines = ($file eq "-") ? readLines(*STDIN,0,$logger) : readTextFileLines($file,0,$logger);
     my $data = CLGTextTools::ObsCollection->new(\%params);
-#    my $textLines = readTextFileLines($file,0,$logger);
-#    my $text = join("", @$textLines);
-#    
-#    $data->addText($text);
-    $data->extractObsFromText($file);
-    $data->filterMinFreq(\@obsTypes, $minFreq) if (defined($minFreq));
-    $data->writeCountFiles($file, \@obsTypes);
+    my $doc = CLGTextTools::DocProvider->new({ logging => $params{logging}, obsCollection => $data, obsTypesList => $params{obsTypes}, filePrefix => $file, useCountFiles => 1});
+    $doc->getObservations();
 }
