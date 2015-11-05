@@ -138,7 +138,6 @@ sub readSourceDoc {
     foreach my $obsType (@{$self->{obsTypesList}}) {
 	$self->{nbObsDistinct}->{$obsType} = $self->{obsCollection}->getNbDistinctNGrams($obsType);
 	$self->{nbObsTotal}->{$obsType} = $self->{obsCollection}->getNbTotalNGrams($obsType);
-	print STDERR "DEBUG: ".$self->{nbObsDistinct}->{$obsType}.";".$self->{nbObsTotal}->{$obsType}."\n";
     }
 }
 

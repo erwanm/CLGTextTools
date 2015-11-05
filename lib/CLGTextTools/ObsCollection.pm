@@ -52,7 +52,7 @@ sub new {
 	confessLog($self->{logger}, "Invalid value '".$self->{formatting}."' for parameter 'formatting'") if ($self->{formatting} && ($self->{formatting} ne "singleLineBreak") && ($self->{formatting} ne "doubleLineBreak"));
 	$self->{families} = {};
 	$self->{typesByFamily} = {};
-	$self->{mapObsTypeToFamilyId} = {};
+	$self->{mapObsTypeToFamily} = {};
 	$self->{wordVocab} = $params->{wordVocab};
 	bless($self, $class);
 	if (defined($params->{obsTypes})) {
@@ -90,7 +90,7 @@ sub addObsType {
 	$self->{families}->{$familyId}->addObsType($familyType);
 	$self->{typesByFamily}->{$familyId}->{$familyType}->{$obsType} = $minFreq;
     }
-    $self->{mapObsTypeToFamilyId}->{$obsType} = $familyId;
+    $self->{mapObsTypeToFamily}->{$obsType} = [ $familyId , $familyType ];
 }
 
 
@@ -189,8 +189,8 @@ sub addText {
 sub getNbDistinctNGrams {
     my $self = shift;
     my $obsType = shift;
-    my $family = $self->{mapObsTypeToFamilyId}->{$obsType};
-    return $self->{families}->{$family}->getNbDistinctNGrams($obsType);
+    my $familyIdAndType = $self->{mapObsTypeToFamily}->{$obsType};
+    return $self->{families}->{$familyIdAndType->[0]}->getNbDistinctNGrams($familyIdAndType->[1]);
 }
 
 #
@@ -199,8 +199,8 @@ sub getNbDistinctNGrams {
 sub getNbTotalNGrams {
     my $self = shift;
     my $obsType = shift;
-    my $family = $self->{mapObsTypeToFamilyId}->{$obsType};
-    return $self->{families}->{$family}->getNbTotalNGrams($obsType);
+    my $familyIdAndType = $self->{mapObsTypeToFamily}->{$obsType};
+    return $self->{families}->{$familyIdAndType->[0]}->getNbTotalNGrams($familyIdAndType->[1]);
 }
 
 
