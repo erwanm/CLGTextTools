@@ -109,6 +109,6 @@ $params{wordVocab} = $vocabResources if (defined($vocabResources));
 foreach my $file (@files) {
 #    my $textLines = ($file eq "-") ? readLines(*STDIN,0,$logger) : readTextFileLines($file,0,$logger);
     my $data = CLGTextTools::ObsCollection->new(\%params);
-    my $doc = CLGTextTools::DocProvider->new({ logging => $params{logging}, obsCollection => $data, obsTypesList => $params{obsTypes}, filePrefix => $file, useCountFiles => 1});
+    my $doc = CLGTextTools::DocProvider->new({ logging => $params{logging}, obsCollection => $data, obsTypesList => $params{obsTypes}, filename => $file, useCountFiles => 1});
     $doc->getObservations();
 }

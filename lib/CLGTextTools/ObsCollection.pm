@@ -60,6 +60,7 @@ sub new {
 		$self->addObsType($obsType);
 	    }
 	}
+	$self->{finalizedData} = undef;
 	$self->{logger}->trace("initiallized new object: ".Dumper($self)) if ($self->{logger});
 	return $self; 	
 }

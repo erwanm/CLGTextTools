@@ -25,8 +25,8 @@ our @EXPORT_OK = qw//;
 # * logging
 # * obsCollection object (initialized)
 # * obsTypesList
-# * filePrefix
-# * useCountFiles: if defined and not zero or empty string, then the instance will try to read observations counts from files filePrefix.<obs>.count; if these files don't exist, then the source document is read and the count files are written. If undef (or zero etc.), then no count file is ever read or written. 
+# * filename
+# * useCountFiles: if defined and not zero or empty string, then the instance will try to read observations counts from files filename.<obs>.count; if these files don't exist, then the source document is read and the count files are written. If undef (or zero etc.), then no count file is ever read or written. 
 #
 
 
@@ -34,8 +34,8 @@ sub new {
 	my ($class, $params) = @_;
 	my $self;
 	$self->{logger} = Log::Log4perl->get_logger(__PACKAGE__) if ($params->{logging});
-	$self->{filePrefix} = $params->{filePrefix};
-	confessLog($self->{logger}, "Error: file '".$self->{filePrefix}."' not found.") if (! -f $self->{filePrefix});
+	$self->{filename} = $params->{filename};
+	confessLog($self->{logger}, "Error: file '".$self->{filename}."' not found.") if (! -f $self->{filename});
 	$self->{obsCollection} = $params->{obsCollection};
 	$self->{obsTypesList} = $params->{obsTypesList};
 	$self->{useCountFiles} = $params->{useCountFiles};
@@ -44,6 +44,12 @@ sub new {
 	$self->{nbObsTotal} = {};
 	bless($self, $class);
 	return $self; 	
+}
+
+
+sub getFilename {
+    my $self = shift;
+    return $self->{filename};
 }
 
 
@@ -56,7 +62,7 @@ sub populate {
 
     my %observs;
     my $writeCountFiles=0;
-    my $prefix = $self->{filePrefix};
+    my $prefix = $self->{filename};
     if (($self->{useCountFiles}) && (-f "$prefix.".$self->{obsTypesList}->[0].".count")) {  # assuming that either all count files are present, or none
 	$self->readCountFiles();
     } else { # either usecount=0 or count files not present
@@ -88,7 +94,7 @@ sub getObservations {
 sub readCountFiles {
     my $self;
 
-    my $prefix = $self->{filePrefix};
+    my $prefix = $self->{filename};
     foreach my $obsType (@{$self->{obsTypesList}}) {
 	my $a = readTSVFileLinesAsArray("$prefix.$obsType.count.total", $self->{logger});
 	$self->{nbObsDistinct}->{$obsType} = $a->[0]->[0];
@@ -107,7 +113,7 @@ sub writeCountFiles {
     my $self = shift;
     my $columnObsType = shift; # optional, prints the obs type first on each line if defined.
 
-    my $prefix = $self->{filePrefix};
+    my $prefix = $self->{filename};
     $self->{logger}->debug("Writing count files to '$prefix.<obsType>.count'") if ($self->{logger});
     foreach my $obsType (@{$self->{obsTypesList}}) {
 	$self->{logger}->debug("Writing count file: '$prefix.$obsType.count'") if ($self->{logger});
@@ -133,7 +139,7 @@ sub writeCountFiles {
 sub readSourceDoc {
     my $self = shift;
 
-    $self->{obsCollection}->extractObsFromText($self->{filePrefix});
+    $self->{obsCollection}->extractObsFromText($self->{filename});
     $self->{observs} = $self->{obsCollection}->getObservations($self->{obsTypesList});
     foreach my $obsType (@{$self->{obsTypesList}}) {
 	$self->{nbObsDistinct}->{$obsType} = $self->{obsCollection}->getNbDistinctNGrams($obsType);
