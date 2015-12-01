@@ -64,6 +64,18 @@ sub getDocFreqTable {
 }
 
 
+sub getDocsAsHash {
+    my $self = shift;
+    return $self->{docs};
+}
+
+
+sub getDocsAsList {
+    my $self = shift;
+    return values $self->{docs};
+}
+
+
 #
 # applyMinDocFreq($minDocFreq, $docFreqTable, $deleteInOriginalDoc)
 # 
