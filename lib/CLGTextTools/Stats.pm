@@ -7,7 +7,7 @@ use Carp;
 use CLGTextTools::Logging qw/confessLog/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/sum min max mean median stdDev geomMean HarmoMean means aggregateVector pickInList pickInListProbas pickNSloppy/;
+our @EXPORT_OK = qw/sum min max mean median stdDev geomMean HarmoMean means aggregateVector pickInList pickInListProbas pickNSloppy  pickNIndexesAmongMSloppy pickNIndexesAmongMExactly  pickDocSubset splitDocRandom splitDocRandomAvoidEmpty/;
 
 
 
@@ -297,6 +297,85 @@ sub pickNIndexesAmongMSloppy {
     return \@res;
 }
 
+
+
+sub pickNIndexesAmongMExactly {
+    my ($n, $m) = @_;
+
+    confess "Error: cannot pick $n indexes among $m without replacement" if ($n>$m);
+    my %h = map { $_ => 1 } (1..$m);
+    my @res;
+    while ($n>0) {
+	my @keys = keys(%h);
+	my $i = int(rand(scalar(@keys)));
+	push(@res, $i);
+	delete $h{$i};
+	$n--;
+    }
+    return \@res;
+}
+
+
+
+# pickDocSubset(doc, prop)
+#
+# given a document as a hash: doc->{obs} = freq (one obs type only), returns a random subset of size prop * size(doc) (non exact size).
+# remark: the random extraction is by occurrence, not simply by observation.
+# remark: can be used to pick random subsets with replacements.
+#
+sub pickDocSubset {
+    my ($doc, $propObsSubset) = @_;
+    my %subset;
+    my ($obs, $nb);
+    while (($obs, $nb) = each %$doc) {
+        for (my $i=0; $i< $nb; $i++) {
+            $subset{$obs}++ if (rand() < $propObsSubset);
+        }
+    }
+    return \%subset;
+}
+
+
+# splitDocRandom(doc, nbBins, ?probas)
+#
+# given a document as a hash: doc->{obs} = freq (one obs type only), splits the observations into nbBins subsets of size  size(doc)/nbBins.
+# The output is a list ref of size nbBins.
+# * probas is an optional parameter (hash ref index->proba): if supplied, every bin is picked according to the distribtuion described as values of the array. Its size must be equal to nbBins.
+#
+# Warning: if the input document is small, it is possible that one of the bins is empty. In that case the corresponding subset is undef.
+#
+# remark: the random extraction is by occurrence, not simply by observation.
+# remark: can be used to pick random subsets without replacements.
+#
+sub splitDocRandom {
+    my ($doc, $nbBins, $probas) = @_;
+    my @subsets;
+    my ($obs, $nb);
+    while (($obs, $nb) = each %$doc) {
+        for (my $i=0; $i< $nb; $i++) {
+	    my $bin = (defined($probas) ? pickInListProbas($probas) : int(rand($nbBins)) );
+	    $subsets[$bin]->{$obs}++;
+        }
+    }
+    return \@subsets;
+}
+
+
+
+#
+# Calls splitDocRandom until every returned subset is non-empty, unless impossible within $nbAttempts attempts.
+#
+#
+sub splitDocRandomAvoidEmpty {
+    my ($nbAttempts, $doc, $nbBins, $probas) = @_;
+
+    my $res;
+    while (containsUndef($res) && ($nbAttempts>0)) {
+	$res = splitDocRandom($doc, $nbBins, $probas);
+	$nbAttempts--;
+    }
+    return $res;
+}
 
 
 1;

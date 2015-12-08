@@ -8,7 +8,7 @@ use File::BOM qw/open_bom/;
 use CLGTextTools::Logging qw/confessLog/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash hashKeysToArray readTSVByLine readTSVFileLinesAsArray readTSVLinesAsArray readConfigFile readTSVFileLinesAsHash readTSVLinesAsHash/;
+our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash hashKeysToArray readTSVByLine readTSVFileLinesAsArray readTSVLinesAsArray readConfigFile readTSVFileLinesAsHash readTSVLinesAsHash getArrayValuesFromIndexes containsUndef mergeDocs/;
 
 
 
@@ -188,6 +188,61 @@ sub readConfigFile {
     close(FILE);
     return \%res;
 }
+
+
+
+sub getArrayValuesFromIndexes {
+    my $array = shift;
+    my $indexes = shift;
+
+    my @res = map { $array->[$_] } @$indexes;
+    return \@res;
+
+}
+
+
+
+# containsUndef($list)
+#
+# $list is a list ref or undef.
+# Returns 1 if list is undefined or contains an undef value.
+#
+sub containsUndef {
+    my $l = shift;
+    return 1 if (!defined($l));
+    foreach my $e (@$l) {
+	return 1 if (!defined($e));
+    }
+    return 0;
+}
+
+
+#
+#
+# * $overwrite: optional, if true the result doc overwrites the doc with the highest number of distinct observations (might be faster).
+#
+sub mergeDocs {
+    my ($doc1, $doc2, $overwrite) = @_;
+    
+    my ($largest, $smallest);
+    if (scalar(keys(%$doc1)) > scalar(keys(%$doc2))) {
+	($largest, $smallest) = ($doc1, $doc2);
+    } else {
+	($largest, $smallest) = ($doc2, $doc1);
+    }
+    my $res;
+    if ($overwrite) {
+	$res = $largest;
+    } else {
+	%$res = %$largest;
+    }
+    my ($obs, $nb);
+    while (($obs, $nb) = each %$smallest) {
+	$res->{$obs} += $nb;
+    }
+    return $res;
+}
+
 
 
 1;
