@@ -13,14 +13,14 @@ use CLGTextTools::Logging qw/confessLog/;
 use CLGTextTools::Observations::WordObsFamily;
 use CLGTextTools::Observations::CharObsFamily;
 use CLGTextTools::Observations::POSObsFamily;
-use CLGTextTools::Observations::VocabClassObsFamily;;
+use CLGTextTools::Observations::VocabClassObsFamily;
 use Data::Dumper::Simple;
-use CLGTextTools::Commons qw/hashKeysToArray readTSVFileLinesAsArray readTextFileLines/;
+use CLGTextTools::Commons qw/hashKeysToArray readTSVFileLinesAsArray readTextFileLines readObsTypesFromConfigHash readParamGroupAsHashFromConfig assignDefaultAndWarnIfUndef/;
 
 use base 'Exporter';
 our @EXPORT_OK = qw/extractObservsWrapper/;
 
-our $decimalDigits = 10;
+our $decimalDigits = 12;
 
 
 #
@@ -32,9 +32,10 @@ our $decimalDigits = 10;
 #
 # $params:
 # * logging
-# * obsTypes (list)
+# * obsTypes (list, or colon-separated string, or as individual keys: obsType.XXX = 1)
 # * wordTokenization = 1 by default; set to 0 if the text is already tokenized (with spaces); applies only to WordFamily observations (POSFamily uses pre-tokenized input, one token by line)
-# * wordVocab
+# * wordVocab: vocabulary resources for word class obs types, as a hash; params->{wordVocab}->{resourceId} = resourceValue (usually the value is the source file).
+# ** or as individual keys: wordVocab.resourceId = resourceValue
 # * formatting
 # ** no formatting at all: formatting = 0 or undef or empty string
 # ** line breaks as meaningful units (e.g. sentences): formatting = singleLineBreak
@@ -47,16 +48,17 @@ sub new {
 	my ($class, $params) = @_;
 	my $self;
 	$self->{logger} = Log::Log4perl->get_logger(__PACKAGE__) if ($params->{logging});
-	$self->{wordTokenization} = 1 unless (defined($params->{wordTokenization}) && ($params->{wordTokenization} == 0));
-	$self->{formatting} = $params->{formatting};
+	$self->{wordTokenization} = assignDefaultAndWarnIfUndef("wordTokenization", $params->{wordTokenization}, 1, $self->{logger});
+	$self->{formatting} = assignDefaultAndWarnIfUndef("formatting", $params->{formatting}, 0, $self->{logger});
 	confessLog($self->{logger}, "Invalid value '".$self->{formatting}."' for parameter 'formatting'") if ($self->{formatting} && ($self->{formatting} ne "singleLineBreak") && ($self->{formatting} ne "doubleLineBreak"));
 	$self->{families} = {};
 	$self->{typesByFamily} = {};
 	$self->{mapObsTypeToFamily} = {};
-	$self->{wordVocab} = $params->{wordVocab};
+	$self->{wordVocab} = (ref($params->{wordVocab}) eq "HASH") ? $params->{wordVocab} : readParamGroupAsHashFromConfig($params, "wordVocab");
 	bless($self, $class);
 	if (defined($params->{obsTypes})) {
-	    foreach my $obsType (@{$params->{obsTypes}}) {
+	    my @obsTypes = (ref($params->{obsTypes}) eq "ARRAY") ? @{$params->{obsTypes}} : readObsTypesFromConfigHash($params);
+	    foreach my $obsType (@obsTypes) {
 		$self->addObsType($obsType);
 	    }
 	}
@@ -64,6 +66,14 @@ sub new {
 	$self->{logger}->trace("initiallized new object: ".Dumper($self)) if ($self->{logger});
 	return $self; 	
 }
+
+
+sub getObsTypes {
+    my $self= shift;
+    my @obsTypes = keys $self->{mapObsTypeToFamily};
+    return \@obsTypes;
+}
+
 
 
 sub addObsType {

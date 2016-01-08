@@ -22,9 +22,9 @@ use CLGTextTools::Logging qw/confessLog/;
 # - obsTypes (list)
 #
 sub new {
-	my ($class, $params) = @_;
+	my ($class, $params, $subclass) = @_;
 	my $self;
-	$self->{logger} = Log::Log4perl->get_logger(__PACKAGE__) if ($params->{logging});
+	$self->{logger} = Log::Log4perl->get_logger(defined($subclass)?$subclass:__PACKAGE__) if ($params->{logging});
 	$self->{observs} = {};
 	bless($self, $class);
 	if (defined($params->{obsTypes})) {

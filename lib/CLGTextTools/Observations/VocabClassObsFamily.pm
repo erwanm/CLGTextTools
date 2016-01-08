@@ -34,8 +34,8 @@ our $unknownToken = "_";
 
 sub new {
     my ($class, $params) = @_;
-    my $self = $class->SUPER::new($params);
-    $self->{wordTokenization} = 1 unless (defined($params->{wordTokenization}) && ($params->{wordTokenization} == 0));
+    my $self = $class->SUPER::new($params, __PACKAGE__);
+    $self->{wordTokenization} = assignDefaultAndWarnIfUndef("wordTokenization", $params->{wordTokenization}, 1, $self->{logger});
     if (defined($params->{lengthClasses})) {
 	$self->{logger}->debug("word length classes parameter found: ".$params->{lengthClasses}) if ($self->{logger});
 	$self->{logger}->trace("word length classes hash content = ".Dumper($params->{lengthClasses})) if ($self->{logger});

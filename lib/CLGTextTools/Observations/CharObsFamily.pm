@@ -34,7 +34,7 @@ our $lineBreakChar="¤";
 
 sub new {
     my ($class, $params) = @_;
-    my $self = $class->SUPER::new($params);
+    my $self = $class->SUPER::new($params, __PACKAGE__);
     return $self;
 }
 

@@ -21,7 +21,7 @@ use warnings;
 use Carp;
 use Log::Log4perl;
 use CLGTextTools::Logging qw/confessLog cluckLog/;
-use CLGTextTools::Commons qw/readTextFileLines arrayToHash/;
+use CLGTextTools::Commons qw/readTextFileLines arrayToHash assignDefaultAndWarnIfUndef/;
 use CLGTextTools::Observations::ObsFamily;
 use Data::Dumper::Simple;
 
@@ -35,8 +35,8 @@ our $unknownToken = "___";
 
 sub new {
     my ($class, $params) = @_;
-    my $self = $class->SUPER::new($params);
-    $self->{wordTokenization} = 1 unless (defined($params->{wordTokenization}) && ($params->{wordTokenization} == 0));
+    my $self = $class->SUPER::new($params, __PACKAGE__);
+    $self->{wordTokenization} = assignDefaultAndWarnIfUndef("wordTokenization", $params->{wordTokenization}, 1, $self->{logger});
     if (defined($params->{vocab})) {
 	$self->{logger}->debug("vocab resources parameter found: ".$params->{vocab}) if ($self->{logger});
 	$self->{logger}->trace("Vocab hash content = ".Dumper($params->{vocab})) if ($self->{logger});

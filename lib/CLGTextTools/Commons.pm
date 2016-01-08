@@ -5,10 +5,10 @@ use warnings;
 use Log::Log4perl;
 use Carp;
 use File::BOM qw/open_bom/;
-use CLGTextTools::Logging qw/confessLog/;
+use CLGTextTools::Logging qw/confessLog warnLog/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash hashKeysToArray readTSVByLine readTSVFileLinesAsArray readTSVLinesAsArray readConfigFile readTSVFileLinesAsHash readTSVLinesAsHash getArrayValuesFromIndexes containsUndef mergeDocs/;
+our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash hashKeysToArray readTSVByLine readTSVFileLinesAsArray readTSVLinesAsArray readConfigFile parseParamsFromString readTSVFileLinesAsHash readTSVLinesAsHash getArrayValuesFromIndexes containsUndef mergeDocs readObsTypesFromConfigHash readParamGroupAsHashFromConfig assignDefaultAndWarnIfUndef/;
 
 
 
@@ -190,6 +190,25 @@ sub readConfigFile {
 }
 
 
+#
+# Reads a string of the form "param1=value1[;param2=value2;...]" and returns a hash res->{paramX} = valueX
+# If a hash ref is provided as 2nd arg, them the key/value pairs are added to this hash (overwriting a value if the key exists)
+#
+#
+sub parseParamsFromString {
+    my $s = shift;
+    my $res = shift; # optional
+
+    $res = {} if (!defined($res));
+    my @nameValuePairs = split(";", $s);
+    foreach my $nameValuePair (@nameValuePairs) {
+	my ($name, $value) = ( $_ =~ m/([^=]+)=(.*)/);
+	$res->{$name} = $value;
+    }
+    return $res;
+}
+
+
 
 sub getArrayValuesFromIndexes {
     my $array = shift;
@@ -243,6 +262,59 @@ sub mergeDocs {
     return $res;
 }
 
+
+sub readObsTypesFromConfigHash {
+    my $params = shift;
+
+    my @obsTypesList;
+    if (defined($params->{obsTypes})) {
+	@obsTypesList = split(":", $params->{obsTypes});
+    } else {
+	foreach my $p (keys %$params) {
+	    if ($p =~ m/^obsType\./) {
+		my ($obsType) = ($p =~ m/^obsType\.(.+)$/);
+		push(@obsTypesList, $obsType) if ($params->{$p});
+	    }
+	}
+    }
+    return \@obsTypesList;
+}
+
+
+#
+# Given a "config hash" params->{name} = value, extracts all parameters where name is prefix.subname = value
+# under the form of a hash: res->{subname} = value
+#
+sub readParamGroupAsHashFromConfig {
+    my $params = shift;
+    my $prefix = shift;
+    my $separator = shift; # as a regexp; optional
+    $separator = "\." if (!defined($separator));
+
+    my %res;
+    foreach my $p (keys %$params) {
+	if ($p =~ m/^${prefix}${separator}/) {
+	    my ($name)  = ($p =~ m/^${prefix}${separator}(.+)$/);
+	    $res{$name} = $params->{$p};
+	}
+    }    
+    return \%res;
+}
+
+
+
+sub assignDefaultAndWarnIfUndef {
+    my $paramId = shift;
+    my $value = shift;
+    my $default = shift;
+    my $logger = shift; # optional
+
+    if (!defined($value)) {
+	warnLog($logger, "No value provided for parameter '$paramId', using default '$default'");
+	$value = $default;
+    }
+    return $value;
+}
 
 
 1;

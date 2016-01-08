@@ -1,4 +1,4 @@
-package CLGTextTools::Logging;
+^package CLGTextTools::Logging;
 
 use strict;
 use warnings;

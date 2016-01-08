@@ -11,6 +11,7 @@ use Carp;
 use Log::Log4perl;
 use CLGTextTools::Logging qw/confessLog/;
 use CLGTextTools::Commons qw/readTSVFileLinesAsHash/;
+use CLGTextTools::ObsCollection;
 use Data::Dumper;
 
 use base 'Exporter';
@@ -23,8 +24,13 @@ our @EXPORT_OK = qw//;
 #
 # $params:
 # * logging
-# * obsCollection object (initialized)
-# * obsTypesList
+# the obs collection parameters are provided either as:
+# ** obsCollection: an ObsCollection object (initialized)
+# ** all the paramers required to initiate a new ObsCollection object (see CLGTextTools::ObsCollection):
+# *** obsTypes (list or colon-separated string)
+# *** wordTokenization
+# *** wordVocab
+# *** formatting
 # * filename
 # * useCountFiles: if defined and not zero or empty string, then the instance will try to read observations counts from files filename.<obs>.count; if these files don't exist, then the source document is read and the count files are written. If undef (or zero etc.), then no count file is ever read or written. 
 #
@@ -36,8 +42,8 @@ sub new {
 	$self->{logger} = Log::Log4perl->get_logger(__PACKAGE__) if ($params->{logging});
 	$self->{filename} = $params->{filename};
 	confessLog($self->{logger}, "Error: file '".$self->{filename}."' not found.") if (! -f $self->{filename});
-	$self->{obsCollection} = $params->{obsCollection};
-	$self->{obsTypesList} = $params->{obsTypesList};
+	$self->{obsCollection} = (defined($params->{obsCollection})) ? $params->{obsCollection} : CLGTextTools::ObsCollection->new($params) ;
+	$self->{obsTypesList} = $self->{obsCollection}->getObsTypes();
 	$self->{useCountFiles} = $params->{useCountFiles};
 	$self->{observs} = undef;
 	$self->{nbObsDistinct} = {};
