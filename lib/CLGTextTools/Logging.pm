@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Log::Log4perl;
 use Carp;
+use Data::Dumper;
 
 use base 'Exporter';
 our @EXPORT_OK = qw/initLogging @possibleLogLevels confessLog warnLog cluckLog/;
@@ -48,7 +49,7 @@ log4perl.appender.LOGFILE.filename  = $filename
 log4perl.appender.LOGFILE.mode      = write
 log4perl.appender.LOGFILE.utf8      = 1
 log4perl.appender.LOGFILE.layout    = Log::Log4perl::Layout::PatternLayout
-log4perl.appender.LOGFILE.layout.ConversionPattern = [%r] %d %p %m\t in %M (%F %L)%n
+log4perl.appender.LOGFILE.layout.ConversionPattern = [%r] %d %p %m\t from %c in %M (%F %L)%n
 );
 	if ($synchronized) {
 		$config .= "log4perl.appender.LOGFILE.syswrite  = 1\n";
@@ -104,8 +105,10 @@ sub confessLog {
 sub warnLog {
     my ($logger, $msg) = @_;
     if (defined($logger)) {
-	$logger->logwarn($msg);
+ 	$logger->logwarn($msg);
+ 	$logger->warn($msg);
     } else {
+#	print STDERR "nope\n";
 	warn($msg);
     }
 

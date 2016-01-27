@@ -26,7 +26,7 @@ our @EXPORT_OK = qw//;
 # * logging
 # the obs collection parameters are provided either as:
 # ** obsCollection: an ObsCollection object (initialized)
-# ** all the paramers required to initiate a new ObsCollection object (see CLGTextTools::ObsCollection):
+# ** all the parameters required to initiate a new ObsCollection object (see CLGTextTools::ObsCollection):
 # *** obsTypes (list or colon-separated string)
 # *** wordTokenization
 # *** wordVocab
@@ -40,10 +40,12 @@ sub new {
 	my ($class, $params) = @_;
 	my $self;
 	$self->{logger} = Log::Log4perl->get_logger(__PACKAGE__) if ($params->{logging});
-	$self->{filename} = $params->{filename};
+	$self->{logger}->debug("Initializing DocProvider for '".$params->{filename}."'") if ($self->{logger});
+ 	$self->{filename} = $params->{filename};
 	confessLog($self->{logger}, "Error: file '".$self->{filename}."' not found.") if (! -f $self->{filename});
 	$self->{obsCollection} = (defined($params->{obsCollection})) ? $params->{obsCollection} : CLGTextTools::ObsCollection->new($params) ;
 	$self->{obsTypesList} = $self->{obsCollection}->getObsTypes();
+	confessLog($self->{logger}, "obs types list undefined or empty") if (!defined($self->{obsTypesList}) || (scalar(@{$self->{obsTypesList}}) == 0));
 	$self->{useCountFiles} = $params->{useCountFiles};
 	$self->{observs} = undef;
 	$self->{nbObsDistinct} = {};
@@ -66,6 +68,7 @@ sub getFilename {
 sub populate {
     my $self = shift;
 
+    $self->{logger}->debug("populating observations for '".$self->{filename}."'...") if ($self->{logger});
     my %observs;
     my $writeCountFiles=0;
     my $prefix = $self->{filename};
@@ -88,6 +91,7 @@ sub getObservations {
     my $self = shift;
     my $obsType = shift;
 
+    $self->{logger}->debug("obtaining observation for '".$self->{filename}."', obsType = ".(defined($obsType)?$obsType:"undef (all)")) if ($self->{logger});
     $self->populate() if (!defined($self->{observs}));
     return (defined($obsType)) ? $self->{observs}->{$obsType} : $self->{observs} ;
 }
@@ -100,6 +104,7 @@ sub getObservations {
 sub readCountFiles {
     my $self;
 
+    $self->{logger}->debug("reading from count files") if ($self->{logger});
     my $prefix = $self->{filename};
     foreach my $obsType (@{$self->{obsTypesList}}) {
 	my $a = readTSVFileLinesAsArray("$prefix.$obsType.count.total", $self->{logger});
@@ -145,11 +150,15 @@ sub writeCountFiles {
 sub readSourceDoc {
     my $self = shift;
 
+    $self->{logger}->debug("reading observations from source doc for '".$self->{filename}."'.") if ($self->{logger});
     $self->{obsCollection}->extractObsFromText($self->{filename});
+    $self->{obsCollection}->finalize();
     $self->{observs} = $self->{obsCollection}->getObservations($self->{obsTypesList});
     foreach my $obsType (@{$self->{obsTypesList}}) {
 	$self->{nbObsDistinct}->{$obsType} = $self->{obsCollection}->getNbDistinctNGrams($obsType);
 	$self->{nbObsTotal}->{$obsType} = $self->{obsCollection}->getNbTotalNGrams($obsType);
+	$self->{logger}->debug("".$self->{nbObsTotal}->{$obsType}." observations for '$obsType'") if ($self->{logger});
+
     }
 }
 

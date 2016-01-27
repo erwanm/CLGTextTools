@@ -22,11 +22,12 @@ use CLGTextTools::Logging qw/confessLog cluckLog/;
 # - logging
 #
 sub new {
-	my ($class, $params) = @_;
-	my $self;
-	$self->{logger} = Log::Log4perl->get_logger(__PACKAGE__) if ($params->{logging});
-	bless($self, $class);
-	return $self; 	
+    my ($class, $params, $subclass) = @_;
+    my $self = {};
+    $self->{logger} = Log::Log4perl->get_logger(defined($subclass)?$subclass:__PACKAGE__) if ($params->{logging});
+    $self->{logger}->debug("Initializing '$subclass' object") if ($self->{logger});
+ #	bless($self, $class);
+    return $self; 	
 }
 
 
@@ -35,7 +36,7 @@ sub new {
 # input: two hash refs, $doc->{ obs } = freq
 #
 sub compute {
-#    my ($doc1, $doc2) = @_;
+    my ($self, $doc1, $doc2) = @_;
     confessLog($self->{logger}, "bug: calling an abstract method");
 }
 

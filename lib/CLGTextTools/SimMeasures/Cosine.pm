@@ -24,6 +24,7 @@ sub new {
     my ($class, $params) = @_;
     my $self = $class->SUPER::new($params);
     $self->{obsWeights} = $params->{obsWeights};
+    bless($self, $class);
     return $self;
 }
 

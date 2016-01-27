@@ -5,7 +5,8 @@ use warnings;
 use Log::Log4perl;
 use Carp;
 use File::BOM qw/open_bom/;
-use CLGTextTools::Logging qw/confessLog warnLog/;
+use CLGTextTools::Logging qw/confessLog warnLog cluckLog/;
+use Data::Dumper;
 
 use base 'Exporter';
 our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash hashKeysToArray readTSVByLine readTSVFileLinesAsArray readTSVLinesAsArray readConfigFile parseParamsFromString readTSVFileLinesAsHash readTSVLinesAsHash getArrayValuesFromIndexes containsUndef mergeDocs readObsTypesFromConfigHash readParamGroupAsHashFromConfig assignDefaultAndWarnIfUndef/;
@@ -198,12 +199,17 @@ sub readConfigFile {
 sub parseParamsFromString {
     my $s = shift;
     my $res = shift; # optional
+    my $logger = shift; # optional
 
     $res = {} if (!defined($res));
     my @nameValuePairs = split(";", $s);
     foreach my $nameValuePair (@nameValuePairs) {
-	my ($name, $value) = ( $_ =~ m/([^=]+)=(.*)/);
-	$res->{$name} = $value;
+	my ($name, $value) = ( $nameValuePair =~ m/([^=]+)=(.*)/);
+	if (defined($name) && defined($value)) {
+	    $res->{$name} = $value;
+	} else {
+	    confessLog($logger, "Cannot parse string '$s' as '<name>=<value>'");
+	}
     }
     return $res;
 }
@@ -293,9 +299,11 @@ sub readParamGroupAsHashFromConfig {
 
     my %res;
     foreach my $p (keys %$params) {
+#	print STDERR "DEBUG readParamGroupAsHashFromConfig 1: p='$p'\n";
 	if ($p =~ m/^${prefix}${separator}/) {
 	    my ($name)  = ($p =~ m/^${prefix}${separator}(.+)$/);
 	    $res{$name} = $params->{$p};
+#	    print STDERR "DEBUG readParamGroupAsHashFromConfig 2: name='$name', value='$res{$name}'\n";
 	}
     }    
     return \%res;

@@ -56,11 +56,9 @@ sub new {
 	$self->{mapObsTypeToFamily} = {};
 	$self->{wordVocab} = (ref($params->{wordVocab}) eq "HASH") ? $params->{wordVocab} : readParamGroupAsHashFromConfig($params, "wordVocab");
 	bless($self, $class);
-	if (defined($params->{obsTypes})) {
-	    my @obsTypes = (ref($params->{obsTypes}) eq "ARRAY") ? @{$params->{obsTypes}} : readObsTypesFromConfigHash($params);
-	    foreach my $obsType (@obsTypes) {
-		$self->addObsType($obsType);
-	    }
+	my $obsTypes = (defined($params->{obsTypes}) && ref($params->{obsTypes}) eq "ARRAY") ? $params->{obsTypes} : readObsTypesFromConfigHash($params);
+	foreach my $obsType (@$obsTypes) {
+	    $self->addObsType($obsType);
 	}
 	$self->{finalizedData} = undef;
 	$self->{logger}->trace("initiallized new object: ".Dumper($self)) if ($self->{logger});
@@ -80,6 +78,7 @@ sub addObsType {
     my $self= shift;
     my $obsType = shift;
 
+    $self->{logger}->debug("Init ObsCollection object: adding obs type '$obsType'") if ($self->{logger});
     my ($familyId, $params, $minFreq) = ($obsType =~ m/^([^.]+)\.(.*)\.mf(\d+)$/);
     $self->{logger}->debug("Adding obs type '$obsType'; familyId = '$familyId', minFreq='$minFreq', params='$params'") if ($self->{logger});
     if (!defined($self->{families}->{$familyId})) {
