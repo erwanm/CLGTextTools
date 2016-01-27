@@ -8,3 +8,4 @@
 addToEnvVar "$(pwd)/bin" PATH :
 addToEnvVar "$(pwd)/lib" PERL5LIB :
 erw-pm activate perl-libraries
+erw-pm activate TreeTaggerWrapper

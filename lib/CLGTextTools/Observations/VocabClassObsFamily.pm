@@ -10,7 +10,7 @@ use warnings;
 use Carp;
 use Log::Log4perl;
 use CLGTextTools::Logging qw/confessLog cluckLog/;
-use CLGTextTools::Commons qw/readTextFileLines arrayToHash/;
+use CLGTextTools::Commons qw/readTextFileLines arrayToHash assignDefaultAndWarnIfUndef/;
 use CLGTextTools::Observations::ObsFamily;
 use Data::Dumper::Simple;
 

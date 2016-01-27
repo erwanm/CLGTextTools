@@ -88,10 +88,12 @@ sub addObsType {
 sub getVocab {
     my $self=  shift;
     my $vocabId = shift;
+    my $requestByObsType = shift;
 
     my $vocab = $self->{vocab}->{$vocabId}->{data};
     if (!defined($vocab)) {
 	my $vocabFile = $self->{vocab}->{$vocabId}->{filename};
+	confessLog($self->{logger}, "Error for obs type $requestByObsType: no vocabulary file defined for vocab id '$vocabId'") if (!defined($vocabFile));
 	$self->{logger}->debug("loading vocabulary '$vocabId' from file '$vocabFile'") if ($self->{logger});
 	$vocab = arrayToHash( readTextFileLines($vocabFile,1,$self->{logger}) );
 	$self->{vocab}->{$vocabId}->{data} = $vocab;
@@ -134,8 +136,7 @@ sub addText {
 	my $vocabId = $self->{params}->{$obsType}->{vocabId};
 	if (defined($vocabId)) {
 	    $self->{logger}->debug("looking for vocab '$vocabId' (addText, type $obsType)") if ($self->{logger});
-	    my $vocab = $self->getVocab($vocabId);
-	    confessLog($self->{logger}, "Error for obs type $obsType: no vocabulary found for vocab id '$vocabId'") if (!defined($vocab));
+	    my $vocab = $self->getVocab($vocabId, $obsType);
 	    my @tokensVocab = map { defined($vocab->{$_}) ? $_ : $unknownToken } @$selectedTokens;
 	    $selectedTokens = \@tokensVocab;
 	}

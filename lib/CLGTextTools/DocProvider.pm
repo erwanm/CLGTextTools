@@ -10,7 +10,7 @@ use warnings;
 use Carp;
 use Log::Log4perl;
 use CLGTextTools::Logging qw/confessLog/;
-use CLGTextTools::Commons qw/readTSVFileLinesAsHash/;
+use CLGTextTools::Commons qw/readTSVFileLinesAsHash readTSVFileLinesAsArray/;
 use CLGTextTools::ObsCollection;
 use Data::Dumper;
 
@@ -73,8 +73,10 @@ sub populate {
     my $writeCountFiles=0;
     my $prefix = $self->{filename};
     if (($self->{useCountFiles}) && (-f "$prefix.".$self->{obsTypesList}->[0].".count")) {  # assuming that either all count files are present, or none
+	$self->{logger}->trace("count file found, going to read from files") if ($self->{logger});
 	$self->readCountFiles();
     } else { # either usecount=0 or count files not present
+	$self->{logger}->trace("option disabled or count file not found, going to read from source doc") if ($self->{logger});
 	$self->readSourceDoc();
 	if ($self->{useCountFiles}) { # if usecount=1 here, then count files were not present: write them
 	    $self->writeCountFiles();
@@ -102,16 +104,21 @@ sub getObservations {
 #
 #
 sub readCountFiles {
-    my $self;
+    my $self = shift;
 
-    $self->{logger}->debug("reading from count files") if ($self->{logger});
+    $self->{logger}->debug("reading from count files...") if ($self->{logger});
     my $prefix = $self->{filename};
     foreach my $obsType (@{$self->{obsTypesList}}) {
-	my $a = readTSVFileLinesAsArray("$prefix.$obsType.count.total", $self->{logger});
+	my $f = "$prefix.$obsType.count";
+	$self->{logger}->debug("obs type $obsType: reading count file '$f'") if ($self->{logger});
+	my $a = readTSVFileLinesAsArray("$f.total", 2, $self->{logger});
 	$self->{nbObsDistinct}->{$obsType} = $a->[0]->[0];
 	$self->{nbObsTotal}->{$obsType} = $a->[0]->[1];
-	$self->{observs}->{$obsType} = readTSVFileLinesAsHash("$prefix.$obsType.count", $self->{logger});
+	$self->{observs}->{$obsType} = readTSVFileLinesAsHash($f, $self->{logger});
+	$self->{logger}->debug("obs type $obsType: read ".$self->{nbObsTotal}->{$obsType}." observations") if ($self->{logger});
+#	$self->{logger}->trace("obs type $obsType: ".scalar(keys %{$self->{observs}->{$obsType}})." observations in hash") if ($self->{logger});
     }
+
 }
 
 
