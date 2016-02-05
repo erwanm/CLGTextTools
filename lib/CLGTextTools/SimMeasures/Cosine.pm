@@ -34,7 +34,7 @@ sub new {
 #
 #
 sub compute {
-    my ($doc1, $doc2) = @_;
+    my ($self, $doc1, $doc2) = @_;
 
     my ($obs, $freq1, $freq2);
     my $weights = $self->{obsWeights};
@@ -47,7 +47,7 @@ sub compute {
 	if (defined($weights)) {
 	    my $w = $weights->{$obs};
 	    if (!defined($w)) {
-		cluckLog($self->{logger}, "Undefined weight for obs '$obs1', set to zero.");
+		cluckLog($self->{logger}, "Undefined weight for obs '$obs', set to zero.");
 		$w=0;
 	    }
 	}
@@ -61,15 +61,15 @@ sub compute {
 	if (defined($weights)) {
 	    my $w = $weights->{$obs};
 	    if (!defined($w)) {
-		cluckLog($self->{logger}, "Undefined weight for obs '$obs1', set to zero.");
+		cluckLog($self->{logger}, "Undefined weight for obs '$obs', set to zero.");
 		$w=0;
 	    }
 	}
         $normSum2 += $freq2 * $w;
     }
-    my ($n1, $n2)  = ( sqrt($n1), sqrt($n2) );
-    return 0 if ($1 * $n2 == 0);
-    return $sumProd / ($n1*$n2);
+    my ($n1, $n2)  = ( sqrt($normSum1), sqrt($normSum2) );
+    return 0 if ($normSum1*$normSum2 == 0);
+    return $sumProd / ($normSum1*$normSum2);
 
 }
 
