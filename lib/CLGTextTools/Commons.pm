@@ -294,7 +294,9 @@ sub readObsTypesFromConfigHash {
 sub readParamGroupAsHashFromConfig {
     my $params = shift;
     my $prefix = shift;
+    my $keepOtherParams = shift; # optional
     my $separator = shift; # as a regexp; optional
+
     $separator = "\." if (!defined($separator));
 
     my %res;
@@ -304,6 +306,8 @@ sub readParamGroupAsHashFromConfig {
 	    my ($name)  = ($p =~ m/^${prefix}${separator}(.+)$/);
 	    $res{$name} = $params->{$p};
 #	    print STDERR "DEBUG readParamGroupAsHashFromConfig 2: name='$name', value='$res{$name}'\n";
+	} else {
+	    $res{$p} = $params->{$p} if ($keepOtherParams);
 	}
     }    
     return \%res;
@@ -323,6 +327,7 @@ sub assignDefaultAndWarnIfUndef {
     }
     return $value;
 }
+
 
 
 1;

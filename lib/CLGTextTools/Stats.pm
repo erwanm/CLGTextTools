@@ -5,9 +5,10 @@ use warnings;
 use Log::Log4perl;
 use Carp;
 use CLGTextTools::Logging qw/confessLog/;
+use CLGTextTools::Commons qw/containsUndef/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/sum min max mean median stdDev geomMean HarmoMean means aggregateVector pickInList pickInListProbas pickNSloppy  pickNIndexesAmongMSloppy pickNIndexesAmongMExactly  pickDocSubset splitDocRandom splitDocRandomAvoidEmpty/;
+our @EXPORT_OK = qw/sum min max mean median stdDev geomMean HarmoMean means aggregateVector pickIndex pickInList pickInListProbas pickNSloppy  pickNIndexesAmongMSloppy pickNIndexesAmongMExactly  pickDocSubset splitDocRandom splitDocRandomAvoidEmpty/;
 
 
 
@@ -241,6 +242,22 @@ sub pickInList {
 }
 
 
+
+# pickIndex(@$list)
+#
+# picks an index randomly in a list, i.e. simply returns an integer between 0 and n-1, where n is the size of the input list.
+# 
+#
+#
+sub pickIndex {
+    my $list = shift;
+
+    confess "Wrong parameter: not an array or empty array" if ((ref($list) ne "ARRAY") || (scalar(@$list)==0));
+    my $n = scalar(@$list);
+    return int(rand(scalar(@$list)));
+}
+
+
 # pickInListProbas(%$hash)
 #
 # picks a random value among (keys %$hash) following, giving each key a probability proportional to $hash->{key} w.r.t to all values in (values %$hash)
@@ -340,7 +357,7 @@ sub pickDocSubset {
 #
 # given a document as a hash: doc->{obs} = freq (one obs type only), splits the observations into nbBins subsets of size  size(doc)/nbBins.
 # The output is a list ref of size nbBins.
-# * probas is an optional parameter (hash ref index->proba): if supplied, every bin is picked according to the distribtuion described as values of the array. Its size must be equal to nbBins.
+# * probas is an optional parameter (hash ref index->proba): if supplied, every bin is picked according to the distribtuion described as values of the array. Its size must be equal to nbBins. If undefined, a uniform distribution is assumed.
 #
 # Warning: if the input document is small, it is possible that one of the bins is empty. In that case the corresponding subset is undef.
 #
@@ -365,10 +382,12 @@ sub splitDocRandom {
 #
 # Calls splitDocRandom until every returned subset is non-empty, unless impossible within $nbAttempts attempts.
 #
+# * probas is an optional parameter (hash ref index->proba): if supplied, every bin is picked according to the distribtuion described as values of the array. Its size must be equal to nbBins. If undefined, a uniform distribution is assumed.
 #
 sub splitDocRandomAvoidEmpty {
-    my ($nbAttempts, $doc, $nbBins, $probas) = @_;
+    my ($nbAttempts, $doc, $nbBins, $probas, $logger) = @_;
 
+    $logger->debug("splitting docs randomly: nbAttempts=$nbAttempts; nbBins=$nbBins") if ($logger);
     my $res;
     while (containsUndef($res) && ($nbAttempts>0)) {
 	$res = splitDocRandom($doc, $nbBins, $probas);

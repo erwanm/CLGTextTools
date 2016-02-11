@@ -22,7 +22,7 @@ our @ISA=qw/CLGTextTools::SimMeasures::Measure/;
 #
 sub new {
     my ($class, $params) = @_;
-    my $self = $class->SUPER::new($params);
+    my $self = $class->SUPER::new($params, __PACKAGE__);
     $self->{obsWeights} = $params->{obsWeights};
     bless($self, $class);
     return $self;

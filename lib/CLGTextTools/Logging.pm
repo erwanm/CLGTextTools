@@ -106,7 +106,7 @@ sub warnLog {
     my ($logger, $msg) = @_;
     if (defined($logger)) {
  	$logger->logwarn($msg);
- 	$logger->warn($msg);
+# 	$logger->warn($msg);
     } else {
 #	print STDERR "nope\n";
 	warn($msg);

@@ -15,7 +15,7 @@ use CLGTextTools::DocProvider;
 use Data::Dumper;
 
 use base 'Exporter';
-our @EXPORT_OK = qw//;
+our @EXPORT_OK = qw/createDatasetsFromParams filterMinDocFreq generateDocFreqTable/;
 
 
 #
@@ -48,7 +48,10 @@ sub addDocProvider {
     my $doc = shift;
 
     my $docId = $doc->getFilename();
-    $self->{docs}->{docId} = $doc;
+    $self->{logger}->debug("Adding DocProvider; id=$docId") if ($self->{logger});
+#    $self->{logger}->debug("Adding DocProvider; ref(doc)=".ref($doc)) if ($self->{logger});
+    $self->{docs}->{$docId} = $doc;
+#    print STDERR Dumper($self->{docs});
 }
 
 
@@ -72,12 +75,15 @@ sub getDocsAsHash {
 
 sub getDocsAsList {
     my $self = shift;
-    return values $self->{docs};
+    my @docs = values %{$self->{docs}};
+#    print STDERR Dumper($self->{docs});
+    map { die "bug undef doc!" if (!defined($_)); } values %{$self->{docs}};
+    return \@docs;
 }
 
 
 #
-# applyMinDocFreq($minDocFreq, $docFreqTable, $deleteInOriginalDoc)
+# applyMinDocFreq($minDocFreq, $docFreqTable)
 # 
 # Removes all the observations which don't appear in at least $minDocFreq distinct documents according to $docFreqTable.
 #
@@ -87,8 +93,8 @@ sub getDocsAsList {
 # * There is little sense using this method if the DocProvider objects have not been initialized with the same obs types list.
 #
 # Parameters:
-# * $minDocFreq: the minimum doc frequency (nothing is done if the current min doc freq, default 1, is lower or equal than this parameter)
-# * $docFreqTable: $docFreqTable->{obsType}->{obs} = doc freq ; if undef, uses the object doc freq table (if undef as well, computes the doc freq table based on the collection of documents)
+# * $minDocFreq: the minimum doc frequency (nothing is done if the current min doc freq, default 1, is higher or equal than this parameter)
+# * $docFreqTable: $docFreqTable->{obsType}->{obs} = doc freq ; if undef, uses the object doc freq table (if undef as well, computes the doc freq table based on the collection of documents itself)
 #
 sub applyMinDocFreq {
     my $self = shift;
@@ -96,9 +102,16 @@ sub applyMinDocFreq {
     my $docFreqTable = shift;
 
     if (!defined($docFreqTable)) {
+	$self->{logger}->debug("applyMinDocFreq: param doc freq table is undefined") if ($self->{logger});
 	if (!defined($self->{docFreqTable})) {
-	    my @docs = values %{$self->{docs}};
-	    $self->{docFreqTable} = generateDocFreqTable(\@docs);
+	    $self->{logger}->debug("applyMinDocFreq: self->{docFreqTable} is undefined, computing it") if ($self->{logger});
+	    my @docsObservs;
+	    foreach my $docP (values %{$self->{docs}}) {
+		push(@docsObservs, $docP->getObservations());
+	    }
+	    $self->{logger}->debug("applyMinDocFreq: ref(docsObservs[0])=".ref($docsObservs[0])) if ($self->{logger});
+	    $self->{docFreqTable} = generateDocFreqTable(\@docsObservs, $self->{logger});
+	    map { die "bug after!" if (!defined($_)); } values %{$self->{docs}};
 	}
 	$docFreqTable = $self->{docFreqTable};
     } 
@@ -142,7 +155,7 @@ sub filterMinDocFreq {
 	    if ($deleteInOriginalDoc) {
 		delete $observs->{$obs} if ($docFreq < $minDocFreq);
 	    } else {
-		$res->{$obsType}->{$obs} = $observs->{$obs};
+		$res{$obsType}->{$obs} = $observs->{$obs};
 	    }
 	}
     }
@@ -166,7 +179,9 @@ sub filterMinDocFreq {
 #
 sub generateDocFreqTable {
     my $documents = shift;
+    my $logger = shift;
 
+    $logger->debug("Generating doc freq table from list of docs") if ($logger);
     my %res;
     foreach my $doc (@$documents) {
 	my ($obsType, $observs);
@@ -178,6 +193,47 @@ sub generateDocFreqTable {
     }
     return \%res;
     
+}
+
+
+# static
+#
+# Returns a hash $docColl{datasetId} = DocCollection
+#
+# * docProviderParams as hash:  (see DocProvider)
+# ** logging
+# ** obsCollection params
+# ** useCountFile
+# * $datasetsIdsList = [ datasetId1, datasetId2, ..]
+# * $mapIdToPath is either:
+# ** a hash such that $mapIdToPath->{id} = <path>, where <path> points to a directory contaning the files to include in the dataset.
+# ** a string <path>, which points to a directory where datasets directories named 'id' are expected, i.e. a dataset "x" is located in <path>/x/
+# * $minDocFreq (optional): min doc frequency threshold; if >1, the collection is entirely populated (can take long) in order to generate the doc freq table. (currently can only be used with the collection itself as reference for doc freq)
+# * $filePattern is optional: if specified, only files which satisfy the pattern are included in the dataset (the default value is "*.txt").
+# * $logger (optional)
+#
+sub createDatasetsFromParams {
+    my ($docProviderParams, $datasetsIdsList, $mapIdToPath, $minDocFreq, $filePattern, $logger) = @_;
+
+    $logger->debug("Creating list of DocCollection objects from parameters") if ($logger);
+    $filePattern= "*.txt" if (!defined($filePattern));
+    $minDocFreq = 1 if (!defined($minDocFreq));
+    my %docColls;
+    foreach my $datasetId (@$datasetsIdsList) {
+	my $path = (ref($mapIdToPath)) ? $mapIdToPath->{$datasetId}."/" : "$mapIdToPath/$datasetId/" ;
+	$logger->debug("Creating DocCollection for id='$datasetId'; path='$path'") if ($logger);
+	my $docColl = CLGTextTools::DocCollection->new({ logging => $docProviderParams->{logging} });
+	foreach my $file (glob("$path/$filePattern")) {
+	    $logger->trace("DocCollection '$datasetId'; adding file '$file'") if ($logger);
+	    my %paramsThis = %$docProviderParams;
+	    $paramsThis{filename} = $file;
+	    my $doc = CLGTextTools::DocProvider->new(\%paramsThis);
+	    $docColl->addDocProvider($doc);
+	}
+	$docColl->applyMinDocFreq($minDocFreq);
+	$docColls{$datasetId} = $docColl;
+    }
+    return \%docColls;
 }
 
 
