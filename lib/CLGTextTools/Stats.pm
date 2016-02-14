@@ -341,13 +341,15 @@ sub pickNIndexesAmongMExactly {
 # remark: can be used to pick random subsets with replacements.
 #
 sub pickDocSubset {
-    my ($doc, $propObsSubset) = @_;
+    my ($doc, $propObsSubset, $logger) = @_;
     my %subset;
+    $logger->debug("Picking doc subset, prop = $propObsSubset") if ($logger);
     my ($obs, $nb);
     while (($obs, $nb) = each %$doc) {
         for (my $i=0; $i< $nb; $i++) {
             $subset{$obs}++ if (rand() < $propObsSubset);
         }
+	$logger->trace("obs = '$obs'; nb = $nb ; selected = ".(defined($subset{$obs})?$subset{$obs}:0)) if ($logger);
     }
     return \%subset;
 }

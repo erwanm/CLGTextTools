@@ -53,8 +53,13 @@ sub compute {
         $max += $freq2 if (!defined($doc1->{$obs2}));
     }
 
-    return 0 if (!defined($min) || (!defined($max)) || ($max == 0));
-    return $min / $max;
+    if (!defined($min) || (!defined($max)) || ($max == 0)) {
+	$self->{logger}->debug("final similarity score: 0") if ($self->{logger});
+	return 0 ;
+    } else {
+	$self->{logger}->debug("final similarity score: ".($min / $max)) if ($self->{logger});
+	return $min / $max;
+    }
 }
 
 1;
