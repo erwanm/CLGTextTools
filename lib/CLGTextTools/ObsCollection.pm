@@ -227,6 +227,7 @@ sub getObservations {
     confessLog($self->{logger}, "Error: obs collection has not been finalized yet.") if (!defined($self->{finalizedData}));
     foreach my $obsType (@$obsTypesList) {
 	$res{$obsType} = $self->{finalizedData}->{$obsType};
+	confessLog($self->{logger}, "Error: invalid observation type '$obsType'; no such type found in the collection.") if (!defined($res{$obsType}));
     }
     return \%res;
 }

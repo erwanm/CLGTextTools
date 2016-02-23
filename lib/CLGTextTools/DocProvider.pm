@@ -95,7 +95,12 @@ sub getObservations {
 
     $self->{logger}->debug("obtaining observation for '".$self->{filename}."', obsType = ".(defined($obsType)?$obsType:"undef (all)")) if ($self->{logger});
     $self->populate() if (!defined($self->{observs}));
-    return (defined($obsType)) ? $self->{observs}->{$obsType} : $self->{observs} ;
+    if (defined($obsType)) {
+	confessLog($self->{logger}, "Error: invalid observation type '$obsType'; no such type found in the collection.") if (!defined($self->{observs}->{$obsType}));
+	return $self->{observs}->{$obsType};
+    } else {
+	return $self->{observs} ;
+    }
 }
 
 
