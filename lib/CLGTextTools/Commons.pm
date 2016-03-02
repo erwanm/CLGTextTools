@@ -9,7 +9,7 @@ use CLGTextTools::Logging qw/confessLog warnLog cluckLog/;
 use Data::Dumper;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash hashKeysToArray readTSVByLine readTSVFileLinesAsArray readTSVLinesAsArray readConfigFile parseParamsFromString readTSVFileLinesAsHash readTSVLinesAsHash getArrayValuesFromIndexes containsUndef mergeDocs readObsTypesFromConfigHash readParamGroupAsHashFromConfig assignDefaultAndWarnIfUndef/;
+our @EXPORT_OK = qw/readTextFileLines readLines arrayToHash hashKeysToArray readTSVByLine readTSVFileLinesAsArray readTSVLinesAsArray readConfigFile parseParamsFromString readTSVFileLinesAsHash readTSVLinesAsHash getArrayValuesFromIndexes containsUndef mergeDocs readObsTypesFromConfigHash readParamGroupAsHashFromConfig assignDefaultAndWarnIfUndef rankWithTies/;
 
 
 
@@ -326,6 +326,139 @@ sub assignDefaultAndWarnIfUndef {
 	$value = $default;
     }
     return $value;
+}
+
+
+
+
+# rankWithTies($parameters)
+#
+# Computes a ranking which takes ties into account, i.e. two identical values are assigned the same rank.
+# The sum property is also fulfilled, i.e. the sum of all ranks is always 1+2+...+N (if first rank is 1). This implies
+# that the rank assigned to several identical values is the average of the ranks they would have been assigned if ties were not taken into account.
+# 
+# $parameters is a hash which must define:
+# * values: a hash ref of the form $values->{id} = value. Can contain NaN values, but these values will be ignored.
+# and optionally defines:
+# * array: if defined, an array ref which contains the ids used as keys in values
+# * arrayAlreadySorted: (only if array is defined, see above). if set to true, "array" must be already sorted. the sorting step
+#   will not be done (this way it is possible to use any kind of sorting) (the ranking step - with ties - is still done of course) 
+# * highestValueFirst: false by default. set to true in order to rank from highest to lowest values. Useless if array is defined. 
+# * printToFileHandle: if defined, a file handle where ranks will be printed.
+# * dontPrintValue: if defined and if printToFileHandle is defined, then lines are of the form
+#  "<id> [otherData] <rank>"  instead of "<id> [otherData] <value> <rank>".
+# 
+# * otherData: hash ref of the form $otherData->{$id}=data. if defined and if printToFileHandle is defined, then lines
+#   like "<id> <otherData> [value] <rank>" will be written to the file instead of "<id> [value] <rank>". if the "data" contains
+#   several columns, these columns must be already separated together but should not contain a column separator at the beginning
+#   or at the end.  
+# * columnSeparator: if defined and if printToFileHandle is defined, will be used as column separator (tabulation by default). 
+# * noNaNWarning: 0 by default, which means that a warning is issued if NaN values are found. This does not happen if this parameter
+#   is set to true. not used if $array is defined.
+# * dontStoreRanking: By default the returned value is a hash ref of the form $ranking->{id}=rank containing the whole ranking. 
+#  If dontStoreRanking is true then nothing is returned. 
+# * firstRank: rank starting value (1 by default).
+# * addNaNValuesBefore: boolean, default 0. by default NaN values are discarded. If true, these values are prepended to the ranking (before first real value).
+# * addNaNValuesAfter: boolean, default 0. by default NaN values are discarded. If true, these values are appended to the ranking (after last real value).
+#
+sub rankWithTies {
+
+	my ($parameters, $logger) = @_;
+	my $firstRank = defined( $parameters->{firstRank} ) ? $parameters->{firstRank} : 1;
+	my $colSep = defined( $parameters->{columnSeparator} ) ? $parameters->{columnSeparator} : "\t";
+	my $values = $parameters->{values};
+	confessLog($logger, "Error: \$parameters->{values} must be defined.") if ( !defined($values) );
+	my $array = $parameters->{array};
+	if ( !defined($array) || !$parameters->{arrayAlreadySorted} ) {
+		my @sortedIds;
+		if ( $parameters->{highestValueFirst} ) {
+			$logger->debug("Sorting by descending order (highest value first)") if ($logger);
+			@sortedIds =
+			  sort { $values->{$b} <=> $values->{$a} }
+			  grep { $values->{$_} == $values->{$_} }
+			  defined($array)
+			  ? @$array
+			  : keys %$values
+			  ; # tricky: remove the NaN values before sorting. found in perl man page for sort.
+		} else {
+			$logger->debug("Sorting by ascending order (lowest value first)") if ($logger);
+			@sortedIds =
+			  sort { $values->{$a} <=> $values->{$b} }
+			  grep { $values->{$_} == $values->{$_} }
+			  defined($array)
+			  ? @$array
+			  : keys %$values
+			  ; # tricky: remove the NaN values before sorting. found in perl man page for sort.
+		}
+		if (   $parameters->{addNaNValuesBefore} || $parameters->{addNaNValuesAfter} ) {
+			my @NaNIds =
+			  grep { $values->{$_} != $values->{$_} }
+			  defined($array) ? @$array : keys %$values;
+			my $nbValues    = scalar( keys %$values );
+			my $nbNaNValues = scalar(@NaNIds);
+			if ( scalar($nbNaNValues) > 0 ) {
+				if ( $parameters->{addNaNValuesBefore} ) {
+					unshift( @sortedIds, @NaNIds );
+					if ( !$parameters->{noNaNWarning} ) {
+					    if ($logger) {
+						$logger->logwarn("$nbNaNValues NaN values (among $nbValues) prepended to ranking.") ;
+					    } else {
+						warn("$nbNaNValues NaN values (among $nbValues) prepended to ranking.") ;
+					    }
+					}
+				}
+				else {
+					push( @sortedIds, @NaNIds );
+					if ( !$parameters->{noNaNWarning} ) {
+					    if ($logger) {
+						$logger->logwarn(
+						    "$nbNaNValues NaN values (among $nbValues) appended to ranking."
+						    ) ;
+					    } else {
+						warn "$nbNaNValues NaN values (among $nbValues) appended to ranking.";
+					    }
+					}
+				}
+			}
+		}
+		elsif ( !$parameters->{noNaNWarning} ) {
+			my $nbValues    = scalar( keys %$values );
+			my $nbNaNValues = $nbValues - scalar(@sortedIds);
+			warnLog($logger, "$nbNaNValues NaN values (among $nbValues) discarded from ranking." ) if ( $nbNaNValues > 0 );
+		}
+		$array = \@sortedIds;
+	}
+	my %ranks;
+	my $i       = 0;
+	my $fh      = $parameters->{printToFileHandle};
+	my $ranking = undef;
+	while ( $i < scalar(@$array) ) {
+		my $currentFirst = $i;
+		my $nbTies       = 0;
+		while (( $i + 1 < scalar(@$array) )
+			&& ( $values->{ $array->[$i] } == $values->{ $array->[ $i + 1 ] } )
+		  )
+		{
+			$nbTies++;
+			$i++;
+		}
+		my $rank = ( ( 2 * ( $currentFirst + $firstRank ) ) + $nbTies ) / 2;
+		for ( my $j = $currentFirst ; $j <= $currentFirst + $nbTies ; $j++ ) {
+			$ranks{ $array->[$j] } = $rank;
+			if ( defined($fh) ) {
+				my $otherData =  defined( $parameters->{otherData} ) ? $colSep . $parameters->{otherData}->{ $array->[$j] } : "";
+				my $valueData =  $parameters->{dontPrintValue}  ? "" : $colSep . $values->{ $array->[$j] };
+				print $fh $array->[$j] . $otherData . $valueData . $colSep . $rank . "\n";
+			}
+			if ( !$parameters->{dontStoreRanking} ) {
+				$ranking->{ $array->[$j] } = $rank;
+			}
+		}
+		$logger->debug("found $nbTies ties starting at position $currentFirst+1, assigned rank is $rank") if ($logger);
+		$i++;
+	}
+	return $ranking if ( !$parameters->{dontStoreRanking} );
+
 }
 
 
