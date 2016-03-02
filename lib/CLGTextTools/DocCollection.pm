@@ -63,6 +63,14 @@ sub getMinDocFreq {
 
 sub getDocFreqTable {
     my $self = shift;
+    if (!defined($self->{docFreqTable})) {
+	$self->{logger}->debug("getDocFreqTable: self->{docFreqTable} is undefined, computing it") if ($self->{logger});
+	my @docsObservs;
+	foreach my $docP (values %{$self->{docs}}) {
+	    push(@docsObservs, $docP->getObservations());
+	}
+	$self->{docFreqTable} = generateDocFreqTable(\@docsObservs, $self->{logger});
+    }
     return $self->{docFreqTable};
 }
 
@@ -101,22 +109,12 @@ sub applyMinDocFreq {
     my $minDocFreq = shift;
     my $docFreqTable = shift;
 
-    if (!defined($docFreqTable)) {
-	$self->{logger}->debug("applyMinDocFreq: param doc freq table is undefined") if ($self->{logger});
-	if (!defined($self->{docFreqTable})) {
-	    $self->{logger}->debug("applyMinDocFreq: self->{docFreqTable} is undefined, computing it") if ($self->{logger});
-	    my @docsObservs;
-	    foreach my $docP (values %{$self->{docs}}) {
-		push(@docsObservs, $docP->getObservations());
-	    }
-	    $self->{logger}->debug("applyMinDocFreq: ref(docsObservs[0])=".ref($docsObservs[0])) if ($self->{logger});
-	    $self->{docFreqTable} = generateDocFreqTable(\@docsObservs, $self->{logger});
-	    map { die "bug after!" if (!defined($_)); } values %{$self->{docs}};
-	}
-	$docFreqTable = $self->{docFreqTable};
-    } 
     my %res;
     if ($minDocFreq > $self->{minDocFreq}) {
+	if (!defined($docFreqTable)) {
+	    $self->{logger}->debug("applyMinDocFreq: param doc freq table is undefined") if ($self->{logger});
+	    $docFreqTable = $self->getDocFreqTable();
+	} 
 	foreach my $docKey (keys %{$self->{docs}}) {
 	    my $allObservsDoc = $self->{docs}->{$docKey}->getObservations();
 	    filterMinDocFreq($allObservsDoc, $minDocFreq, $docFreqTable, 1);
