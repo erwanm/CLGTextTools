@@ -22,9 +22,11 @@ patternsVocabClass="MORPHO TTR LENGTH.2,4,6,9,14"
 
 function usage {
   echo
-  echo "Usage: $progName [options] <min freq> [<stop-words id 1> [<stop-words id 2> ...]]"
+  echo "Usage: $progName [options] <min frequencies> <stop-words ids>"
   echo
   echo "  prints a standard list of obs types to STDOUT."
+  echo "  <min frequencies> and <stop-words ids> contain a list of values"
+  echo "  separated by spaces (use quotes if several values)."
   echo
   echo "  Options:"
   echo "    -h this help"
@@ -64,44 +66,44 @@ if [ ! -z "$printHelp" ]; then
     exit 1
 fi
 
-minFreq="$1"
-shift 1
-stopWordsIds="$@"
+minFreqs="$1"
+stopWordsIds="$2"
 
 
-for p in $patternsWord; do
-    for lc in $lcWord; do
-	for sl in $slWord; do
-	    printObsType "WORD.$p.lc$lc.sl$sl.mf$minFreq"
-	done
-    done
-done
-
-for swId in $stopWordsIds; do
-    for p in $patternsStopWords; do
-	for lc in $lcStopWords; do
-	    for sl in $slStopWords; do
-		printObsType "WORD.$p.lc$lc.sl$sl.$swId.mf$minFreq"
+for minFreq in $minFreqs; do
+    for p in $patternsWord; do
+	for lc in $lcWord; do
+	    for sl in $slWord; do
+		printObsType "WORD.$p.lc$lc.sl$sl.mf$minFreq"
 	    done
 	done
     done
-done
 
-for p in $patternsChar; do
-    for lc in $lcChar; do
-	for sl in $slChar; do
-	    printObsType "CHAR.$p.lc$lc.sl$sl.mf$minFreq"
+    for swId in $stopWordsIds; do
+	for p in $patternsStopWords; do
+	    for lc in $lcStopWords; do
+		for sl in $slStopWords; do
+		    printObsType "WORD.$p.lc$lc.sl$sl.$swId.mf$minFreq"
+		done
+	    done
 	done
     done
-done
 
-for p in $patternsPOS; do
-    for sl in $slPOS; do
-	printObsType "POS.$p.sl$sl.mf$minFreq"
+    for p in $patternsChar; do
+	for lc in $lcChar; do
+	    for sl in $slChar; do
+		printObsType "CHAR.$p.lc$lc.sl$sl.mf$minFreq"
+	    done
+	done
+    done
+
+    for p in $patternsPOS; do
+	for sl in $slPOS; do
+	    printObsType "POS.$p.sl$sl.mf$minFreq"
+	done
+    done
+
+    for p in $patternsVocabClass; do
+	printObsType "VOCABCLASS.$p.mf$minFreq"
     done
 done
-
-for p in $patternsVocabClass; do
-    printObsType "VOCABCLASS.$p.mf$minFreq"
-done
-

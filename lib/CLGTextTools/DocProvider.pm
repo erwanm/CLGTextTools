@@ -43,10 +43,10 @@ sub new {
 	$self->{logger}->debug("Initializing DocProvider for '".$params->{filename}."'") if ($self->{logger});
  	$self->{filename} = $params->{filename};
 	confessLog($self->{logger}, "Error: file '".$self->{filename}."' not found.") if (! -f $self->{filename});
+	$self->{useCountFiles} = $params->{useCountFiles};
 	$self->{obsCollection} = (defined($params->{obsCollection})) ? $params->{obsCollection} : CLGTextTools::ObsCollection->new($params) ;
 	$self->{obsTypesList} = $self->{obsCollection}->getObsTypes();
 	confessLog($self->{logger}, "obs types list undefined or empty") if (!defined($self->{obsTypesList}) || (scalar(@{$self->{obsTypesList}}) == 0));
-	$self->{useCountFiles} = $params->{useCountFiles};
 	$self->{observs} = undef;
 	$self->{nbObsDistinct} = {};
 	$self->{nbObsTotal} = {};
@@ -61,6 +61,19 @@ sub getFilename {
 }
 
 
+sub allCountFilesExist {
+    my $self = shift;
+
+    my $prefix = $self->{filename};
+    foreach my $obsType (@{$self->{obsTypesList}}) {
+	return 0 if (! -f "$prefix.".$obsType.".count");
+    }
+    return 1;
+}
+
+
+
+
 #
 # forces populating the document (using count files or source file)
 #
@@ -72,7 +85,9 @@ sub populate {
     my %observs;
     my $writeCountFiles=0;
     my $prefix = $self->{filename};
-    if (($self->{useCountFiles}) && (-f "$prefix.".$self->{obsTypesList}->[0].".count")) {  # assuming that either all count files are present, or none
+    if (($self->{useCountFiles}) && ($self->allCountFilesExist()) {  
+        # assuming that either all count files are present, or none
+	# disadvantage: if some files exist and some are missing, everything is recomputed (including if only one is missing).
 	$self->{logger}->trace("count file found, going to read from files") if ($self->{logger});
 	$self->readCountFiles();
     } else { # either usecount=0 or count files not present
