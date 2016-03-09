@@ -85,7 +85,7 @@ sub populate {
     my %observs;
     my $writeCountFiles=0;
     my $prefix = $self->{filename};
-    if (($self->{useCountFiles}) && ($self->allCountFilesExist()) {  
+    if (($self->{useCountFiles}) && ($self->allCountFilesExist())) {  
         # assuming that either all count files are present, or none
 	# disadvantage: if some files exist and some are missing, everything is recomputed (including if only one is missing).
 	$self->{logger}->trace("count file found, going to read from files") if ($self->{logger});
