@@ -31,6 +31,7 @@ our @ISA=qw/CLGTextTools::Observations::ObsFamily/;
 our $startLimitChar = "§";
 our $endLimitChar = "§";
 our $lineBreakChar="¤";
+our $tabChar="µ";
 
 sub new {
     my ($class, $params) = @_;
@@ -87,7 +88,9 @@ sub addText {
     my $self = shift;
     my $text = shift;
 
+    # replace special delimiters: line break and tabulation
     $text =~ s/\n/$lineBreakChar/g;
+    $text =~ s/\t/$tabChar/g;
     my $lcText;
     $lcText = lc($text) if ($self->{lc});
     my @textCase = ($text, $lcText);
