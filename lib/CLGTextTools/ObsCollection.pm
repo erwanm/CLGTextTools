@@ -98,8 +98,8 @@ sub addObsType {
     my $familyType = "$familyId.$params";
     if (!defined($self->{typesByFamily}->{$familyId}->{$familyType})) {
 	$self->{families}->{$familyId}->addObsType($familyType);
-	$self->{typesByFamily}->{$familyId}->{$familyType}->{$obsType} = $minFreq;
     }
+    $self->{typesByFamily}->{$familyId}->{$familyType}->{$obsType} = $minFreq;
     $self->{mapObsTypeToFamily}->{$obsType} = [ $familyId , $familyType ];
 }
 
@@ -238,13 +238,18 @@ sub filterMinFreq {
     my $self = shift;
     
     foreach my $familyId (keys %{$self->{families}}) {
+	$self->{logger}->debug("filter min freq for family '$familyId'") if ($self->{logger});
 	foreach my $familyType (keys %{$self->{typesByFamily}->{$familyId}}) {
+	    $self->{logger}->debug("filter min freq for family '$familyId', family type = '$familyType'") if ($self->{logger});
 	    my $observs1 = $self->{families}->{$familyId}->getObservations($familyType);
 	    foreach my $obsType (keys %{$self->{typesByFamily}->{$familyId}->{$familyType}}) {
 		my $minFreq = $self->{typesByFamily}->{$familyId}->{$familyType}->{$obsType};
+		$self->{logger}->debug("filter min freq for family '$familyId', family type = '$familyType', obs type = '$obsType'") if ($self->{logger});
 		if ($minFreq <= 1) {
-		$self->{finalizedData}->{$obsType} = $observs1;
+		    $self->{logger}->debug("obs type = '$obsType': min freq <= 1, keeping all observations") if ($self->{logger});
+		    $self->{finalizedData}->{$obsType} = $observs1;
 		} else {
+		    $self->{logger}->debug("obs type = '$obsType': min freq = $minFreq, filtering") if ($self->{logger});
 		    my ($key, $freq, %res);
 		    while (($key, $freq) = each (%$observs1)) {
 			$res{$key} = $freq if ($freq >= $minFreq);
