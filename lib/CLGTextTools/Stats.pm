@@ -8,7 +8,7 @@ use CLGTextTools::Logging qw/confessLog/;
 use CLGTextTools::Commons qw/containsUndef/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/sum min max mean median stdDev geomMean HarmoMean means aggregateVector pickIndex pickInList pickInListProbas pickNSloppy  pickNIndexesAmongMSloppy pickNIndexesAmongMExactly  pickDocSubset splitDocRandom splitDocRandomAvoidEmpty/;
+our @EXPORT_OK = qw/sum min max mean median stdDev geomMean harmoMean means aggregateVector pickIndex pickInList pickInListProbas pickNSloppy  pickNIndexesAmongMSloppy pickNIndexesAmongMExactly  pickDocSubset splitDocRandom splitDocRandomAvoidEmpty averageByGroup/;
 
 
 
@@ -396,6 +396,66 @@ sub splitDocRandomAvoidEmpty {
 	$nbAttempts--;
     }
     return $res;
+}
+
+
+# averageByGroup($table, $params, $logger)
+#
+#  groups together series of data which have the same values in certain columns, 
+#  and calculates the average of a given other column for each such group. 
+#
+# Caution: columns (and rows) are indexed from 0.
+#
+# * $table is a two dimensions array: values->[rowNo]->[colNo] = value
+# * $logger: optional
+# * $params is a hash which optionally defines:
+# ** valueArgNo: arg no for the value to use for the average. If undefined, 
+#    then the last arg is used (this is the default). 
+# ** groupByArgsNos: the args nos by which series of data should be   
+#    grouped, separated by commas. For example if groupByArgsNos="2,4" then   
+#    all lines with identical values in columns 2 and 4 are grouped together, 
+#    and the result for each group is <val arg2> <val arg4> <average value>.  
+#    If the option is defined but is the empty string, then the group consists
+#    in the whole data and the global average is the only output.
+#    Default value (if undefined): 0 (first column only).  
+# ** checkSameNumberByGroup: if true (default), a warning is emitted  
+#    if there is not the same number of elements in every group.  
+# ** expectedNumberByGroup: check that  there is the same number and this precise
+#     number in every group (implies checkSameNumberByGroup)
+#
+sub averageByGroup {
+    my ($table, $params, $logger) = @_;
+
+    confessLog($logger, "Error: empty table of values") if (scalar(@$table) == 0);
+    my $nbCols = scalar(@{$table->[0]});
+    my @groupsNos = defined($params->{groupByArgsNos}) ? split(/,/, $params->{groupByArgsNos}) : (0);
+    my $valueArgNo = defined($params->{valueArgNo}) ? $params->{valueArgNo} : $nbCols-1;
+
+    my %sumByGroup;
+    my %nbByGroup;
+    for (my $rowNo=0; $rowNo < scalar(@$table); $rowNo++) {
+	my @groupValues = map { $table->[$rowNo]->[$_] } @groupsNos;
+	my $groupId = join("\t", @groupValues);
+	$sumByGroup{$groupId} += $table->[$rowNo]->[$valueArgNo];
+	$nbByGroup{$groupId}++;
+    }
+    my $nbExpectedByGroup = undef;
+    if (defined($params->{expectedNumberByGroup})) {
+	$params->{checkSameNumberByGroup} = 1;
+	$nbExpectedByGroup = $params->{expectedNumberByGroup};
+    }
+    foreach my $groupId (sort keys %sumByGroup) {
+	if ($params->{checkSameNumberByGroup}) {
+	    if (defined($nbExpectedByGroup)) {
+		confessLog($logger, "Error: found $nbByGroup{$groupId} rows for group '$groupId', expected $nbExpectedByGroup.") if ($nbByGroup{$groupId} != $nbExpectedByGroup);
+	    } else { # first group as ref
+		$nbExpectedByGroup = $nbByGroup{$groupId};
+	    }
+	}
+	my $avg = $sumByGroup{$groupId} / $nbByGroup{$groupId};
+	print "$groupId\t$avg";
+    }
+
 }
 
 
