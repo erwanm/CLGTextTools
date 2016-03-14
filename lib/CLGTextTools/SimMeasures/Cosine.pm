@@ -67,6 +67,7 @@ sub compute {
 	}
         $normSum2 += $freq2 * $w;
     }
+    $self->{logger}->debug("compute cosine: normSum1=$normSum1; normSum2=$normSum2; sumProd=$sumProd") if ($self->{logger});
     my ($n1, $n2)  = ( sqrt($normSum1), sqrt($normSum2) );
     return 0 if ($normSum1*$normSum2 == 0);
     return $sumProd / ($normSum1*$normSum2);
