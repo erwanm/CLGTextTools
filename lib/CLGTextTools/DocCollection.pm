@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use Carp;
 use Log::Log4perl;
-use CLGTextTools::Logging qw/confessLog/;
+use CLGTextTools::Logging qw/confessLog warnLog/;
 use CLGTextTools::Commons qw//;
 use CLGTextTools::DocProvider;
 use Data::Dumper;
@@ -219,15 +219,16 @@ sub createDatasetsFromParams {
     my %docColls;
     foreach my $datasetId (@$datasetsIdsList) {
 	my $path = (ref($mapIdToPath)) ? $mapIdToPath->{$datasetId}."/" : "$mapIdToPath/$datasetId/" ;
-	$logger->debug("Creating DocCollection for id='$datasetId'; path='$path'") if ($logger);
+	$logger->debug("Creating DocCollection for id='$datasetId'; path='$path', pattern='$path/$filePattern'") if ($logger);
 	my $docColl = CLGTextTools::DocCollection->new({ logging => $docProviderParams->{logging} });
 	foreach my $file (glob("$path/$filePattern")) {
-	    $logger->trace("DocCollection '$datasetId'; adding file '$file'") if ($logger);
+	    $logger->debug("DocCollection '$datasetId'; adding file '$file'") if ($logger);
 	    my %paramsThis = %$docProviderParams;
 	    $paramsThis{filename} = $file;
 	    my $doc = CLGTextTools::DocProvider->new(\%paramsThis);
 	    $docColl->addDocProvider($doc);
 	}
+	warnLog($logger, "Warning: dataset '$datasetId' is empty!") if (scalar(keys %{$docColl->{docs}}) == 0);
 	$docColl->applyMinDocFreq($minDocFreq);
 	$docColls{$datasetId} = $docColl;
     }

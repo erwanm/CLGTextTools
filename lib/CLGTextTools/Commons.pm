@@ -105,9 +105,10 @@ sub readTSVFileLinesAsArray {
 sub readTSVLinesAsArray {
     my $fh = shift;
     my $filename = shift; # set to undef if not a file or doesn't matter - used ony for error mesg
-    my $checkNbCols = shift;
+    my $checkNbCols = shift; # optional
     my $logger = shift; # optional
-
+    $checkNbCols = 0 if (!defined($checkNbCols));
+    
     my @lines;
     my $index = 0;
     while (<$fh>) {
