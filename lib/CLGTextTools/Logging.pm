@@ -105,8 +105,8 @@ sub confessLog {
 sub warnLog {
     my ($logger, $msg) = @_;
     if (defined($logger)) {
- 	$logger->logwarn($msg);
-# 	$logger->warn($msg);
+#	print STDERR "DEBUG msg= '$msg' ; logger defined...\n";
+	$logger->logwarn($msg);
     } else {
 #	print STDERR "nope\n";
 	warn($msg);

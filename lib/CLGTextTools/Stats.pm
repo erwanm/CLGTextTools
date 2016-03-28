@@ -367,12 +367,13 @@ sub pickDocSubset {
 # remark: can be used to pick random subsets without replacements.
 #
 sub splitDocRandom {
-    my ($doc, $nbBins, $probas) = @_;
-    my @subsets;
+    my ($doc, $nbBins, $probas, $logger) = @_;
+    my @subsets = (undef) x $nbBins;
     my ($obs, $nb);
     while (($obs, $nb) = each %$doc) {
         for (my $i=0; $i< $nb; $i++) {
 	    my $bin = (defined($probas) ? pickInListProbas($probas) : int(rand($nbBins)) );
+	    $logger->trace("obs = $obs, i=$i: bin = $bin") if ($logger);
 	    $subsets[$bin]->{$obs}++;
         }
     }
@@ -382,19 +383,21 @@ sub splitDocRandom {
 
 
 #
-# Calls splitDocRandom until every returned subset is non-empty, unless impossible within $nbAttempts attempts.
+# Calls splitDocRandom until every returned subset is non-empty, unless impossible within $nbAttempts attempts;
 #
 # * probas is an optional parameter (hash ref index->proba): if supplied, every bin is picked according to the distribtuion described as values of the array. Its size must be equal to nbBins. If undefined, a uniform distribution is assumed.
 #
 sub splitDocRandomAvoidEmpty {
     my ($nbAttempts, $doc, $nbBins, $probas, $logger) = @_;
 
-    $logger->debug("splitting docs randomly: nbAttempts=$nbAttempts; nbBins=$nbBins") if ($logger);
+    $logger->debug("splitting doc randomly: nb obs=".scalar(%$doc)."; nbAttempts=$nbAttempts; nbBins=$nbBins") if ($logger);
     my $res;
     while (containsUndef($res) && ($nbAttempts>0)) {
-	$res = splitDocRandom($doc, $nbBins, $probas);
+	$logger->trace("$nbAttempts attempts left") if ($logger);
+	$res = splitDocRandom($doc, $nbBins, $probas, $logger);
 	$nbAttempts--;
     }
+#    return undef if (containsUndef($res));
     return $res;
 }
 

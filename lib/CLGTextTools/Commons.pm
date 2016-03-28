@@ -235,7 +235,9 @@ sub getArrayValuesFromIndexes {
 #
 sub containsUndef {
     my $l = shift;
+#    print STDERR "list undef ?\n";
     return 1 if (!defined($l));
+ #   print STDERR "list not undef\n";
     foreach my $e (@$l) {
 	return 1 if (!defined($e));
     }

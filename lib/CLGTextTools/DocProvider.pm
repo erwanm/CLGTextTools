@@ -43,7 +43,7 @@ sub new {
 	$self->{logger}->debug("Initializing DocProvider for '".$params->{filename}."'") if ($self->{logger});
  	$self->{filename} = $params->{filename};
 	confessLog($self->{logger}, "Error: file '".$self->{filename}."' not found.") if (! -f $self->{filename});
-	$self->{useCountFiles} = $params->{useCountFiles};
+	$self->{useCountFiles} = defined($params->{useCountFiles}) ? 1 : 0;
 	$self->{obsCollection} = (defined($params->{obsCollection})) ? $params->{obsCollection} : CLGTextTools::ObsCollection->new($params) ;
 	$self->{obsTypesList} = $self->{obsCollection}->getObsTypes();
 	confessLog($self->{logger}, "obs types list undefined or empty") if (!defined($self->{obsTypesList}) || (scalar(@{$self->{obsTypesList}}) == 0));
@@ -81,7 +81,7 @@ sub allCountFilesExist {
 sub populate {
     my $self = shift;
 
-    $self->{logger}->debug("populating observations for '".$self->{filename}."'...") if ($self->{logger});
+    $self->{logger}->debug("populating observations for '".$self->{filename}."', useCountFiles=".$self->{useCountFiles}) if ($self->{logger});
     my %observs;
     my $writeCountFiles=0;
     my $prefix = $self->{filename};
@@ -94,6 +94,7 @@ sub populate {
 	$self->{logger}->trace("option disabled or count file not found, going to read from source doc") if ($self->{logger});
 	$self->readSourceDoc();
 	if ($self->{useCountFiles}) { # if usecount=1 here, then count files were not present: write them
+	    $self->{logger}->trace("option count files enabled, going to write observations to file") if ($self->{logger});
 	    $self->writeCountFiles();
 	}
     }
