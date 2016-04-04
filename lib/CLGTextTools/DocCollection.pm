@@ -219,6 +219,7 @@ sub createDatasetsFromParams {
     my %docColls;
     foreach my $datasetId (@$datasetsIdsList) {
 	my $path = (ref($mapIdToPath)) ? $mapIdToPath->{$datasetId}."/" : "$mapIdToPath/$datasetId/" ;
+	$path =~ s:/+:/:g; 
 	$logger->debug("Creating DocCollection for id='$datasetId'; path='$path', pattern='$path/$filePattern'") if ($logger);
 	my $docColl = CLGTextTools::DocCollection->new({ logging => $docProviderParams->{logging} });
 	foreach my $file (glob("$path/$filePattern")) {
