@@ -58,8 +58,6 @@ sub usage {
 	print $fh "     -r <resourceId1:filename2[;resourceId2:filename2;...]> vocab resouces files\n";
 	print $fh "        with their ids.\n";
 	print $fh "\n";
-	print $fh "\n";
-	print $fh "\n";
 }
 
 
@@ -89,6 +87,13 @@ if ($opt{r}) {
 	my ($id, $file) = split (":", $pair);
 #	print STDERR "DEBUG pair = $pair ; id,file = $id,$file\n";
 	$vocabResources->{$id} = $file;
+    }
+}
+
+if ($readFilesFromSTDIN) {
+    while (my $line = <STDIN>) {
+        chomp($line);
+        push(@files, $line);
     }
 }
 

@@ -237,4 +237,22 @@ sub createDatasetsFromParams {
 }
 
 
+#
+# populateAll
+#
+# useful only if writeCountFiles is true: forces parsing every document and writing count files.
+#
+sub populateAll {
+    my $self = shift;
+
+    my $documents = $self->{docs};
+    my $nbDocs= scalar(@$documents);
+    $self->{logger}->debug("Populating all $nbDocs documents in the collection") if ($self->{logger});
+    my %res;
+    foreach my $doc (@$documents) {
+	$doc->populate();
+    }
+}
+
+
 1;
