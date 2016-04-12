@@ -214,6 +214,7 @@ sub createDatasetsFromParams {
     my ($docProviderParams, $datasetsIdsList, $mapIdToPath, $minDocFreq, $filePattern, $logger) = @_;
 
     $logger->debug("Creating list of DocCollection objects from parameters") if ($logger);
+    warnLog($logger, "Warning: no dataset provided (empty list)!") if (scalar(@$datasetsIdsList) == 0);
     $filePattern= "*.txt" if (!defined($filePattern));
     $minDocFreq = 1 if (!defined($minDocFreq));
     my %docColls;
@@ -246,11 +247,11 @@ sub populateAll {
     my $self = shift;
 
     my $documents = $self->{docs};
-    my $nbDocs= scalar(@$documents);
+    my $nbDocs= scalar(keys %$documents);
     $self->{logger}->debug("Populating all $nbDocs documents in the collection") if ($self->{logger});
     my %res;
-    foreach my $doc (@$documents) {
-	$doc->populate();
+    foreach my $doc (keys %$documents) {
+	$documents->{$doc}->populate();
     }
 }
 

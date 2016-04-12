@@ -10,11 +10,10 @@ use warnings;
 use Carp;
 use Log::Log4perl;
 use Getopt::Std;
-use CLGTextTools::ObsCollection;
-use CLGTextTools::Logging qw/@possibleLogLevels/;
-use CLGTextTools::DocProvider;
+use CLGTextTools::DocCollection qw/createDatasetsFromParams/;
+use CLGTextTools::Logging qw/@possibleLogLevels confessLog/;
 
-my $progNamePrefix = "extract-observations"; 
+my $progNamePrefix = "extract-observations-collection"; 
 my $progname = "$progNamePrefix.pl";
 
 my $defaultLogFilename = "$progNamePrefix.log";
@@ -25,9 +24,9 @@ sub usage {
 	my $fh = shift;
 	$fh = *STDOUT if (!defined $fh);
 	print $fh "\n"; 
-	print $fh "Usage: $progname [options] <obs types> [<file1> [<file2>...] ]\n";
+	print $fh "Usage: $progname [options] <obs types> [<[id1:]path1> [<[id2:]path2>...] ]\n";
 	print $fh "\n";
-	print $fh "  Extracts features from a collection of text files.\n";
+	print $fh "  Extracts features from a set of collections of text files.\n";
 	print $fh "  The type of features is specified with <obs types>, which is a\n";
 	print $fh "  list of 'observation types' separated with ':' (see the\n";
 	print $fh "  documentation for a comprehensive list of obs types codes).\n";
@@ -42,7 +41,7 @@ sub usage {
 	print $fh "\n";
 	print $fh "  Main options:\n";
 #	print $fh "     -c <config file> TODO\n";
-	print $fh "     -i read a list of input filenames from STDIN. These are processed\n";
+	print $fh "     -i read a list of input paths from STDIN. These are processed\n";
 	print $fh "        the same way as filenames given on the command line.\n";
 	print $fh "     -h print this help message\n";
 	print $fh "     -l <log config file | Log level> specify either a Log4Perl config file\n";
@@ -50,24 +49,27 @@ sub usage {
 	print $fh "        By default there is no logging at all.\n";
 	print $fh "     -L <Log output file> log filename (useless if a log config file is given).\n";
 	print $fh "     -s <singleLineBreak|doubleLineBreak> by default all the text is collated\n";
-	print $fh "        together; this option allows to specify a separator for meaningful units,\n";
+	print $fh "        togenther; this option allows to specify a separator for meaningful units,\n";
 	print $fh "        typically sentences or paragraphs.";
 	print $fh "        (applies only to CHAR and WORD observations).\n";
 	print $fh "     -t pre-tokenized text, do not perform default tokenization\n";
 	print $fh "        (applies only to WORD observations).\n";
 	print $fh "     -r <resourceId1:filename2[;resourceId2:filename2;...]> vocab resouces files\n";
 	print $fh "        with their ids.\n";
+	print $fh "     -m <min doc freq> discard observations with doc freq lower than <min doc freq>.\n";
+	print $fh "     -p <file pattern> file pattern which gives the list of documents when located\n";
+	print $fh "        in the dataset path. Default: '*.txt'\n";
 	print $fh "\n";
 }
 
 
 # PARSING OPTIONS
 my %opt;
-getopts('ihl:L:t:r:s:', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
+getopts('ihl:L:t:r:s:m:p:', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
 usage(*STDOUT) && exit 0 if $opt{h};
 print STDERR "at least 1 argument expected but ".scalar(@ARGV)." found: ".join(" ; ", @ARGV)  && usage(*STDERR) && exit 1 if (scalar(@ARGV) < 1);
 my $obsTypesList = shift(@ARGV);
-my @files = @ARGV;
+my @datasetsPaths = @ARGV;
 # init log
 my $logger;
 if ($opt{l} || $opt{L}) {
@@ -79,6 +81,9 @@ my $readFilesFromSTDIN = $opt{i};
 my $formattingSeparator = $opt{s};
 my $performTokenization = 0 if ($opt{t});
 my $resourcesStr = $opt{r};
+my $minDocFreq = $opt{m};
+my $filePattern  = $opt{p};
+
 my $vocabResources;
 if ($opt{r}) {
     $vocabResources ={};
@@ -92,15 +97,10 @@ if ($opt{r}) {
 
 if ($readFilesFromSTDIN) {
     while (my $line = <STDIN>) {
-        chomp($line);
-        push(@files, $line);
+	chomp($line);
+	push(@datasetsPaths, $line);
     }
 }
-
-#if ($files[0] eq "-") {
-#    confessLog($logger, "Error: using '-' as input file is not compatible with additional input files") if (scalar(@files)>1);
-#    confessLog($logger, "Error: using '-' as input file is not compatible with option '-i'") if ($readFilesFromSTDIN);
-#}
 
 my %params;
 $params{logging} = 1 if ($logger);
@@ -111,9 +111,24 @@ $params{wordTokenization} = $performTokenization;
 $params{formatting} = $formattingSeparator;
 $params{wordVocab} = $vocabResources if (defined($vocabResources));
 
-foreach my $file (@files) {
-#    my $textLines = ($file eq "-") ? readLines(*STDIN,0,$logger) : readTextFileLines($file,0,$logger);
-    my $data = CLGTextTools::ObsCollection->new(\%params);
-    my $doc = CLGTextTools::DocProvider->new({ logging => $params{logging}, obsCollection => $data, obsTypesList => $params{obsTypes}, filename => $file, useCountFiles => 1});
-    $doc->getObservations();
+$params{useCountFiles} = 1;
+
+my %mapIdToPath;
+my @ids;
+my $num=1;
+foreach my $collPath (@datasetsPaths) {
+    my ($id, $path) = ("dummy_dataset_id_$num", $collPath);
+    if ($collPath =~ m/:/) {
+	($id, $path) = split (":", $collPath);
+    }
+    $mapIdToPath{$id} = $path;
+    $num++;
+    push(@ids, $id);
+    $logger->debug("preparing parameters for dataset path = '$collPath'; id = '$id', path = '$path'");
+}
+confessLog($logger, "No dataset at all!") if (scalar(@ids) == 0);
+
+my $datasets = createDatasetsFromParams(\%params, \@ids, \%mapIdToPath, $minDocFreq, $filePattern, $logger);
+foreach my $dataset (keys %$datasets) {
+    $datasets->{$dataset}->populateAll();
 }
