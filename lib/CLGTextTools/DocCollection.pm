@@ -10,7 +10,7 @@ use warnings;
 use Carp;
 use Log::Log4perl;
 use CLGTextTools::Logging qw/confessLog warnLog/;
-use CLGTextTools::Commons qw//;
+use CLGTextTools::Commons qw/readTextFileLines/;
 use CLGTextTools::DocProvider;
 use Data::Dumper;
 
@@ -204,7 +204,7 @@ sub generateDocFreqTable {
 # ** useCountFile
 # * $datasetsIdsList = [ datasetId1, datasetId2, ..]
 # * $mapIdToPath is either:
-# ** a hash such that $mapIdToPath->{id} = <path>, where <path> points to a directory contaning the files to include in the dataset.
+# ** a hash such that $mapIdToPath->{id} = <path>, where <path> points to a directory contaning the files to include in the dataset; alternatively, if path points to a file, this file contains the list of all documents to include (one by line).
 # ** a string <path>, which points to a directory where datasets directories named 'id' are expected, i.e. a dataset "x" is located in <path>/x/
 # * $minDocFreq (optional): min doc frequency threshold; if >1, the collection is entirely populated (can take long) in order to generate the doc freq table. (currently can only be used with the collection itself as reference for doc freq)
 # * $filePattern is optional: if specified, only files which satisfy the pattern are included in the dataset (the default value is "*.txt").
@@ -221,9 +221,16 @@ sub createDatasetsFromParams {
     foreach my $datasetId (@$datasetsIdsList) {
 	my $path = (ref($mapIdToPath)) ? $mapIdToPath->{$datasetId}."/" : "$mapIdToPath/$datasetId/" ;
 	$path =~ s:/+:/:g; 
-	$logger->debug("Creating DocCollection for id='$datasetId'; path='$path', pattern='$path/$filePattern'") if ($logger);
+	my @docFiles;
+	if (-f $path) {
+	    @docFiles = readTextFileLines($path, 1, $logger);
+	    $logger->debug("Creating DocCollection for id='$datasetId'; list of files read from '$path'") if ($logger);
+	} else {
+	    @docFiles = glob("$path/$filePattern");
+	    $logger->debug("Creating DocCollection for id='$datasetId'; path='$path', pattern='$path/$filePattern'") if ($logger);
+	}
 	my $docColl = CLGTextTools::DocCollection->new({ logging => $docProviderParams->{logging} });
-	foreach my $file (glob("$path/$filePattern")) {
+	foreach my $file (@docFiles) {
 	    $logger->debug("DocCollection '$datasetId'; adding file '$file'") if ($logger);
 	    my %paramsThis = %$docProviderParams;
 	    $paramsThis{filename} = $file;

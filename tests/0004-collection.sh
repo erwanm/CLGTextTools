@@ -14,7 +14,7 @@ fi
 echo "$0. work dir: '$d'"
 
 cp "$sourceDir"/"$prefix"* "$d"
-cmd="extract-observations-collection.pl -s doubleLineBreak -l TRACE $obsTypes $sourceDir"
+cmd="extract-observations-collection.pl -s doubleLineBreak -l TRACE $obsTypes $d"
 #cmd="extract-observations.pl -l TRACE -r \"$resources\" $obsTypes $d/$prefix"
 #cmd="extract-observations.pl -r \"$resources\" $obsTypes $d/$prefix"
 echo "$cmd"

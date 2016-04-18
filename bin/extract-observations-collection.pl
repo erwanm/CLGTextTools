@@ -24,7 +24,7 @@ sub usage {
 	my $fh = shift;
 	$fh = *STDOUT if (!defined $fh);
 	print $fh "\n"; 
-	print $fh "Usage: $progname [options] <obs types> [<[id1:]path1> [<[id2:]path2>...] ]\n";
+	print $fh "Usage: $progname [options] <obs types> <path1> [<path2> ...] ]\n";
 	print $fh "\n";
 	print $fh "  Extracts features from a set of collections of text files.\n";
 	print $fh "  The type of features is specified with <obs types>, which is a\n";
@@ -35,9 +35,11 @@ sub usage {
 	print $fh "  If POS observations are used, expects a file <file>.POS containing\n";
 	print $fh "  the output in TreeTagger format (with lemma): \n";
 	print $fh "   <token> <POS tag> <lemma>\n";
-#	print $fh "  If <file1> is '-', then STDIN is used and the output is printed\n";
-#	print $fh "  to STDOUT (no other input file is accepted).\n";
-#	print $fh "\n";
+	print $fh "  Every collection is specified by a <path>, which is either a directory or a\n";
+	print $fh "  file. In the former case, a pattern '*.txt' is used to find the document (see";
+	print $fh "  also option -p). In the latter case, the file contains the list of all the\n";
+	print $fh "  documents filenames.\n";
+
 	print $fh "\n";
 	print $fh "  Main options:\n";
 #	print $fh "     -c <config file> TODO\n";
@@ -61,6 +63,8 @@ sub usage {
 	print $fh "        in the dataset path. Default: '*.txt'\n";
 	print $fh "\n";
 }
+
+
 
 
 # PARSING OPTIONS
@@ -117,10 +121,11 @@ my %mapIdToPath;
 my @ids;
 my $num=1;
 foreach my $collPath (@datasetsPaths) {
-    my ($id, $path) = ("dummy_dataset_id_$num", $collPath);
+    my ($path, $listFile)   = ($collPath, undef);
     if ($collPath =~ m/:/) {
-	($id, $path) = split (":", $collPath);
+	($path, $listFile) = split (":", $collPath);
     }
+    my $id = "dummy_dataset_id_$num";
     $mapIdToPath{$id} = $path;
     $num++;
     push(@ids, $id);
