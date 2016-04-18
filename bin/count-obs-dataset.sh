@@ -15,7 +15,7 @@ readFromFile=""
 
 function usage {
   echo
-  echo "Usage: $progName [options] <dest dir> <language> <obs types list>"
+  echo "Usage: $progName [options] <language> <obs types list>"
   echo
   echo "  Prepares observations count files for a list of documents read from"
   echo "  <STDIN> (filenames), including generating TreeTagger POS output if"
@@ -38,9 +38,8 @@ function usage {
 
 
 function tokAndPOS {
-    local destDir="$1"
-    local language="$2"
-    local filesList="$3"
+    local language="$1"
+    local filesList="$2"
 
     cat "$filesList" | while read f; do
 	if [ $force -ne 0 ] || [ ! -s "$f.POS" ]; then
@@ -71,13 +70,12 @@ while getopts 'hfo:i:' option ; do
     esac
 done
 shift $(($OPTIND - 1))
-if [ $# -ne 3 ]; then
-    echo "Error: expecting 3 args." 1>&2
+if [ $# -ne 2 ]; then
+    echo "Error: expecting 2 args." 1>&2
     printHelp=1
 fi
-destDir="$1"
-lang="$2"
-obsTypesList="$3"
+lang="$1"
+obsTypesList="$2"
 
 if [ ! -z "$printHelp" ]; then
     usage 1>&2
@@ -85,7 +83,6 @@ if [ ! -z "$printHelp" ]; then
 fi
 
 
-dieIfNoSuchDir "$destDir" "$progName:$LINENO: "
 if [ -z "$readFromFile" ]; then
     listFile=$(mktemp "$progName.XXXXXXXX")
     while read inputDocFile; do
@@ -103,7 +100,7 @@ if [ -z "$requiresPOSTags" ]; then
     echo "$progName: no TreeTagger tokenization/POS tagging needed"
 else
     echo "$progName: tokenization and POS tagging"
-    tokAndPOS "$destDir" "$lang" "$listFile"
+    tokAndPOS "$lang" "$listFile"
 fi
 
 echo "$progName: generating count files"
