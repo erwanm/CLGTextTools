@@ -13,8 +13,10 @@ else
 fi
 echo "$0. work dir: '$d'"
 
-cp "$sourceDir"/"$prefix"* "$d"
-cmd="extract-observations-collection.pl -s doubleLineBreak -l TRACE $obsTypes $d"
+cp "$sourceDir"/*.txt "$d"
+ls "$d"/*.txt > "$d/files.list"
+cmd="count-obs-dataset.sh -i $d/files.list -o '-s doubleLineBreak -l TRACE' $d dutch $obsTypes"
+#cmd="extract-observations-collection.pl -s doubleLineBreak -l TRACE $obsTypes $d"
 #cmd="extract-observations.pl -l TRACE -r \"$resources\" $obsTypes $d/$prefix"
 #cmd="extract-observations.pl -r \"$resources\" $obsTypes $d/$prefix"
 echo "$cmd"

@@ -219,18 +219,18 @@ sub createDatasetsFromParams {
     $minDocFreq = 1 if (!defined($minDocFreq));
     my %docColls;
     foreach my $datasetId (@$datasetsIdsList) {
-	my $path = (ref($mapIdToPath)) ? $mapIdToPath->{$datasetId}."/" : "$mapIdToPath/$datasetId/" ;
+	my $path = (ref($mapIdToPath)) ? $mapIdToPath->{$datasetId} : "$mapIdToPath/$datasetId/" ;
 	$path =~ s:/+:/:g; 
-	my @docFiles;
+	my $docFiles;
 	if (-f $path) {
-	    @docFiles = readTextFileLines($path, 1, $logger);
+	    $docFiles = readTextFileLines($path, 1, $logger);
 	    $logger->debug("Creating DocCollection for id='$datasetId'; list of files read from '$path'") if ($logger);
 	} else {
-	    @docFiles = glob("$path/$filePattern");
+	    @$docFiles = glob("$path/$filePattern");
 	    $logger->debug("Creating DocCollection for id='$datasetId'; path='$path', pattern='$path/$filePattern'") if ($logger);
 	}
 	my $docColl = CLGTextTools::DocCollection->new({ logging => $docProviderParams->{logging} });
-	foreach my $file (@docFiles) {
+	foreach my $file (@$docFiles) {
 	    $logger->debug("DocCollection '$datasetId'; adding file '$file'") if ($logger);
 	    my %paramsThis = %$docProviderParams;
 	    $paramsThis{filename} = $file;

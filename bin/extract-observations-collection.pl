@@ -129,7 +129,7 @@ foreach my $collPath (@datasetsPaths) {
     $mapIdToPath{$id} = $path;
     $num++;
     push(@ids, $id);
-    $logger->debug("preparing parameters for dataset path = '$collPath'; id = '$id', path = '$path'");
+    $logger->debug("preparing parameters for dataset path = '$collPath'; id = '$id', path = '$path'") if ($logger);
 }
 confessLog($logger, "No dataset at all!") if (scalar(@ids) == 0);
 
