@@ -31,6 +31,7 @@ our @EXPORT_OK = qw//;
 # *** wordTokenization
 # *** wordVocab
 # *** formatting
+# *** optional: if the obs collection has been finalized (i.e. has been populated), then the document is considered loaded regardless of the existence of corresponding count files.
 # * filename
 # * useCountFiles: if defined and not zero or empty string, then the instance will try to read observations counts from files filename.<obs>.count; if these files don't exist, then the source document is read and the count files are written. If undef (or zero etc.), then no count file is ever read or written. 
 #
@@ -42,17 +43,27 @@ sub new {
 	$self->{logger} = Log::Log4perl->get_logger(__PACKAGE__) if ($params->{logging});
 	$self->{logger}->debug("Initializing DocProvider for '".$params->{filename}."'") if ($self->{logger});
  	$self->{filename} = $params->{filename};
-	confessLog($self->{logger}, "Error: file '".$self->{filename}."' not found.") if (! -f $self->{filename});
 	$self->{useCountFiles} = defined($params->{useCountFiles}) ? 1 : 0;
 	$self->{obsCollection} = (defined($params->{obsCollection})) ? $params->{obsCollection} : CLGTextTools::ObsCollection->new($params) ;
 	$self->{obsTypesList} = $self->{obsCollection}->getObsTypes();
 	confessLog($self->{logger}, "obs types list undefined or empty") if (!defined($self->{obsTypesList}) || (scalar(@{$self->{obsTypesList}}) == 0));
-	$self->{observs} = undef;
-	$self->{nbObsDistinct} = {};
-	$self->{nbObsTotal} = {};
+	if ($self->{obsCollection}->isFinalized()) {
+	    $self->{observs} = $self->{obsCollection}->getObservations($self->{obsTypesList});
+	    foreach my $obsType (@{$self->{obsTypesList}}) {
+		$self->{nbObsDistinct}->{$obsType} = $self->{obsCollection}->getNbDistinctNGrams($obsType);
+		$self->{nbObsTotal}->{$obsType} = $self->{obsCollection}->getNbTotalNGrams($obsType);
+	    }
+	} else {
+	    confessLog($self->{logger}, "Error: file '".$self->{filename}."' not found.") if (! -f $self->{filename}); # only in case doc not finalized (otherwise no need for the source doc, which might not exist)
+	    $self->{observs} = undef;
+	    $self->{nbObsDistinct} = {};
+	    $self->{nbObsTotal} = {};
+	}
 	bless($self, $class);
 	return $self; 	
 }
+
+
 
 
 sub getFilename {

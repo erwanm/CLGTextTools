@@ -66,6 +66,56 @@ sub new {
 }
 
 
+
+#
+# Creates a pre-populated obs collection object. To be used with addFinalizedObsType().
+#
+#
+# $params:
+# * logging
+# * obsTypes (list, or colon-separated string, or as individual keys: obsType.XXX = 1)
+#
+sub newFinalized {
+	my ($class, $params) = @_;
+	my $self;
+	$self->{logger} = Log::Log4perl->get_logger(__PACKAGE__) if ($params->{logging});
+	my $obsTypes = (defined($params->{obsTypes}) && ref($params->{obsTypes}) eq "ARRAY") ? $params->{obsTypes} : readObsTypesFromConfigHash($params);
+	foreach my $obsType (@$obsTypes) {
+	    $self->{mapObsTypeToFamily}->{$obsType} = 1; # dummy value (mapObsTypeToFamily must be initialized in order to store obs types and return them through getObsTypes)
+	}
+	# these parameters and data structures are not needed and should not be used
+	$self->{wordTokenization} = undef;
+	$self->{formatting} = undef;
+	$self->{families} = {};
+	$self->{typesByFamily} = {};
+	$self->{wordVocab} = undef;
+	$self->{finalizedData} = {};
+	$self->{nbNGramsTotal} = {}; # special for finalized version!!
+	bless($self, $class);
+	$self->{logger}->trace("initiallized new object: ".Dumper($self)) if ($self->{logger});
+	return $self; 	
+}
+
+
+
+# Adds a set of observations for one obs type to the collection.
+# $self->{nbNGramsTotal} is updated accordingly.
+#
+# * observs: hash observs->{obs} = freq
+#
+sub addFinalizedObsType {
+    my $self = shift;
+    my $obsType = shift;
+    my $observs = shift;
+    
+    my ($obs, $freq);
+    while (($obs, $freq) = each %$observs) {
+	$self->{finalizedData}->{$obsType}->{$obs} += $freq;
+	$self->{nbNGramsTotal}->{$obsType} += $freq;
+    }
+}
+
+
 sub getObsTypes {
     my $self= shift;
     my @obsTypes = keys $self->{mapObsTypeToFamily};
@@ -199,8 +249,12 @@ sub addText {
 sub getNbDistinctNGrams {
     my $self = shift;
     my $obsType = shift;
-    my $familyIdAndType = $self->{mapObsTypeToFamily}->{$obsType};
-    return $self->{families}->{$familyIdAndType->[0]}->getNbDistinctNGrams($familyIdAndType->[1]);
+    if (defined($self->{nbNGramsTotal})) { # special case for pre-populated obs collection
+	return scalar(keys %{$self->{finalizedData}->{$obsType}});
+    } else {
+	my $familyIdAndType = $self->{mapObsTypeToFamily}->{$obsType};
+	return $self->{families}->{$familyIdAndType->[0]}->getNbDistinctNGrams($familyIdAndType->[1]);
+    }
 }
 
 #
@@ -209,8 +263,22 @@ sub getNbDistinctNGrams {
 sub getNbTotalNGrams {
     my $self = shift;
     my $obsType = shift;
-    my $familyIdAndType = $self->{mapObsTypeToFamily}->{$obsType};
-    return $self->{families}->{$familyIdAndType->[0]}->getNbTotalNGrams($familyIdAndType->[1]);
+
+    if (defined($self->{nbNGramsTotal})) { # special case for pre-populated obs collection
+	return $self->{nbNGramsTotal}->{$obsType};
+    } else {
+	my $familyIdAndType = $self->{mapObsTypeToFamily}->{$obsType};
+	return $self->{families}->{$familyIdAndType->[0]}->getNbTotalNGrams($familyIdAndType->[1]);
+    }
+}
+
+
+#
+# returns true if and only if the obs collection has been populated and finalized
+#
+sub isFinalized {
+    my $self = shift;
+    return defined($self->{finalizedData});
 }
 
 

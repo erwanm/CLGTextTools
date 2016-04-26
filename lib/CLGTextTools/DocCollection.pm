@@ -263,4 +263,32 @@ sub populateAll {
 }
 
 
+
+
+# 
+#
+# returns a DocProvider object contaning the counts for the whole collection.
+# the method writeCountFiles can then be used to write the counts to disk.
+#
+sub generateCollectionCount {
+    my $self = shift;
+    my $obsTypes = shift;
+    my $filename = shift;
+    
+    $self->{logger}->debug("Generating counts at collection level") if ($self->{logger});
+    $self->{logger}->trace("obs types list = (".join(",", @$obsTypes).")") if ($self->{logger});
+    my $obsColl = CLGTextTools::ObsCollection->newFinalized({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}) }) ;
+    my $allDocs = $self->getDocsAsList();
+    foreach my $doc (@$allDocs) {
+	my $observs = $doc->getObservations();
+	my ($obsType, $observsObsType);
+	while (($obsType, $observsObsType) = each %$observs) {
+	    $obsColl->addFinalizedObsType($obsType, $observsObsType);
+	}
+    }
+    return CLGTextTools::DocProvider->new({ "logging" => defined($self->{logger}), "obsCollection" => $obsColl, "filename" => $filename });
+
+}
+
+
 1;

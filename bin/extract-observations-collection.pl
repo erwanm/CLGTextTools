@@ -10,6 +10,7 @@ use warnings;
 use Carp;
 use Log::Log4perl;
 use Getopt::Std;
+use File::Basename;
 use CLGTextTools::DocCollection qw/createDatasetsFromParams/;
 use CLGTextTools::Logging qw/@possibleLogLevels confessLog/;
 
@@ -18,7 +19,8 @@ my $progname = "$progNamePrefix.pl";
 
 my $defaultLogFilename = "$progNamePrefix.log";
 
-
+my $filePrefixGlobalCount = "global";
+my $filePrefixDocFreqCount = "doc-freq";
 
 sub usage {
 	my $fh = shift;
@@ -61,6 +63,10 @@ sub usage {
 	print $fh "     -m <min doc freq> discard observations with doc freq lower than <min doc freq>.\n";
 	print $fh "     -p <file pattern> file pattern which gives the list of documents when located\n";
 	print $fh "        in the dataset path. Default: '*.txt'\n";
+	print $fh "     -g generate also count files for the whole dataset (sum of the counts); for\n";
+	print $fh "        every <obs type> the count file <dirname>/[global|doc-freq].<obs type>.count\n";
+	print $fh "        is generated. <dirname> is <path> if <path> is a directory, the directory\n";
+	print $fh "        contaning the list file otherwise.\n";
 	print $fh "\n";
 }
 
@@ -69,7 +75,7 @@ sub usage {
 
 # PARSING OPTIONS
 my %opt;
-getopts('ihl:L:t:r:s:m:p:', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
+getopts('ihl:L:t:r:s:m:p:g', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
 usage(*STDOUT) && exit 0 if $opt{h};
 print STDERR "at least 1 argument expected but ".scalar(@ARGV)." found: ".join(" ; ", @ARGV)  && usage(*STDERR) && exit 1 if (scalar(@ARGV) < 1);
 my $obsTypesList = shift(@ARGV);
@@ -87,6 +93,7 @@ my $performTokenization = 0 if ($opt{t});
 my $resourcesStr = $opt{r};
 my $minDocFreq = $opt{m};
 my $filePattern  = $opt{p};
+my $globalCountPrefix = $opt{g};
 
 my $vocabResources;
 if ($opt{r}) {
@@ -136,4 +143,21 @@ confessLog($logger, "No dataset at all!") if (scalar(@ids) == 0);
 my $datasets = createDatasetsFromParams(\%params, \@ids, \%mapIdToPath, $minDocFreq, $filePattern, $logger);
 foreach my $dataset (keys %$datasets) {
     $datasets->{$dataset}->populateAll();
+    if ($globalCountPrefix) {
+	my $path = $mapIdToPath{$dataset};
+	if (-f $path) { # list file
+	    $path  = dirname($path);
+	}
+	my $globalCountDocProv = $datasets->{$dataset}->generateCollectionCount(\@obsTypes, "$path/$filePrefixGlobalCount");
+	$globalCountDocProv->writeCountFiles();
+	my $docFreqTable = $datasets->{$dataset}->getDocFreqTable();
+	my $docFreqCountObsColl =  CLGTextTools::ObsCollection->newFinalized({ "obsTypes" => \@obsTypes, "logging" => defined($logger) }) ;
+	my ($obsType, $observsObsType);
+        while (($obsType, $observsObsType) = each %$docFreqTable) {
+            $docFreqCountObsColl->addFinalizedObsType($obsType, $observsObsType);
+        }
+	my $docFreqCountDocProv =  CLGTextTools::DocProvider->new({ "logging" => defined($logger), "obsCollection" => $docFreqCountObsColl, "filename" => "$path/$filePrefixDocFreqCount" });
+	$docFreqCountDocProv->writeCountFiles();
+
+    }
 }
