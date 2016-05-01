@@ -67,6 +67,8 @@ sub usage {
 	print $fh "        every <obs type> the count file <dirname>/[global|doc-freq].<obs type>.count\n";
 	print $fh "        is generated. <dirname> is <path> if <path> is a directory, the directory\n";
 	print $fh "        contaning the list file otherwise.\n";
+	print $fh "     -f force writing count files even if they already exist (default: only if the.\n";
+	print $fh "        files don't exist yet.\n";
 	print $fh "\n";
 }
 
@@ -75,7 +77,7 @@ sub usage {
 
 # PARSING OPTIONS
 my %opt;
-getopts('ihl:L:t:r:s:m:p:g', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
+getopts('ihl:L:t:r:s:m:p:gf', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
 usage(*STDOUT) && exit 0 if $opt{h};
 print STDERR "at least 1 argument expected but ".scalar(@ARGV)." found: ".join(" ; ", @ARGV)  && usage(*STDERR) && exit 1 if (scalar(@ARGV) < 1);
 my $obsTypesList = shift(@ARGV);
@@ -89,11 +91,12 @@ if ($opt{l} || $opt{L}) {
 
 my $readFilesFromSTDIN = $opt{i};
 my $formattingSeparator = $opt{s};
-my $performTokenization = 0 if ($opt{t});
+my $performTokenization = ($opt{t}) ? 0 : 1;
 my $resourcesStr = $opt{r};
 my $minDocFreq = $opt{m};
 my $filePattern  = $opt{p};
 my $globalCountPrefix = $opt{g};
+my $force=$opt{f};
 
 my $vocabResources;
 if ($opt{r}) {
@@ -123,6 +126,7 @@ $params{formatting} = $formattingSeparator;
 $params{wordVocab} = $vocabResources if (defined($vocabResources));
 
 $params{useCountFiles} = 1;
+$params{forceCountFiles} = $force;
 
 my %mapIdToPath;
 my @ids;

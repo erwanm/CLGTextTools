@@ -77,7 +77,7 @@ if ($opt{l} || $opt{L}) {
 
 my $readFilesFromSTDIN = $opt{i};
 my $formattingSeparator = $opt{s};
-my $performTokenization = 0 if ($opt{t});
+my $performTokenization = ($opt{t}) ? 0 : 1;
 my $resourcesStr = $opt{r};
 my $vocabResources;
 if ($opt{r}) {

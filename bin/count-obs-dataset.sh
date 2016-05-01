@@ -103,6 +103,9 @@ else
     tokAndPOS "$lang" "$listFile"
 fi
 
+if [ $force -ne 0 ]; then
+    extractObsOptions="-f $extractObsOptions"
+fi
 echo "$progName: generating count files"
 evalSafe "extract-observations-collection.pl $extractObsOptions \"$obsTypesList\" \"$listFile\"" "$progName,$LINENO: "
 

@@ -34,6 +34,7 @@ our @EXPORT_OK = qw//;
 # *** optional: if the obs collection has been finalized (i.e. has been populated), then the document is considered loaded regardless of the existence of corresponding count files.
 # * filename
 # * useCountFiles: if defined and not zero or empty string, then the instance will try to read observations counts from files filename.<obs>.count; if these files don't exist, then the source document is read and the count files are written. If undef (or zero etc.), then no count file is ever read or written. 
+# * forceCountFiles: optional. if useCountFiles is true and the count files already exist, they are not used and the source doc is re-analyzed, then the count files are overwritten.
 #
 
 
@@ -96,12 +97,12 @@ sub populate {
     my %observs;
     my $writeCountFiles=0;
     my $prefix = $self->{filename};
-    if (($self->{useCountFiles}) && ($self->allCountFilesExist())) {  
+    if ($self->{useCountFiles} && !$self->{forceCountFiles} && $self->allCountFilesExist()) {  
         # assuming that either all count files are present, or none
 	# disadvantage: if some files exist and some are missing, everything is recomputed (including if only one is missing).
 	$self->{logger}->trace("count file found, going to read from files") if ($self->{logger});
 	$self->readCountFiles();
-    } else { # either usecount=0 or count files not present
+    } else { # either usecount=0 or count files not present or force is true
 	$self->{logger}->trace("option disabled or count file not found, going to read from source doc") if ($self->{logger});
 	$self->readSourceDoc();
 	if ($self->{useCountFiles}) { # if usecount=1 here, then count files were not present: write them
