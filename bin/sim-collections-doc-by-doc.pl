@@ -13,8 +13,9 @@ use Getopt::Std;
 use File::Basename;
 use CLGTextTools::DocCollection qw/createDatasetsFromParams/;
 use CLGTextTools::Logging qw/@possibleLogLevels confessLog/;
+use CLGTextTools::SimMeasures::Measure qw/createSimMeasureFromId/;
 
-my $progNamePrefix = "extract-observations-collection"; 
+my $progNamePrefix = "sim-collections-doc-by-doc"; 
 my $progname = "$progNamePrefix.pl";
 
 my $defaultLogFilename = "$progNamePrefix.log";
@@ -22,7 +23,7 @@ my $defaultLogFilename = "$progNamePrefix.log";
 my $filePrefixGlobalCount = "global";
 my $filePrefixDocFreqCount = "doc-freq";
 
-my $obsTypeSim = "WORD.T.lc1.sl1.mf3";
+my $obsTypeSim = "WORD.T.lc1.sl1.mf1";
 my $simMeasureId = "minmax";
 
 sub usage {
@@ -105,6 +106,7 @@ my $globalCountPrefix = $opt{g};
 my $force=$opt{f};
 $obsTypeSim = $opt{o} if (defined($opt{o}));
 $simMeasureId = $opt{S} if (defined($opt{S}));
+
 my $simMeasure = createSimMeasureFromId($simMeasureId, {}, 0); # TODO: no params possible currently
 
 
@@ -173,9 +175,8 @@ foreach my $dataset (keys %$datasets) {
 }
 
 # 2. compute similarities
-$simMeasure = createSimMeasureFromId();
-my $docs1 = $datasets->[0]->getDocsAsHash();
-my $docs2 = $datasets->[1]->getDocsAsHash();
+my $docs1 = $datasets->{$ids[0]}->getDocsAsHash();
+my $docs2 = $datasets->{$ids[1]}->getDocsAsHash();
 my ($id1, $doc1);
 my ($id2, $doc2);
 while (($id1, $doc1) = each %$docs1) {
