@@ -12,6 +12,7 @@ use Log::Log4perl;
 use CLGTextTools::Logging qw/confessLog warnLog/;
 use CLGTextTools::Commons qw/readTextFileLines/;
 use CLGTextTools::DocProvider;
+use File::Basename;
 use Data::Dumper;
 
 use base 'Exporter';
@@ -209,9 +210,10 @@ sub generateDocFreqTable {
 # * $minDocFreq (optional): min doc frequency threshold; if >1, the collection is entirely populated (can take long) in order to generate the doc freq table. (currently can only be used with the collection itself as reference for doc freq)
 # * $filePattern is optional: if specified, only files which satisfy the pattern are included in the dataset (the default value is "*.txt").
 # * $logger (optional)
+# * $removePrefix: optional, path prefix to remove from the doc id. If using special value "BASENAME", then the file basename is used.
 #
 sub createDatasetsFromParams {
-    my ($docProviderParams, $datasetsIdsList, $mapIdToPath, $minDocFreq, $filePattern, $logger) = @_;
+    my ($docProviderParams, $datasetsIdsList, $mapIdToPath, $minDocFreq, $filePattern, $logger, $removePrefix) = @_;
 
     $logger->debug("Creating list of DocCollection objects from parameters") if ($logger);
     warnLog($logger, "Warning: no dataset provided (empty list)!") if (scalar(@$datasetsIdsList) == 0);
@@ -231,9 +233,18 @@ sub createDatasetsFromParams {
 	}
 	my $docColl = CLGTextTools::DocCollection->new({ logging => $docProviderParams->{logging} });
 	foreach my $file (@$docFiles) {
-	    $logger->debug("DocCollection '$datasetId'; adding file '$file'") if ($logger);
+	    my $docId = $file;
+	    if (defined($removePrefix)) {
+		if ($removePrefix eq "BASENAME") {
+		    $docId = basename($file);
+		} else {
+		    $docId =~ s/^\Q$removePrefix//g ;
+		}
+	    }
+	    $logger->debug("DocCollection '$datasetId'; adding file '$file' with id = '$docId'") if ($logger);
 	    my %paramsThis = %$docProviderParams;
 	    $paramsThis{filename} = $file;
+	    $paramsThis{id} = $docId;
 	    my $doc = CLGTextTools::DocProvider->new(\%paramsThis);
 	    $docColl->addDocProvider($doc);
 	}

@@ -30,7 +30,7 @@ sub usage {
 	my $fh = shift;
 	$fh = *STDOUT if (!defined $fh);
 	print $fh "\n"; 
-	print $fh "Usage: $progname [options] <obs types> <path1> <path2>\n";
+	print $fh "Usage: $progname [options] <obs types> <[id1:]path1> <[id2:]path2>\n";
 	print $fh "\n";
 	print $fh "  Extracts features from a set of collections of text files and\n";
 	print $fh "  writes similarity scores for every pair of documents doc1 x doc2,\n";
@@ -44,11 +44,11 @@ sub usage {
 	print $fh "  the output in TreeTagger format (with lemma): \n";
 	print $fh "   <token> <POS tag> <lemma>\n";
 	print $fh "  Every collection is specified by a <path>, which is either a directory or a\n";
-	print $fh "  file. In the former case, a pattern '*.txt' is used to find the document (see";
+	print $fh "  file. In the former case, a pattern '*.txt' is used to find the document (see\n";
 	print $fh "  also option -p). In the latter case, the file contains the list of all the\n";
 	print $fh "  documents filenames.\n";
 	print $fh "  For every <file1> in <path1>, all the similarities against <path2> are\n";
-	print $fh "  written to <file1>.simdir/<path2 id>.similarities, one file by line:";
+	print $fh "  written to <file1>.simdir/<path2 id>.similarities, one file by line:\n";
 	print $fh "  <file2> <sim score>\n";
 	print $fh "\n";
 	print $fh "  Main options:\n";
@@ -77,6 +77,8 @@ sub usage {
 	print $fh "        '$obsTypeSim'.\n";
 	print $fh "     -S <sim measure params> specifiy a particular sim measure id instead of the\n";
 	print $fh "        default '$simMeasureId'\n";
+	print $fh "     -R <prefix> remove <prefix> from the filename for every doc id in the sim output\n";
+	print $fh "         file (only for <file2> since the probe files are not written).\n";
 	print $fh "\n";
 }
 
@@ -85,7 +87,7 @@ sub usage {
 
 # PARSING OPTIONS
 my %opt;
-getopts('hl:L:t:r:s:m:p:gfo:S:', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
+getopts('hl:L:t:r:s:m:p:gfo:S:R:', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
 usage(*STDOUT) && exit 0 if $opt{h};
 print STDERR "at least 1 argument expected but ".scalar(@ARGV)." found: ".join(" ; ", @ARGV)  && usage(*STDERR) && exit 1 if (scalar(@ARGV) < 1);
 my $obsTypesList = shift(@ARGV);
@@ -104,6 +106,7 @@ my $minDocFreq = $opt{m};
 my $filePattern  = $opt{p};
 my $globalCountPrefix = $opt{g};
 my $force=$opt{f};
+my $removePrefixSimFile2 = $opt{R};
 $obsTypeSim = $opt{o} if (defined($opt{o}));
 $simMeasureId = $opt{S} if (defined($opt{S}));
 
@@ -138,11 +141,10 @@ my %mapIdToPath;
 my @ids;
 my $num=1;
 foreach my $collPath (@datasetsPaths) {
-    my ($path, $listFile)   = ($collPath, undef);
+    my ($id, $path)   = ("dummy_dataset_id_$num", $collPath);
     if ($collPath =~ m/:/) {
-	($path, $listFile) = split (":", $collPath);
+	($id, $path) = split (":", $collPath);
     }
-    my $id = "dummy_dataset_id_$num";
     $mapIdToPath{$id} = $path;
     $num++;
     push(@ids, $id);
@@ -150,7 +152,7 @@ foreach my $collPath (@datasetsPaths) {
 }
 confessLog($logger, "Exactly two datasets paths must be supplied, ".scalar(@ids)." found.") if (scalar(@ids) != 2);
 
-my $datasets = createDatasetsFromParams(\%params, \@ids, \%mapIdToPath, $minDocFreq, $filePattern, $logger);
+my $datasets = createDatasetsFromParams(\%params, \@ids, \%mapIdToPath, $minDocFreq, $filePattern, $logger, $removePrefixSimFile2);
 
 # 1. populate and write count files
 foreach my $dataset (keys %$datasets) {
@@ -177,15 +179,16 @@ foreach my $dataset (keys %$datasets) {
 # 2. compute similarities
 my $docs1 = $datasets->{$ids[0]}->getDocsAsHash();
 my $docs2 = $datasets->{$ids[1]}->getDocsAsHash();
-my ($id1, $doc1);
-my ($id2, $doc2);
-while (($id1, $doc1) = each %$docs1) {
+my ($file1, $doc1);
+my ($file2, $doc2);
+while (($file1, $doc1) = each %$docs1) {
     my %simScores;
-    while (($id2, $doc2) = each %$docs2) {
+    while (($file2, $doc2) = each %$docs2) {
+	my $id2 = $doc2->getId();
 	$simScores{$id2} = $simMeasure->compute($doc1->getObservations($obsTypeSim), $doc2->getObservations($obsTypeSim));
     }
-    mkdir "$id1.simdir" if (! -d "$id1.simdir");
-    my $outputFilename = "$id1.simdir/".$ids[1].".similarities";
+    mkdir "$file1.simdir" if (! -d "$file1.simdir");
+    my $outputFilename = "$file1.simdir/".$ids[1].".similarities";
     my $fh;
     open($fh, ">", $outputFilename) or confessLog($logger, "Error: cannot open file '$outputFilename' for writing.");
     my ($id2, $score2);

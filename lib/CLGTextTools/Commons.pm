@@ -201,15 +201,16 @@ sub parseParamsFromString {
     my $s = shift;
     my $res = shift; # optional
     my $logger = shift; # optional
+    my $separatorEqual = shift;  # optional
 
     $res = {} if (!defined($res));
     my @nameValuePairs = split(";", $s);
     foreach my $nameValuePair (@nameValuePairs) {
-	my ($name, $value) = ( $nameValuePair =~ m/([^=]+)=(.*)/);
+	my ($name, $value) = ( $nameValuePair =~ m/([^$separatorEqual]+)$separatorEqual(.*)/);
 	if (defined($name) && defined($value)) {
 	    $res->{$name} = $value;
 	} else {
-	    confessLog($logger, "Cannot parse string '$s' as '<name>=<value>'");
+	    confessLog($logger, "Cannot parse string '$s' as '<name>$separatorEqual<value>'");
 	}
     }
     return $res;

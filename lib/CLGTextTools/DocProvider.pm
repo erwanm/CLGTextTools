@@ -33,6 +33,7 @@ our @EXPORT_OK = qw//;
 # *** formatting
 # *** optional: if the obs collection has been finalized (i.e. has been populated), then the document is considered loaded regardless of the existence of corresponding count files.
 # * filename
+# * id (optional; filename will be used if undef)
 # * useCountFiles: if defined and not zero or empty string, then the instance will try to read observations counts from files filename.<obs>.count; if these files don't exist, then the source document is read and the count files are written. If undef (or zero etc.), then no count file is ever read or written. 
 # * forceCountFiles: optional. if useCountFiles is true and the count files already exist, they are not used and the source doc is re-analyzed, then the count files are overwritten.
 #
@@ -44,6 +45,7 @@ sub new {
 	$self->{logger} = Log::Log4perl->get_logger(__PACKAGE__) if ($params->{logging});
 	$self->{logger}->debug("Initializing DocProvider for '".$params->{filename}."'") if ($self->{logger});
  	$self->{filename} = $params->{filename};
+ 	$self->{id} = (defined($params->{id})) ? $params->{id} : $params->{filename};
 	$self->{useCountFiles} = defined($params->{useCountFiles}) ? 1 : 0;
 	$self->{obsCollection} = (defined($params->{obsCollection})) ? $params->{obsCollection} : CLGTextTools::ObsCollection->new($params) ;
 	$self->{obsTypesList} = $self->{obsCollection}->getObsTypes();
@@ -70,6 +72,12 @@ sub new {
 sub getFilename {
     my $self = shift;
     return $self->{filename};
+}
+
+
+sub getId {
+    my $self = shift;
+    return $self->{id};
 }
 
 
