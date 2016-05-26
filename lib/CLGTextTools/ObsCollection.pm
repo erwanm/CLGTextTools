@@ -118,7 +118,7 @@ sub addFinalizedObsType {
 
 sub getObsTypes {
     my $self= shift;
-    my @obsTypes = keys $self->{mapObsTypeToFamily};
+    my @obsTypes = keys %{$self->{mapObsTypeToFamily}};
     return \@obsTypes;
 }
 
@@ -237,7 +237,7 @@ sub addText {
    my $self = shift;
     my $text = shift;
 
-    foreach my $family (keys ($self->{families})) {
+    foreach my $family (keys %{$self->{families}}) {
 	$self->{families}->{$family}->addText($text);
     }
 }
