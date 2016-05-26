@@ -203,6 +203,7 @@ sub parseParamsFromString {
     my $logger = shift; # optional
     my $separatorEqual = shift;  # optional
 
+    $separatorEqual = "=" if (!defined($separatorEqual));
     $res = {} if (!defined($res));
     my @nameValuePairs = split(";", $s);
     foreach my $nameValuePair (@nameValuePairs) {
