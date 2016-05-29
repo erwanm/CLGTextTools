@@ -8,7 +8,7 @@ use CLGTextTools::Logging qw/confessLog/;
 use CLGTextTools::Commons qw/containsUndef/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/sum min max mean median stdDev geomMean harmoMean means aggregateVector pickIndex pickInList pickInListProbas pickNSloppy  pickNIndexesAmongMSloppy pickNIndexesAmongMExactly  pickDocSubset splitDocRandom splitDocRandomAvoidEmpty averageByGroup/;
+our @EXPORT_OK = qw/sum min max mean median stdDev geomMean harmoMean means aggregateVector pickIndex pickInList pickInListProbas pickNSloppy  pickNIndexesAmongMSloppy pickNIndexesAmongMExactly  pickDocSubset splitDocRandom splitDocRandomAvoidEmpty averageByGroup scaleDoc scaleUpMaxDocSize getDocsSizes getDocSize/;
 
 
 
@@ -346,7 +346,7 @@ sub pickDocSubset {
     $logger->debug("Picking doc subset, prop = $propObsSubset") if ($logger);
     my ($obs, $nb);
     while (($obs, $nb) = each %$doc) {
-        for (my $i=0; $i< $nb; $i++) {
+        for (my $i=0; $i< int($nb + 0.5); $i++) {
             $subset{$obs}++ if (rand() < $propObsSubset);
         }
 	$logger->trace("obs = '$obs'; nb = $nb ; selected = ".(defined($subset{$obs})?$subset{$obs}:0)) if ($logger);
@@ -371,7 +371,7 @@ sub splitDocRandom {
     my @subsets = (undef) x $nbBins;
     my ($obs, $nb);
     while (($obs, $nb) = each %$doc) {
-        for (my $i=0; $i< $nb; $i++) {
+        for (my $i=0; $i< int($nb + 0.5); $i++) {
 	    my $bin = (defined($probas) ? pickInListProbas($probas) : int(rand($nbBins)) );
 	    $logger->trace("obs = $obs, i=$i: bin = $bin") if ($logger);
 	    $subsets[$bin]->{$obs}++;
@@ -459,6 +459,112 @@ sub averageByGroup {
 	print "$groupId\t$avg";
     }
 
+}
+
+
+#
+# scaleDoc($doc, $newSize, $logger)
+#
+# given a document as a hash: doc->{obs} = freq (one obs type only), scales it up or down by multiplying every frequency by $newSize / $oldSize
+#
+# remark: the random extraction is by occurrence, not simply by observation.
+#
+# args:
+# * $doc
+# * $newSize
+# * $oldSize optional: if not provided the current size is calculated first (saves time if provided)
+# *logger optional
+#
+sub scaleDoc {
+    my ($doc, $newSize, $oldSize, $logger) = @_;
+    
+    if (!defined($oldSize)) {
+	$oldSize = 0;
+	my ($obs, $nb);
+	while (($obs, $nb) = each %$doc) {
+	    $oldSize += $nb;
+	}
+    }
+    my $coeff = $newSize / $oldSize ;
+
+    my %res;
+    my ($obs, $nb);
+    while (($obs, $nb) = each %$doc) {
+	$res{$obs} = $nb * $coeff;
+    }
+    return \%res;
+}
+
+
+#
+# scaleUpMaxDocSize($docsList, $sizesList, $logger)
+#
+# given a list of documents as hash: doc->{obs} = freq (one obs type only), scales all of them to the size of the largest doc.
+#
+# remark: the random extraction is by occurrence, not simply by observation.
+# args:
+# * $docsList
+# * $sizesList optional: list of the sizes
+# * $logger
+#
+sub scaleUpMaxDocSize {
+    my ($docsList, $sizesList, $logger) = @_;
+
+    $sizesList = getDocsSizes($docsList) if (!defined($sizesList));
+    my $newSize = max($sizesList);
+
+    my @res;
+    for (my $i=0; $i<scalar(@$docsList); $i++) {
+	if ($sizesList->[$i] <= $newSize) { # avoid the max doc
+	    $res[$i] = scaleDoc($docsList->[$i], $newSize, $sizesList->[$i], $logger);
+	} else {
+	    $res[$i] = $docsList->[$i] ;
+	}
+    }
+    
+    return \@res;
+}
+
+
+#
+# getDocsSizes($docsList)
+#
+# given a list of documents as hash: doc->{obs} = freq (one obs type only), returns a list of their sizes in the same order.
+#
+# args:
+# * $docsList
+# * $logger
+#
+sub getDocsSizes {
+    my ($docsList, $logger) = @_;
+
+    my @sizes;
+    for (my $i=0; $i<scalar(@$docsList); $i++) {
+	my $doc = $docsList->[$i];
+	my ($obs, $nb);
+	while (($obs, $nb) = each %$doc) {
+	    $sizes[$i] += $nb;
+	}
+    }
+    return \@sizes;
+}
+
+
+#
+# getDocsSize($doc)
+#
+# given a document as hash: doc->{obs} = freq (one obs type only), returns its size.
+#
+#
+sub getDocSize {
+    my ($doc, $logger) = @_;
+
+    my $size = 0;
+    my ($obs, $nb);
+    while (($obs, $nb) = each %$doc) {
+	$size += $nb;
+    }
+    return $size;
 }
 
 
