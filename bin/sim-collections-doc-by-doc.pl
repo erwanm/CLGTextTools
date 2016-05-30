@@ -185,7 +185,7 @@ while (($file1, $doc1) = each %$docs1) {
     my %simScores;
     while (($file2, $doc2) = each %$docs2) {
 	my $id2 = $doc2->getId();
-	$simScores{$id2} = $simMeasure->compute($doc1->getObservations($obsTypeSim), $doc2->getObservations($obsTypeSim));
+	$simScores{$id2} = $simMeasure->normalizeCompute($doc1, $doc2, $obsTypeSim);
     }
     mkdir "$file1.simdir" if (! -d "$file1.simdir");
     my $outputFilename = "$file1.simdir/".$ids[1].".similarities";

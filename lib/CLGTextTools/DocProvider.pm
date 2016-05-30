@@ -140,6 +140,46 @@ sub getObservations {
 }
 
 
+# getNbObsDistinct($obsType)
+#
+# returns the number of distinct observations for this obs type.
+# if $obsType is not specified, returns the whole hash: res->{obsType} = nb
+#
+sub getNbObsDistinct {
+    my $self = shift;
+    my $obsType = shift;
+
+    $self->{logger}->debug("obtaining nb distinct obs for '".$self->{filename}."', obsType = ".(defined($obsType)?$obsType:"undef (all)")) if ($self->{logger});
+    $self->populate() if (!defined($self->{observs}));
+    if (defined($obsType)) {
+	confessLog($self->{logger}, "Error: invalid observation type '$obsType'; no such type found in the collection.") if (!defined($self->{observs}->{$obsType}));
+	return $self->{nbObsDistinct}->{$obsType};
+    } else {
+	return $self->{nbObsDistinct};
+    }
+}
+
+
+# getNbObsDistinct($obsType)
+#
+# returns the total number of observations for this obs type.
+# if $obsType is not specified, returns the whole hash: res->{obsType} = nb
+#
+sub getNbObsTotal {
+    my $self = shift;
+    my $obsType = shift;
+
+    $self->{logger}->debug("obtaining total nb obs for '".$self->{filename}."', obsType = ".(defined($obsType)?$obsType:"undef (all)")) if ($self->{logger});
+    $self->populate() if (!defined($self->{observs}));
+    if (defined($obsType)) {
+	confessLog($self->{logger}, "Error: invalid observation type '$obsType'; no such type found in the collection.") if (!defined($self->{observs}->{$obsType}));
+	return $self->{nbObsTotal}->{$obsType};
+    } else {
+	return $self->{nbObsTotal};
+    }
+}
+
+
 
 #
 #

@@ -8,7 +8,7 @@ use CLGTextTools::Logging qw/confessLog/;
 use CLGTextTools::Commons qw/containsUndef/;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/sum min max mean median stdDev geomMean harmoMean means aggregateVector pickIndex pickInList pickInListProbas pickNSloppy  pickNIndexesAmongMSloppy pickNIndexesAmongMExactly  pickDocSubset splitDocRandom splitDocRandomAvoidEmpty averageByGroup scaleDoc scaleUpMaxDocSize getDocsSizes getDocSize/;
+our @EXPORT_OK = qw/sum min max mean median stdDev geomMean harmoMean means aggregateVector pickIndex pickInList pickInListProbas pickNSloppy  pickNIndexesAmongMSloppy pickNIndexesAmongMExactly  pickDocSubset splitDocRandom splitDocRandomAvoidEmpty averageByGroup scaleDoc scaleUpMaxDocSize getDocsSizes getDocSize normalizeFreqDoc/;
 
 
 
@@ -565,6 +565,20 @@ sub getDocSize {
 	$size += $nb;
     }
     return $size;
+}
+
+
+sub normalizeFreqDoc {
+    my ($doc, $total, $logger) = @_;
+
+    my %res;
+    my ($obs, $nb);
+    while (($obs, $nb) = each %$doc) {
+	$res{$obs} = $nb / $total;
+    }
+    return \%res;
+
+
 }
 
 
