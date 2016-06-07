@@ -121,6 +121,17 @@ sub populate {
 }
 
 
+
+sub obsTypeInList {
+    my $self = shift;
+    my $obsType = shift;
+
+    $self->{logger}->debug("checking if '$obsType' belongs to the lsit of obs types") if ($self->{logger});
+    return ( grep { $obsType eq $_ } @{$self->{obsTypesList}} );
+}
+
+
+
 # 
 # returns observs->{obs} = freq
 # if $obsType is not specified, returns the whole collection: observs->{obsType}->{obs} = freq

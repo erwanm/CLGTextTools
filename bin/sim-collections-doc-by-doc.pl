@@ -189,6 +189,7 @@ while (($file1, $doc1) = each %$docs1) {
     }
     mkdir "$file1.simdir" if (! -d "$file1.simdir");
     my $outputFilename = "$file1.simdir/".$ids[1].".similarities";
+#    print STDERR "writing sims to '$outputFilename'\n";
     my $fh;
     open($fh, ">", $outputFilename) or confessLog($logger, "Error: cannot open file '$outputFilename' for writing.");
     my ($id2, $score2);
