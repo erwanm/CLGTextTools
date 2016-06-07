@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Log::Log4perl;
 use Carp;
-use CLGTextTools::Logging qw/confessLog/;
+use CLGTextTools::Logging qw/confessLog warnLog/;
 use CLGTextTools::Commons qw/containsUndef/;
 
 use base 'Exporter';
@@ -474,28 +474,31 @@ sub averageByGroup {
 # * $newSize
 # * $oldSize optional: if not provided the current size is calculated first (saves time if provided)
 # *logger optional
+# * noWarning optional
 #
 sub scaleDoc {
-    my ($doc, $newSize, $oldSize, $logger) = @_;
-    
+    my ($doc, $newSize, $oldSize, $logger, $noWarning) = @_;
+
     if (!defined($oldSize)) {
 	$oldSize = 0;
 	my ($obs, $nb);
 	while (($obs, $nb) = each %$doc) {
 	    $oldSize += $nb;
 	}
+    }
+    if ($oldSize == 0) {
+	warnLog($logger, "warning: empty document in scaleDoc") unless ($noWarning);
+	return $doc;
     } else {
-	confessLog($logger, "Error: oldSize defined as zero") if ($oldSize == 0);
-    }
-    confessLog($logger, "Error: empty document") if ($oldSize == 0);
-    my $coeff = $newSize / $oldSize ;
+	my $coeff = $newSize / $oldSize ;
 
-    my %res;
-    my ($obs, $nb);
-    while (($obs, $nb) = each %$doc) {
-	$res{$obs} = $nb * $coeff;
+	my %res;
+	my ($obs, $nb);
+	while (($obs, $nb) = each %$doc) {
+	    $res{$obs} = $nb * $coeff;
+	}
+	return \%res;
     }
-    return \%res;
 }
 
 
@@ -509,18 +512,19 @@ sub scaleDoc {
 # * $docsList
 # * $sizesList optional: list of the sizes
 # * $logger
+# * noWarning optional
 #
 sub scaleUpMaxDocSize {
-    my ($docsList, $sizesList, $logger) = @_;
+    my ($docsList, $sizesList, $logger, $noWarning) = @_;
 
-    print STDERR "DEBUG sizeList = [".join(";", @$sizesList)."]\n";
     $sizesList = getDocsSizes($docsList) if (!defined($sizesList));
+#    print STDERR "DEBUG sizesList = [".join(";", @$sizesList)."]\n";
     my $newSize = max($sizesList);
 
     my @res;
     for (my $i=0; $i<scalar(@$docsList); $i++) {
 	if ($sizesList->[$i] <= $newSize) { # avoid the max doc
-	    $res[$i] = scaleDoc($docsList->[$i], $newSize, $sizesList->[$i], $logger);
+	    $res[$i] = scaleDoc($docsList->[$i], $newSize, $sizesList->[$i], $logger, $noWarning);
 	} else {
 	    $res[$i] = $docsList->[$i] ;
 	}
@@ -549,6 +553,7 @@ sub getDocsSizes {
 	while (($obs, $nb) = each %$doc) {
 	    $sizes[$i] += $nb;
 	}
+	$sizes[$i] = 0 if (!defined($sizes[$i]));
     }
     return \@sizes;
 }
