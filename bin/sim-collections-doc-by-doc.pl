@@ -71,7 +71,7 @@ sub usage {
 	print $fh "        every <obs type> the count file <dirname>/[global|doc-freq].<obs type>.count\n";
 	print $fh "        is generated. <dirname> is <path> if <path> is a directory, the directory\n";
 	print $fh "        contaning the list file otherwise.\n";
-	print $fh "     -f force writing count files even if they already exist (default: only if the.\n";
+	print $fh "     -f force writing output files even if they already exist (default: only if the.\n";
 	print $fh "        files don't exist yet).\n";
 	print $fh "     -o <sim obs type> the obs type to use to compute similarities; default:\n";
 	print $fh "        '$obsTypeSim'.\n";
@@ -182,18 +182,20 @@ my $docs2 = $datasets->{$ids[1]}->getDocsAsHash();
 my ($file1, $doc1);
 my ($file2, $doc2);
 while (($file1, $doc1) = each %$docs1) {
-    my %simScores;
-    while (($file2, $doc2) = each %$docs2) {
-	my $id2 = $doc2->getId();
-	$simScores{$id2} = $simMeasure->normalizeCompute($doc1, $doc2, $obsTypeSim);
-    }
     mkdir "$file1.simdir" if (! -d "$file1.simdir");
     my $outputFilename = "$file1.simdir/".$ids[1].".similarities";
-    my $fh;
-    open($fh, ">", $outputFilename) or confessLog($logger, "Error: cannot open file '$outputFilename' for writing.");
-    my ($id2, $score2);
-    while (($id2, $score2) = each %simScores) {
-	print $fh "$id2\t$score2\n";
+    if ($force || (! -f $outputFilename) || (-z $outputFilename)) {
+	my %simScores;
+	while (($file2, $doc2) = each %$docs2) {
+	    my $id2 = $doc2->getId();
+	    $simScores{$id2} = $simMeasure->normalizeCompute($doc1, $doc2, $obsTypeSim);
+	}
+	my $fh;
+	open($fh, ">", $outputFilename) or confessLog($logger, "Error: cannot open file '$outputFilename' for writing.");
+	my ($id2, $score2);
+	while (($id2, $score2) = each %simScores) {
+	    print $fh "$id2\t$score2\n";
+	}
+	close($fh);
     }
-    close($fh);
 }
