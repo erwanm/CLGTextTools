@@ -484,7 +484,10 @@ sub scaleDoc {
 	while (($obs, $nb) = each %$doc) {
 	    $oldSize += $nb;
 	}
+    } else {
+	confessLog($logger, "Error: oldSize defined as zero") if ($oldSize == 0);
     }
+    confessLog($logger, "Error: empty document") if ($oldSize == 0);
     my $coeff = $newSize / $oldSize ;
 
     my %res;
@@ -510,6 +513,7 @@ sub scaleDoc {
 sub scaleUpMaxDocSize {
     my ($docsList, $sizesList, $logger) = @_;
 
+    print STDERR "DEBUG sizeList = [".join(";", @$sizesList)."]\n";
     $sizesList = getDocsSizes($docsList) if (!defined($sizesList));
     my $newSize = max($sizesList);
 
