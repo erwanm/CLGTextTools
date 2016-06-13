@@ -70,10 +70,10 @@ sub readLines {
     my $logger = shift; # optional
 
     my @content;
-    while (<$fh>) {
-	chomp if ($removeLineBreaks);
+    while (my $l=<$fh>) {
+	chomp($l) if ($removeLineBreaks);
 #	$logger->trace("Reading line '$_'") if ($logger);
-	push(@content, $_);
+	push(@content, $l);
     }
     return \@content;
 }
@@ -111,9 +111,9 @@ sub readTSVLinesAsArray {
     
     my @lines;
     my $index = 0;
-    while (<$fh>) {
-	chomp;
-	my @columns = split(/\t/);
+    while (my $l=<$fh>) {
+	chomp($l);
+	my @columns = split(/\t/, $l);
 #	$logger->trace("Reading line '$_'") if ($logger);
 	confessLog($logger, "Error: wrong number of columns: expected $checkNbCols but found ".scalar(@columns)." in '$filename', line ".($index+1)."") if (($checkNbCols > 0) && (scalar(@columns) != $checkNbCols));
 	push(@lines, \@columns);
@@ -151,9 +151,9 @@ sub readTSVLinesAsHash {
 
     my %res;
     my $index = 0;
-    while (<$fh>) {
-	chomp;
-	my @columns = split(/\t/);
+    while (my $l=<$fh>) {
+	chomp($l);
+	my @columns = split(/\t/, $l);
 #	$logger->trace("Reading line '$_'") if ($logger);
 	confessLog($logger, "Error: wrong number of columns: expected 2 but found ".scalar(@columns)." in '$filename', line ".($index+1)."") if (scalar(@columns) != 2);
 	$res{$columns[0]} = $columns[1];
@@ -173,6 +173,7 @@ sub readConfigFile {
     my $filename=shift;
     open( FILE, '<:encoding(UTF-8)', $filename ) or die "Cannot read config file '$filename'.";
     my %res;
+    local $_;
     while (<FILE>) {
 	    #print "debug: $_";
 	chomp;
