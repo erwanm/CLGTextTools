@@ -132,11 +132,10 @@ my %mapIdToPath;
 my @ids;
 my $num=1;
 foreach my $collPath (@datasetsPaths) {
-    my ($path, $listFile)   = ($collPath, undef);
+    my ($id, $path)   = ("dummy_dataset_id_$num", $collPath);
     if ($collPath =~ m/:/) {
-	($path, $listFile) = split (":", $collPath);
+        ($id, $path) = split (":", $collPath);
     }
-    my $id = "dummy_dataset_id_$num";
     $mapIdToPath{$id} = $path;
     $num++;
     push(@ids, $id);
@@ -152,16 +151,8 @@ foreach my $dataset (keys %$datasets) {
 	if (-f $path) { # list file
 	    $path  = dirname($path);
 	}
-	my $globalCountDocProv = $datasets->{$dataset}->generateCollectionCount(\@obsTypes, "$path/$filePrefixGlobalCount");
-	$globalCountDocProv->writeCountFiles();
-	my $docFreqTable = $datasets->{$dataset}->getDocFreqTable();
-	my $docFreqCountObsColl =  CLGTextTools::ObsCollection->newFinalized({ "obsTypes" => \@obsTypes, "logging" => defined($logger) }) ;
-	my ($obsType, $observsObsType);
-        while (($obsType, $observsObsType) = each %$docFreqTable) {
-            $docFreqCountObsColl->addFinalizedObsType($obsType, $observsObsType);
-        }
-	my $docFreqCountDocProv =  CLGTextTools::DocProvider->new({ "logging" => defined($logger), "obsCollection" => $docFreqCountObsColl, "filename" => "$path/$filePrefixDocFreqCount" });
-	$docFreqCountDocProv->writeCountFiles();
+	my $globalCountDocProv = $datasets->{$dataset}->getGlobalCountDocProv() ;
+	my $docFreqCountDocProv =  $datasets->{$dataset}->getDocFreqCountDocProv() ;
 
     }
 }

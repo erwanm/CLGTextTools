@@ -18,6 +18,9 @@ use Data::Dumper;
 use base 'Exporter';
 our @EXPORT_OK = qw/createDatasetsFromParams filterMinDocFreq generateDocFreqTable/;
 
+our $filePrefixGlobalCount = "global";
+our $filePrefixDocFreqCount = "doc-freq";
+
 
 #
 # Provides methods to process a set of documents (represented as DocProvider objects) together.
@@ -30,14 +33,19 @@ our @EXPORT_OK = qw/createDatasetsFromParams filterMinDocFreq generateDocFreqTab
 #
 # $params:
 # * logging
+# * globalPath: optional; if specified, specifies the directory where the global count files and the doc freq count files are read from/written to. If undefined, the global/doc freq data is always computed.
+#
 #
 sub new {
 	my ($class, $params) = @_;
 	my $self;
 	$self->{logger} = Log::Log4perl->get_logger(__PACKAGE__) if ($params->{logging});
+	$self->{globalPath} =  $params->{globalPath};
 	$self->{docs} = {};
 	$self->{docFreqTable} = undef;
 	$self->{minDocFreq} = 1;
+	$self->{globalCountDocProv} = undef;
+	$self->{docFreqCountDocProv} = undef;
  	bless($self, $class);
 	return $self; 	
 }
@@ -64,15 +72,12 @@ sub getMinDocFreq {
 
 sub getDocFreqTable {
     my $self = shift;
-    if (!defined($self->{docFreqTable})) {
+
+    if (!defined($self->{docFreqCountDocProv})) {
 	$self->{logger}->debug("getDocFreqTable: self->{docFreqTable} is undefined, computing it") if ($self->{logger});
-	my @docsObservs;
-	foreach my $docP (values %{$self->{docs}}) {
-	    push(@docsObservs, $docP->getObservations());
-	}
-	$self->{docFreqTable} = generateDocFreqTable(\@docsObservs, $self->{logger});
+	$self->{docFreqCountDocProv} = $self->getDocFreqCountDocProv();
     }
-    return $self->{docFreqTable};
+    return $self->{docFreqCountDocProv}->getObservations();
 }
 
 
@@ -227,11 +232,12 @@ sub createDatasetsFromParams {
 	if (-f $path) {
 	    $docFiles = readTextFileLines($path, 1, $logger);
 	    $logger->debug("Creating DocCollection for id='$datasetId'; list of files read from '$path'") if ($logger);
+	    $path = dirname($path);
 	} else {
 	    @$docFiles = glob("$path/$filePattern");
 	    $logger->debug("Creating DocCollection for id='$datasetId'; path='$path', pattern='$path/$filePattern'") if ($logger);
 	}
-	my $docColl = CLGTextTools::DocCollection->new({ logging => $docProviderParams->{logging} });
+	my $docColl = CLGTextTools::DocCollection->new({ logging => $docProviderParams->{logging}, "globalPath" => $path });
 	foreach my $file (@$docFiles) {
 	    my $docId = $file;
 	    if (defined($removePrefix)) {
@@ -281,23 +287,89 @@ sub populateAll {
 # returns a DocProvider object contaning the counts for the whole collection.
 # the method writeCountFiles can then be used to write the counts to disk.
 #
-sub generateCollectionCount {
+sub getGlobalCountDocProv {
     my $self = shift;
-    my $obsTypes = shift;
-    my $filename = shift;
-    
-    $self->{logger}->debug("Generating counts at collection level") if ($self->{logger});
-    $self->{logger}->trace("obs types list = (".join(",", @$obsTypes).")") if ($self->{logger});
-    my $obsColl = CLGTextTools::ObsCollection->newFinalized({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}) }) ;
-    my $allDocs = $self->getDocsAsList();
-    foreach my $doc (@$allDocs) {
-	my $observs = $doc->getObservations();
-	my ($obsType, $observsObsType);
-	while (($obsType, $observsObsType) = each %$observs) {
-	    $obsColl->addFinalizedObsType($obsType, $observsObsType);
+
+    if (!defined($self->{globalCountDocProv})) {
+	my $populated = 0;
+	my ($anyDocId, $anyDoc) = each %{$self->{docs}};
+	my $obsTypes = $anyDoc->getObsTypesList(); # assuming all docs have the same list of obs types
+	my $filename;
+	if (defined($self->{globalPath})) {
+	    $filename = $self->{globalPath}."/$filePrefixGlobalCount";
+	    my $globalCountObsColl =  CLGTextTools::ObsCollection->new({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}) }) ;
+	    $self->{globalCountDocProv} = CLGTextTools::DocProvider->new({ "logging" => defined($self->{logger}), "obsCollection" => $globalCountObsColl, "filename" => $filename, "checkIfSourceDocExists" => 0 });
+	    if ($self->{globalCountDocProv}->allCountFilesExist()) {
+		$self->{globalCountDocProv}->readCountFiles();
+		$populated = 1;
+	    }
+	} else {
+	    warnLog($self->{logger}, "Warning: DocCollection parameter globalPath not defined, cannot read/write global count files.") if (defined($self->{logger}));
+	    $filename  = "/DUMMY-FILENAME";
+	}
+	if (!$populated) { # either no path defined or no count file found 
+	    $self->{logger}->debug("Generating counts at collection level") if ($self->{logger});
+	    $self->{logger}->trace("obs types list = (".join(",", @$obsTypes).")") if ($self->{logger});
+	    my $globalCountObsColl =  CLGTextTools::ObsCollection->newFinalized({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}) }) ;
+	    my $allDocs = $self->getDocsAsList();
+	    foreach my $doc (@$allDocs) {
+		my $observs = $doc->getObservations();
+		my ($obsType, $observsObsType);
+		while (($obsType, $observsObsType) = each %$observs) {
+		    $globalCountObsColl->addFinalizedObsType($obsType, $observsObsType);
+		}
+	    }
+	    $self->{globalCountDocProv} = CLGTextTools::DocProvider->new({ "logging" => defined($self->{logger}), "obsCollection" => $globalCountObsColl, "filename" => $filename });
+	    $self->{globalCountDocProv}->writeCountFiles() if (defined($self->{globalPath}));
 	}
     }
-    return CLGTextTools::DocProvider->new({ "logging" => defined($self->{logger}), "obsCollection" => $obsColl, "filename" => $filename });
+    return $self->{globalCountDocProv};
+} 
+
+
+#
+# returns a DocProvider object contaning the counts for the doc frequency table obtained from this collection.
+# the method writeCountFiles can then be used to write the counts to disk.
+#
+sub getDocFreqCountDocProv {
+    my $self = shift;
+
+    if (!defined($self->{docFreqCountDocProv})) {
+	my $populated = 0;
+	my ($anyDocId, $anyDoc) = each %{$self->{docs}};
+	my $obsTypes = $anyDoc->getObsTypesList(); # assuming all docs have the same list of obs types
+	my $filename;
+	if (defined($self->{globalPath})) {
+	    $filename = $self->{globalPath}."/$filePrefixDocFreqCount";
+	    my $docFreqCountObsColl =  CLGTextTools::ObsCollection->new({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}) }) ;
+	    $self->{docFreqCountDocProv} = CLGTextTools::DocProvider->new({ "logging" => defined($self->{logger}), "obsCollection" => $docFreqCountObsColl, "filename" => $filename, "checkIfSourceDocExists" => 0 });
+	    if ($self->{docFreqCountDocProv}->allCountFilesExist()) {
+		$self->{docFreqCountDocProv}->readCountFiles();
+		$populated = 1;
+	    }
+	} else {
+	    warnLog($self->{logger}, "Warning: DocCollection parameter globalPath not defined, cannot read/write doc freq count files.") if (defined($self->{logger}));
+	    $filename  = "/DUMMY-FILENAME";
+	}
+	if (!$populated) { # either no path defined or no count file found 
+	    $self->{logger}->debug("Generating doc provider for doc freq counts") if ($self->{logger});
+	    $self->{logger}->trace("obs types list = (".join(",", @$obsTypes).")") if ($self->{logger});
+	    my @docsObservs;
+	    foreach my $docP (values %{$self->{docs}}) {
+		push(@docsObservs, $docP->getObservations());
+	    }
+	    my $docFreqTable = generateDocFreqTable(\@docsObservs, $self->{logger});
+	    my $docFreqCountObsColl =  CLGTextTools::ObsCollection->newFinalized({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}) }) ;
+	    my ($obsType, $observsObsType);
+	    while (($obsType, $observsObsType) = each %$docFreqTable) {
+		$docFreqCountObsColl->addFinalizedObsType($obsType, $observsObsType);
+	    }
+	    $self->{docFreqCountDocProv} = CLGTextTools::DocProvider->new({ "logging" => defined($self->{logger}), "obsCollection" => $docFreqCountObsColl, "filename" => $filename });
+	    $self->{docFreqCountDocProv}->writeCountFiles() if (defined($self->{globalPath}));
+	}
+    }
+    return $self->{docFreqCountDocProv};
+ 
 
 }
 

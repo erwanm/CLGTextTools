@@ -20,9 +20,6 @@ my $progname = "$progNamePrefix.pl";
 
 my $defaultLogFilename = "$progNamePrefix.log";
 
-my $filePrefixGlobalCount = "global";
-my $filePrefixDocFreqCount = "doc-freq";
-
 my $obsTypeSim = "WORD.T.lc1.sl1.mf1";
 my $simMeasureId = "minmax";
 
@@ -158,20 +155,8 @@ my $datasets = createDatasetsFromParams(\%params, \@ids, \%mapIdToPath, $minDocF
 foreach my $dataset (keys %$datasets) {
     $datasets->{$dataset}->populateAll();
     if ($globalCountPrefix) {
-	my $path = $mapIdToPath{$dataset};
-	if (-f $path) { # list file
-	    $path  = dirname($path);
-	}
-	my $globalCountDocProv = $datasets->{$dataset}->generateCollectionCount(\@obsTypes, "$path/$filePrefixGlobalCount");
-	$globalCountDocProv->writeCountFiles();
-	my $docFreqTable = $datasets->{$dataset}->getDocFreqTable();
-	my $docFreqCountObsColl =  CLGTextTools::ObsCollection->newFinalized({ "obsTypes" => \@obsTypes, "logging" => defined($logger) }) ;
-	my ($obsType, $observsObsType);
-        while (($obsType, $observsObsType) = each %$docFreqTable) {
-            $docFreqCountObsColl->addFinalizedObsType($obsType, $observsObsType);
-        }
-	my $docFreqCountDocProv =  CLGTextTools::DocProvider->new({ "logging" => defined($logger), "obsCollection" => $docFreqCountObsColl, "filename" => "$path/$filePrefixDocFreqCount" });
-	$docFreqCountDocProv->writeCountFiles();
+	my $globalCountDocProv = $datasets->{$dataset}->getGlobalCountDocProv();
+	my $docFreqCountDocProv = $datasets->{$dataset}->getDocProvCountDocProv();
 
     }
 }
