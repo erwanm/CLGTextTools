@@ -74,7 +74,7 @@ sub getDocFreqTable {
     my $self = shift;
 
     if (!defined($self->{docFreqCountDocProv})) {
-	$self->{logger}->debug("getDocFreqTable: self->{docFreqTable} is undefined, computing it") if ($self->{logger});
+	$self->{logger}->debug("getDocFreqTable: self->{docFreqTable} is undefined, obtaining it") if ($self->{logger});
 	$self->{docFreqCountDocProv} = $self->getDocFreqCountDocProv();
     }
     return $self->{docFreqCountDocProv}->getObservations();
