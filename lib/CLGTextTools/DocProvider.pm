@@ -86,12 +86,21 @@ sub getId {
 }
 
 
+
+sub getCountFileName {
+    my $self = shift;
+    my $obsType = shift;
+    
+    my $prefix = $self->{filename};
+    return "$prefix.".$obsType.".count";
+}
+
+
 sub allCountFilesExist {
     my $self = shift;
 
-    my $prefix = $self->{filename};
     foreach my $obsType (@{$self->{obsTypesList}}) {
-	return 0 if (! -f "$prefix.".$obsType.".count");
+	return 0 if (! -f $self->getCountFileName($obsType));
     }
     return 1;
 }
@@ -105,17 +114,21 @@ sub allCountFilesExist {
 #
 sub populate {
     my $self = shift;
+    my $obsType = shift; # optional
 
     $self->{logger}->debug("populating observations for '".$self->{filename}."', useCountFiles=".$self->{useCountFiles}) if ($self->{logger});
     my %observs;
     my $writeCountFiles=0;
-    my $prefix = $self->{filename};
-    if ($self->{useCountFiles} && !$self->{forceCountFiles} && $self->allCountFilesExist()) {  
-        # assuming that either all count files are present, or none
+    if ($self->{useCountFiles} && !$self->{forceCountFiles} && ((defined($obsType) && -f $self->getCountFileName($obsType)) || $self->allCountFilesExist() )   )  {
+	$self->{logger}->trace("count file(s) found, going to read from file(s)") if ($self->{logger});
+	if (defined($obsType)) {
+	    $self->readCountFile($obsType);
+	} else {
+	    $self->readCountFiles();
+	}
+    } else { # either usecount=0 or (some) count files not present or force is true
+	# in case $obsType is undef,  assuming that either all count files are present, or none
 	# disadvantage: if some files exist and some are missing, everything is recomputed (including if only one is missing).
-	$self->{logger}->trace("count file found, going to read from files") if ($self->{logger});
-	$self->readCountFiles();
-    } else { # either usecount=0 or count files not present or force is true
 	$self->{logger}->trace("option disabled or count file not found, going to read from source doc") if ($self->{logger});
 	$self->readSourceDoc();
 	if ($self->{useCountFiles}) { # if usecount=1 here, then count files were not present: write them
@@ -146,11 +159,12 @@ sub getObservations {
     my $obsType = shift;
 
     $self->{logger}->debug("obtaining observation for '".$self->{filename}."', obsType = ".(defined($obsType)?$obsType:"undef (all)")) if ($self->{logger});
-    $self->populate() if (!defined($self->{observs}));
     if (defined($obsType)) {
+	$self->populate($obsType) if (!defined($self->{observs}->{$obsType}));
 	confessLog($self->{logger}, "Error: invalid observation type '$obsType'; no such type found in the collection.") if (!defined($self->{observs}->{$obsType}));
 	return $self->{observs}->{$obsType};
     } else {
+	$self->populate() if (!defined($self->{observs}));
 	return $self->{observs} ;
     }
 }
@@ -173,11 +187,12 @@ sub getNbObsDistinct {
     my $obsType = shift;
 
     $self->{logger}->debug("obtaining nb distinct obs for '".$self->{filename}."', obsType = ".(defined($obsType)?$obsType:"undef (all)")) if ($self->{logger});
-    $self->populate() if (!defined($self->{observs}));
     if (defined($obsType)) {
+	$self->populate($obsType) if (!defined($self->{observs}->{$obsType}));
 	confessLog($self->{logger}, "Error: invalid observation type '$obsType'; no such type found in the collection.") if (!defined($self->{observs}->{$obsType}));
 	return $self->{nbObsDistinct}->{$obsType};
     } else {
+	$self->populate() if (!defined($self->{observs}));
 	return $self->{nbObsDistinct};
     }
 }
@@ -193,15 +208,32 @@ sub getNbObsTotal {
     my $obsType = shift;
 
     $self->{logger}->debug("obtaining total nb obs for '".$self->{filename}."', obsType = ".(defined($obsType)?$obsType:"undef (all)")) if ($self->{logger});
-    $self->populate() if (!defined($self->{observs}));
     if (defined($obsType)) {
 	confessLog($self->{logger}, "Error: invalid observation type '$obsType'; no such type found in the collection.") if (!defined($self->{observs}->{$obsType}));
+	$self->populate($obsType) if (!defined($self->{observs}->{$obsType}));
 	return $self->{nbObsTotal}->{$obsType};
     } else {
+	$self->populate() if (!defined($self->{observs}));
 	return $self->{nbObsTotal};
     }
 }
 
+
+
+sub readCountFile {
+    my $self = shift;
+    my $obsType = shift;
+
+    my $prefix = $self->{filename};
+    my $f = $self->getCountFileName($obsType);
+    $self->{logger}->debug("obs type $obsType: reading count file '$f'") if ($self->{logger});
+    my $a = readTSVFileLinesAsArray("$f.total", 2, $self->{logger});
+    $self->{nbObsDistinct}->{$obsType} = $a->[0]->[0];
+    $self->{nbObsTotal}->{$obsType} = $a->[0]->[1];
+    $self->{observs}->{$obsType} = readTSVFileLinesAsHash($f, $self->{logger});
+    $self->{logger}->debug("obs type $obsType: read ".$self->{nbObsTotal}->{$obsType}." observations") if ($self->{logger});
+#	$self->{logger}->trace("obs type $obsType: ".scalar(keys %{$self->{observs}->{$obsType}})." observations in hash") if ($self->{logger});
+}
 
 
 #
@@ -210,17 +242,9 @@ sub getNbObsTotal {
 sub readCountFiles {
     my $self = shift;
 
-    $self->{logger}->debug("reading from count files...") if ($self->{logger});
-    my $prefix = $self->{filename};
+    $self->{logger}->debug("reading from all count files...") if ($self->{logger});
     foreach my $obsType (@{$self->{obsTypesList}}) {
-	my $f = "$prefix.$obsType.count";
-	$self->{logger}->debug("obs type $obsType: reading count file '$f'") if ($self->{logger});
-	my $a = readTSVFileLinesAsArray("$f.total", 2, $self->{logger});
-	$self->{nbObsDistinct}->{$obsType} = $a->[0]->[0];
-	$self->{nbObsTotal}->{$obsType} = $a->[0]->[1];
-	$self->{observs}->{$obsType} = readTSVFileLinesAsHash($f, $self->{logger});
-	$self->{logger}->debug("obs type $obsType: read ".$self->{nbObsTotal}->{$obsType}." observations") if ($self->{logger});
-#	$self->{logger}->trace("obs type $obsType: ".scalar(keys %{$self->{observs}->{$obsType}})." observations in hash") if ($self->{logger});
+	$self->readCountFile($obsType);
     }
 
 }
