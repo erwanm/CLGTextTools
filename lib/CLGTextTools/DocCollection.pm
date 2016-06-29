@@ -1,8 +1,16 @@
 package CLGTextTools::DocCollection;
 
+#twdoc
+#
+# This class provides methods to process a set of documents (represented as ``DocProvider`` objects) together. Additional computations can be processed on the collection of documents, in particular about the document frequency (i.e. number of documents which contain a given observation) and global frequency (frequency in all documents).
+#
+# * Most methods have a static version (thus can be used without instantiating an object).
+#
+#
+# ---
 # EM Oct 2015
 # 
-#
+#/twdoc
 
 
 use strict;
@@ -22,20 +30,14 @@ our $filePrefixGlobalCount = "global";
 our $filePrefixDocFreqCount = "doc-freq";
 
 
-#
-# Provides methods to process a set of documents (represented as DocProvider objects) together.
-#
-# Most methods have a static version (thus can be used without instantiating an object).
-#
 
 
+#twdoc new($class, $params)
 #
-#
-# $params:
 # * logging
-# * globalPath: optional; if specified, specifies the directory where the global count files and the doc freq count files are read from/written to. If undefined, the global/doc freq data is always computed.
+# * globalPath: optional; if specified, specifies the directory where the global count files and the doc freq count files are read from/written to. If undefined, the global/doc freq data is never read or written from files (i.e. always computed, if required).
 #
-#
+#/twdoc
 sub new {
 	my ($class, $params) = @_;
 	my $self;
@@ -52,6 +54,11 @@ sub new {
 
 
 
+#twdoc addDocProvider($self, $doc)
+#
+# adds a document to the collection.
+#
+#/twdoc
 sub addDocProvider {
     my $self = shift;
     my $doc = shift;
@@ -64,12 +71,22 @@ sub addDocProvider {
 }
 
 
+#twdoc getMinDocFreq($self)
+#
+# returns the current min doc frequency for the collection.
+#
+#/twdoc
 sub getMinDocFreq {
     my $self = shift;
     return $self->{minDocFreq};
 }
 
 
+#twdoc getDocFreqTable($self)
+#
+# returns the document frequency table of the collection: ``$res->{obsType}->{obs} = doc freq``. The doc frequencies are computed if the table wasn't defined already.
+#
+#/twdoc
 sub getDocFreqTable {
     my $self = shift;
 
@@ -81,12 +98,23 @@ sub getDocFreqTable {
 }
 
 
+
+#twdoc getDocsAsHash($self)
+#
+# returns the hash of docs in the collection (keys are the filenames).
+#
+#/twdoc
 sub getDocsAsHash {
     my $self = shift;
     return $self->{docs};
 }
 
 
+#twdoc getDocsAsList($self)
+#
+# returns a list containing the ``DocProvider`` objects in the collection.
+#
+#/twdoc
 sub getDocsAsList {
     my $self = shift;
     my @docs = values %{$self->{docs}};
@@ -96,20 +124,21 @@ sub getDocsAsList {
 }
 
 
-#
-# applyMinDocFreq($minDocFreq, $docFreqTable)
+
+#twdoc applyMinDocFreq($self, $minDocFreq, $docFreqTable)
 # 
-# Removes all the observations which don't appear in at least $minDocFreq distinct documents according to $docFreqTable.
+# Removes all the observations which don't appear in at least ``$minDocFreq`` distinct documents according to $docFreqTable.
 #
-# * Caution: the observations are removed from the original DocProvider objects (and possibly underlying ObsCollection objects).
+# * Caution: the observations are removed from the original ``DocProvider`` objects (and possibly underlying ObsCollection objects).
 # * Must be called after all docs have been added to the collection.
-# * If an observation doesn't exist in $docFreqTable, its doc frequency is assumed to be zero and the observation is therefore removed.
+# * If an observation doesn't exist in ``$docFreqTable``, its doc frequency is assumed to be zero and the observation is therefore removed.
 # * There is little sense using this method if the DocProvider objects have not been initialized with the same obs types list.
 #
 # Parameters:
-# * $minDocFreq: the minimum doc frequency (nothing is done if the current min doc freq, default 1, is higher or equal than this parameter)
-# * $docFreqTable: $docFreqTable->{obsType}->{obs} = doc freq ; if undef, uses the object doc freq table (if undef as well, computes the doc freq table based on the collection of documents itself)
+# * ``$minDocFreq``: the minimum doc frequency (nothing is done if the current min doc freq, default 1, is higher or equal than this parameter)
+# * ``$docFreqTable``: ``$docFreqTable->{obsType}->{obs} = doc freq`` ; if undef, uses the object doc freq table (if undef as well, computes the doc freq table based on the collection of documents itself)
 #
+#/twdoc
 sub applyMinDocFreq {
     my $self = shift;
     my $minDocFreq = shift;
@@ -131,22 +160,22 @@ sub applyMinDocFreq {
 
 
 
-# filterMinDocFreq($inputDoc, $minDocFreq, $minFreqTable, $deleteInOriginalDoc)
+#twdoc filterMinDocFreq($inputDoc, $minDocFreq, $minFreqTable, $deleteInOriginalDoc)
 #
 # * ''static''
 #
-# returns a hash by obs type corresponding to $inputDoc but in which observations which don't appear in at least $minDocFreq distinct documents (according to $docFreqTable) have been removed.
+# Returns a hash by obs type corresponding to ``$inputDoc`` but in which observations which don't appear in at least ``$minDocFreq`` distinct documents (according to ``$docFreqTable``) have been removed.
 #
-# * If an observation doesn't exist in $docFreqTable, its doc frequency is assumed to be zero and the observation is therefore removed.
+# * If an observation doesn't exist in ``$docFreqTable``, its doc frequency is assumed to be zero and the observation is therefore removed.
 #
 # Parameters:
-# * $inputDoc: $inputDoc->{obstype}->{obs} = freq
-# * $minDocFreq: the minimum doc frequency
-# * $docFreqTable: $docFreqTable->{obsType}->{obs} = doc freq
-# * $deleteInOriginalDoc: optional; if defined and true, then the input hash is modified (observations are therefore removed permanently from the underlying object). By default a new hash is created containing only the observations which satisfy the condition.
-# * output: $outputDoc->{obstype}->{obs} = freq 
+# * ``$inputDoc``: ``$inputDoc->{obstype}->{obs} = freq``
+# * ``$minDocFreq``: the minimum doc frequency
+# * ``$docFreqTable``: ``$docFreqTable->{obsType}->{obs} = doc freq``
+# * ``$deleteInOriginalDoc``: optional; if defined and true, then the input hash is modified (observations are therefore removed permanently from the underlying object). By default a new hash is created containing only the observations which satisfy the condition.
+# * output: ``$outputDoc->{obstype}->{obs} = freq``
 #
-#
+#/twdoc
 sub filterMinDocFreq {
     my ($inputDoc, $minDocFreq, $docFreqTable, $deleteInOriginalDoc) = @_;
 
@@ -169,18 +198,18 @@ sub filterMinDocFreq {
 
 
 
-# generateDocFreqTable($documents)
+#twdoc generateDocFreqTable($documents)
 #
 # * ''static''
 #
-# Returns a hash by obs type which gives for each observation <obs> the number of documents which contain at least one occurrence of <obs>.
+# Returns a hash by obs type which gives for each observation ``obs`` the number of documents which contain at least one occurrence of ``obs``.
 #
-# * documents: $documents->[docNo]->{obsType}->{obs} = freq
-# * output: $docFreqTable->{obsType}->{obs} = doc freq
+# * ``$documents``: ``$documents->[docNo]->{obsType}->{obs} = freq``
+# * output: ``$docFreqTable->{obsType}->{obs} = doc freq``
 #
 # * There is little sense using this method if the documents have not been initialized with the same obs types list.
 #
-#
+#/twdoc
 sub generateDocFreqTable {
     my $documents = shift;
     my $logger = shift;
@@ -200,23 +229,29 @@ sub generateDocFreqTable {
 }
 
 
-# static
+
+#twdoc createDatasetsFromParams($docProviderParams, $datasetsIdsList, $mapIdToPath, ?$minDocFreq, ?$filePattern, ?$logger, ?$removePrefix)
 #
-# Returns a hash $docColl{datasetId} = DocCollection
+# * ''static''
 #
-# * docProviderParams as hash:  (see DocProvider)
+# Generates a set of ``DocCollection`` objects based on the parameters passed as argument.
+#
+#
+# * ``$docProviderParams`` as hash:  (see ``DocProvider``)
 # ** logging
 # ** obsCollection params
 # ** useCountFile
-# * $datasetsIdsList = [ datasetId1, datasetId2, ..]
-# * $mapIdToPath is either:
-# ** a hash such that $mapIdToPath->{id} = <path>, where <path> points to a directory contaning the files to include in the dataset; alternatively, if path points to a file, this file contains the list of all documents to include (one by line).
-# ** a string <path>, which points to a directory where datasets directories named 'id' are expected, i.e. a dataset "x" is located in <path>/x/
-# * $minDocFreq (optional): min doc frequency threshold; if >1, the collection is entirely populated (can take long) in order to generate the doc freq table. (currently can only be used with the collection itself as reference for doc freq)
-# * $filePattern is optional: if specified, only files which satisfy the pattern are included in the dataset (the default value is "*.txt").
-# * $logger (optional)
-# * $removePrefix: optional, path prefix to remove from the doc id. If using special value "BASENAME", then the file basename is used.
+# * ``$datasetsIdsList = [ datasetId1, datasetId2, ..]``
+# * ``$mapIdToPath`` is either:
+# ** a hash such that ``$mapIdToPath->{id} = path``, where ``path`` points to a directory contaning the files to include in the dataset; alternatively, if path points to a file, this file contains the list of all documents to include (one by line).
+# ** a string ``path``, which points to a directory where datasets directories named 'id' are expected, i.e. a dataset ``x`` is located in ``path/x/``
+# * ``$minDocFreq`` (optional): min doc frequency threshold; if >1, the collection is entirely populated (can take long) in order to generate the doc freq table. (currently can only be used with the collection itself as reference for doc freq)
+# * ``$filePattern`` is optional: if specified, only files which satisfy the pattern are included in the dataset (the default value is ``*.txt``).
+# * ``$logger`` (optional)
+# * ``$removePrefix``: optional, path prefix to remove from the doc id. If using special value "BASENAME", then the file basename is used.
+# * ''Returns'' a hash ``$docColl{datasetId} = DocCollection``
 #
+#/twdoc
 sub createDatasetsFromParams {
     my ($docProviderParams, $datasetsIdsList, $mapIdToPath, $minDocFreq, $filePattern, $logger, $removePrefix) = @_;
 
@@ -262,11 +297,14 @@ sub createDatasetsFromParams {
 }
 
 
+
+#twdoc populateAll($self)
 #
-# populateAll
+# Useful only if writeCountFiles is true: forces parsing every document and writing count files. 
 #
-# useful only if writeCountFiles is true: forces parsing every document and writing count files.
+# * remark: global counts and doc freq are not processed.
 #
+#/twdoc
 sub populateAll {
     my $self = shift;
 
@@ -282,11 +320,12 @@ sub populateAll {
 
 
 
-# 
+#twdoc getGlobalCountDocProv($self)
 #
-# returns a DocProvider object contaning the counts for the whole collection.
+# returns a ``DocProvider`` object contaning the counts for the whole collection.
 # the method writeCountFiles can then be used to write the counts to disk.
 #
+#/twdoc
 sub getGlobalCountDocProv {
     my $self = shift;
 
@@ -334,10 +373,13 @@ sub getGlobalCountDocProv {
 } 
 
 
+
+#twdoc getDocFreqCountDocProv($self)
 #
-# returns a DocProvider object contaning the counts for the doc frequency table obtained from this collection.
+# returns a ``DocProvider`` object contaning the counts for the doc frequency table obtained from this collection.
 # the method writeCountFiles can then be used to write the counts to disk.
 #
+#/twdoc
 sub getDocFreqCountDocProv {
     my $self = shift;
 

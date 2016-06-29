@@ -1,8 +1,13 @@
 package CLGTextTools::Observations::ObsFamily;
 
+#twdoc
+#
+# Parent class for obs family classes.
+#
+# ---
 # EM June 2015
 # 
-#
+#/twdoc
 
 
 use strict;
@@ -15,12 +20,13 @@ use CLGTextTools::Logging qw/confessLog/;
 #our @EXPORT_OK = qw//;
 
 
-
+#twdoc new($class, $params, $subclass)
 #
 # $params:
 # - logging
 # - obsTypes (list)
 #
+#/twdoc
 sub new {
 	my ($class, $params, $subclass) = @_;
 	my $self;

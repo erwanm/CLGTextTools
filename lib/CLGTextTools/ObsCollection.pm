@@ -1,8 +1,18 @@
 package CLGTextTools::ObsCollection;
 
+#twdoc 
+#
+# This class represents a collection of observations from different observations types, these being themselves organized into different observations families. 
+# The class deals with calling the right family function to extract observations from a raw text (possibly using additional resources), in a way as efficient as possible (for intance,
+# by avoiding reading the source document several times for each obs type or family).
+#
+# * An ``ObsCollection`` may contain more obsTypes than the ones asked as input, because of dependencies.
+# * implementation remark: the min freq paramters is dealt with in this class; the obs type id transmitted to the actual family class is stripped from the ``mf<x>`` part.
+#
+# ---
 # EM June 2015
 # 
-#
+#/twdoc
 
 
 use strict;
@@ -23,18 +33,15 @@ our @EXPORT_OK = qw/extractObservsWrapper/;
 our $decimalDigits = 12;
 
 
+#twdoc new($class, $params)
 #
-# an ObsCollection may contain more obsTypes than the ones asked as input, because of dependencies.
 #
-# implementation remark: the min freq paramters is dealt with in this class; the obs type id transmitted to the actual family class is stripped from the 'mf<x>' part.
+# ``$params``:
 #
-
-#
-# $params:
 # * logging
 # * obsTypes (list, or colon-separated string, or as individual keys: obsType.XXX = 1)
 # * wordTokenization = 1 by default; set to 0 if the text is already tokenized (with spaces); applies only to WordFamily observations (POSFamily uses pre-tokenized input, one token by line)
-# * wordVocab: vocabulary resources for word class obs types, as a hash; params->{wordVocab}->{resourceId} = resourceValue (usually the value is the source file).
+# * wordVocab: vocabulary resources for word class obs types, as a hash; ``params->{wordVocab}->{resourceId} = resourceValue`` (usually the value is the source file).
 # ** or as individual keys: wordVocab.resourceId = resourceValue
 # * formatting
 # ** no formatting at all: formatting = 0 or undef or empty string
@@ -43,7 +50,7 @@ our $decimalDigits = 12;
 # ** the formatting does not apply to POS observations
 #
 #
-#
+#/twdoc
 sub new {
 	my ($class, $params) = @_;
 	my $self;
@@ -66,15 +73,17 @@ sub new {
 }
 
 
-
+#twdoc newFinalized($class, $params)
 #
-# Creates a pre-populated obs collection object. To be used with addFinalizedObsType().
+# Creates a pre-populated obs collection object. To be used with ``addFinalizedObsType()``. Used only in a few specific cases (see ``DocCollection``).
 #
 #
 # $params:
+#
 # * logging
 # * obsTypes (list, or colon-separated string, or as individual keys: obsType.XXX = 1)
 #
+#/twdoc
 sub newFinalized {
 	my ($class, $params) = @_;
 	my $self;
@@ -97,12 +106,14 @@ sub newFinalized {
 }
 
 
-
-# Adds a set of observations for one obs type to the collection.
-# $self->{nbNGramsTotal} is updated accordingly.
+#twdoc addFinalizedObsType($self, $obsType, $observs)
 #
-# * observs: hash observs->{obs} = freq
+# Adds a set of observations for one obs type to the collection. The data is considered "finalized".
+# ``$self->{nbNGramsTotal}`` is updated accordingly.
 #
+# * ``$observs``: hash ``$observs->{obs} = freq``
+#
+#/twdoc
 sub addFinalizedObsType {
     my $self = shift;
     my $obsType = shift;
@@ -116,6 +127,12 @@ sub addFinalizedObsType {
 }
 
 
+
+#twdoc getObsTypes($self)
+#
+# Returns the list of obs types.
+#
+#/twdoc
 sub getObsTypes {
     my $self= shift;
     my @obsTypes = keys %{$self->{mapObsTypeToFamily}};
@@ -124,6 +141,15 @@ sub getObsTypes {
 
 
 
+#twdoc addObsType($self, $obsType)
+#
+# Adds an obs type to the list of obs types to process. The obs type string is parsed:
+#
+# # the min freq suffix ``.mf<N>`` is removed to be taken care of later;
+# # the prefix is extracted, in order to find the family the obs type belongs to;
+# # the appropriate family constructor is called (with the relevant parameters, including possible resources)
+#
+#/twdoc
 sub addObsType {
     my $self= shift;
     my $obsType = shift;
@@ -154,31 +180,34 @@ sub addObsType {
 }
 
 
+#twdoc finalize($self)
 #
-# must be called after all data has been populated, in order to initialize
-# 'finalized data' (e.g. apply frequency minima)
+# * Must be called after all data has been populated, in order to initialize 'finalized data' (e.g. apply frequency minima)
 #
+#/twdoc
 sub finalize {
     my $self = shift;
     $self->filterMinFreq();
 }
 
 
-
+#twdoc  extractObsFromText($self, $filePrefix)
 #
-# * Reads raw text files with one of the following types of formatting:
+# * Reads a raw text file ``$filePrefix`` with one of the following types of formatting:
 # ** no formatting at all: $formattingOption = 0 or undef or empty string
 # ** line breaks as meaningful units (e.g. sentences): $formattingOption = singleLineBreak
 # ** empty lines (i.e. at least two consecutive line breaks) as meaningful separators (e.g. paragraphs): $formattingOption = doubleLineBreak
 # * the formatting does not apply to POS observations
 #
 # * Should be called only after:
-# ** the obs types have been initialized (with new or addObsTypes)
-# ** resources (e.g. vocabulary) have been initialized (with new)
-# * 
-# * If POS observations are used, expects a file $filePrefix.POS containing the output in TreeTagger format (with lemma): <token> <POS tag> <lemma>
+# ** the obs types have been initialized (with ``new`` and/or ``addObsTypes``)
+# ** resources (e.g. vocabulary for word observations) have been initialized (with ``new``)
+# 
+# After extracting all the observations, the data is "finalized", which includes applying the minimum individual frequency thresholds.
 #
+# * If POS observations are used, expects a file ``$filePrefix.POS`` containing the output in TreeTagger format (with lemma): ``<token> <POS tag> <lemma>``
 #
+#/twdoc
 sub extractObsFromText {
     my $self = shift;
     my $filePrefix = shift;
@@ -231,8 +260,12 @@ sub extractObsFromText {
 }
 
 
+#twdoc addText($self, $text)
+#
+# Adds the observations found in ``$text`` to the current sets of observations for every obs type.
 #
 #
+#/twdoc
 sub addText {
    my $self = shift;
     my $text = shift;
@@ -243,9 +276,13 @@ sub addText {
 }
 
 
+#twdoc getNbDistinctNGrams($self, $obsType)
 #
-# remark: the number reported is always the original one, no matter the min frequency
+# Returns the number of distinct observations (i.e. not counting multiple occurrences) for ``$obsType``.
 #
+# * Remark: the reported number is always the original one, no matter the min frequency
+#
+#/twdoc
 sub getNbDistinctNGrams {
     my $self = shift;
     my $obsType = shift;
@@ -257,9 +294,13 @@ sub getNbDistinctNGrams {
     }
 }
 
+#twdoc getNbDistinctNGrams($self, $obsType)
 #
-# remark: the number reported is always the original one, no matter the min frequency
+# Returns the total number of observations (i.e. taking multiple occurrences into account) for ``$obsType``.
 #
+# * Remark: the reported number is always the original one, no matter the min frequency
+#
+#/twdoc
 sub getNbTotalNGrams {
     my $self = shift;
     my $obsType = shift;
@@ -273,20 +314,23 @@ sub getNbTotalNGrams {
 }
 
 
+#twdoc isFinalized($self)
 #
 # returns true if and only if the obs collection has been populated and finalized
 #
+#/twdoc
 sub isFinalized {
     my $self = shift;
     return defined($self->{finalizedData});
 }
 
 
+#twdoc getObservations($self, $obsTypesList)
 #
-# Returns the observations for a list of obs types as a hash ref:
-# h->{obsType}->{ngram} = frequency
-# (should be called only after extractObsFromText)
+# Returns the observations for a list of obs types as a hash ref ``h->{obsType}->{ngram} = frequency``
+# (should be called only after ``extractObsFromText``, i.e. after the data has been finalized)
 #
+#/twdoc
 sub getObservations {
     my $self = shift;
     my $obsTypesList = shift;
@@ -302,6 +346,13 @@ sub getObservations {
 
 
 
+#twdoc filterMinFreq($self)
+#
+# For every obs type ``XXX.mf<minFreq>``, filters out thr observations which do not appear at least ``<minFreq>`` times.
+#
+# * Called when the data is finalized.
+#
+#/twdoc
 sub filterMinFreq {
     my $self = shift;
     

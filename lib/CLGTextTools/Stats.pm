@@ -1,5 +1,15 @@
 package CLGTextTools::Stats;
 
+
+#twdoc
+#
+# Library containing various statistics-related functions.
+#
+# ---
+# Erwan Moreau 2015-2016
+#
+#/twdoc
+
 use strict;
 use warnings;
 use Log::Log4perl;
@@ -14,11 +24,12 @@ our @EXPORT_OK = qw/sum min max mean median stdDev geomMean harmoMean means aggr
 
 
 
-# sum(@$values, $naStr)
+#twdoc sum(@$values, $naStr)
 #
 # returns the sum of the values, ignoring undefined values, and returns 0 if no values at all.
 # $naStr is used instead of undef if it is defined. If not, perl will complain about undef values.
 #
+#/twdoc
 sub sum {
     my $values = shift;
     my $naStr = shift;
@@ -32,10 +43,12 @@ sub sum {
 }
 
 
-# min(@$values, $naStr)
+#twdoc min(@$values, $naStr)
+#
 # returns the minimum value of the vector, ignoring undef values.
 # $naStr is used instead of undef if it is defined.
 #
+#/twdoc
 sub min {
     my $values = shift;
     my $naStr = shift;
@@ -49,10 +62,13 @@ sub min {
 }
 
 
-# max(@$values, $naStr)
+
+#twdoc max(@$values, $naStr)
+#
 # returns the maximum value of the vector, ignoring undef values.
 # $naStr is used instead of undef if it is defined.
 #
+#/twdoc
 sub max {
     my $values = shift;
     my $naStr = shift;
@@ -66,11 +82,12 @@ sub max {
 }
 
 
-# mean(@$values, $naStr)
+#twdoc mean(@$values, $naStr)
 #
 # returns the arithmetic mean of the values, not taking into account undefined values, and returns undef in no defined values at all.
 # $naStr is used instead of undef if it is defined.
 #
+#/twdoc
 sub mean {
     my $values = shift;
     my $naStr = shift;
@@ -86,11 +103,12 @@ sub mean {
 }
 
 
-#  median(@$values, $naStr)
+#twdoc  median(@$values, $naStr)
 # 
 # returns the median of the values, not taking into account undefined values, and returns undef in no defined values at all.
 # $naStr is used instead of undef if it is defined.
 # 
+#/twdoc
 sub median {
     my $values = shift;
     my $naStr = shift;
@@ -112,11 +130,12 @@ sub median {
 }
 
 
-# stdDev(@$values, $naStr)
+#twdoc stdDev(@$values, $naStr)
 # 
 # returns the std dev of the values, not taking into account undefined values, and returns undef in no defined values at all.
 # $naStr is used instead of undef if it is defined.
 # 
+#/twdoc
 sub stdDev {
     my $values = shift;
     my $naStr = shift;
@@ -140,11 +159,12 @@ sub stdDev {
 }
 
 
-# geomMean(@$values, $naStr)
+#twdoc geomMean(@$values, $naStr)
 # 
 # returns the geometric mean of the values, not taking into account undefined values, and returns undef in no defined values at all.
 # $naStr is used instead of undef if it is defined.
 # 
+#/twdoc
 sub geomMean {
     my $values = shift;
     my $naStr = shift;
@@ -164,12 +184,13 @@ sub geomMean {
 }
 
 
-# geomMean(@$values, $naStr)
+#twdoc harmoMean(@$values, $naStr)
 # 
 # returns the harmonic mean of the values, not taking into account undefined values, and returns undef in no defined values at all.
 # $naStr is used instead of undef if it is defined.
 # Zero values are not ignored: if there is a zero value, the result is undef (or $naStr)
 # 
+#/twdoc
 sub harmoMean {
     my $values = shift;
     my $naStr = shift;
@@ -188,11 +209,12 @@ sub harmoMean {
     return ($n>0) ? $n/$sum : ( defined($naStr) ? $naStr : undef );
 }
 
-#  means(@$values, $naStr)
+#twdoc  means(@$values, $naStr)
 # 
 # returns the arithmetic, geometric and harmonic mean of the values (following the exceptions defined form each function) in a hash.
 # $naStr is used instead of undef if it is defined.
 # 
+#/twdoc
 sub means {
     my $values = shift;
     my $naStr = shift;
@@ -202,11 +224,12 @@ sub means {
 }
 
 
-# aggregateVector(@$values, $aggregType, $naStr)
+#twdoc aggregateVector(@$values, $aggregType, $naStr)
 # 
 # returns the value corresponding to the statistic described by $aggregType: 'median', 'arithm', 'geom', 'harmo' for the array ref @$values.
 # $naStr is used instead of undef if it is defined.
 # 
+#/twdoc
 sub aggregateVector {
     my $values = shift;
     my $aggregType = shift;
@@ -228,12 +251,13 @@ sub aggregateVector {
 
 
 
-# pickInList(@$list)
+#twdoc pickInList(@$list)
 #
 # picks randomly a value in a list.
 # Uniform probability distribution over cells (thus a value occuring twice is twice more likely to get picked than a value occuring only once).
 # Fatal error if the array is empty.
 #
+#/twdoc
 sub pickInList {
     my $list = shift;
 #print Dumper($list);
@@ -243,11 +267,11 @@ sub pickInList {
 
 
 
-# pickIndex(@$list)
+#twdoc pickIndex(@$list)
 #
 # picks an index randomly in a list, i.e. simply returns an integer between 0 and n-1, where n is the size of the input list.
 # 
-#
+#/twdoc
 #
 sub pickIndex {
     my $list = shift;
@@ -258,12 +282,13 @@ sub pickIndex {
 }
 
 
-# pickInListProbas(%$hash)
+#twdoc pickInListProbas(%$hash)
 #
 # picks a random value among (keys %$hash) following, giving each key a probability proportional to $hash->{key} w.r.t to all values in (values %$hash)
 # Remark: method is equivalent to scaling the sum of the values (values %$hash) to 1, as if these represented a stochastic vector of probabilities.
 # Fatal error if the array is empty.
 #
+#/twdoc
 sub pickInListProbas {
     my $areaByValue = shift;
     confess "Wrong parameter: not a hash or empty hash" if ((ref($areaByValue) ne "HASH") || (scalar(keys %$areaByValue)==0));
@@ -283,13 +308,14 @@ sub pickInListProbas {
 }
 
 
-# pickNSloppy($n, $list)
+#twdoc pickNSloppy($n, $list)
 #
-# randomly picks N elements from the list, but not exactly. 
-# In fact, the method returns a list of "statistical size $n": every element in the list
-# has a chance $n / size($list) to be picked.
-# Remark: if $n>=size(list), returns all elements from the list.
+# randomly picks ``$n`` (unique) elements from the list, but not exactly. 
+# In fact, the method returns a list of "statistical size" ``$n``: every element in the list
+# has a chance ``$n / size($list)`` to be picked.
+# Remark: if ``$n>=size(list)``, returns all elements from the list.
 #
+#/twdoc
 sub pickNSloppy {
     my $n= shift;
     my $list = shift;
@@ -302,7 +328,14 @@ sub pickNSloppy {
 }
 
 
-
+#twdoc pickNIndexesAmongMSloppy($n, $m)
+#
+# randomly picks ``$n`` (unique) indexes from the list of indexes ``[0,..,$m-1]``, but not exactly. 
+# In fact, the method returns a list of "statistical size" ``$n``: every element in the list
+# has a chance ``$n / $m`` to be picked.
+# Remark: if ``$n>=$m``, returns all elements from the list.
+#
+#/twdoc
 sub pickNIndexesAmongMSloppy {
     my $n = shift;
     my $m = shift;
@@ -316,6 +349,13 @@ sub pickNIndexesAmongMSloppy {
 
 
 
+#twdoc pickNIndexesAmongMExactly($n, $m)
+#
+# randomly picks ``$n`` (unique) indexes from the list of indexes ``[0,..,$m-1]``. This function can be significantly slower than ``pickNIndexesAmongMSloppy``.
+#
+# * An error is raised if ``$n>$m``.
+#
+#/twdoc
 sub pickNIndexesAmongMExactly {
     my ($n, $m) = @_;
 
@@ -334,12 +374,14 @@ sub pickNIndexesAmongMExactly {
 
 
 
-# pickDocSubset(doc, prop)
+#twdoc pickDocSubset($doc, $propObsSubset, ?$logger)
 #
-# given a document as a hash: doc->{obs} = freq (one obs type only), returns a random subset of size prop * size(doc) (non exact size).
-# remark: the random extraction is by occurrence, not simply by observation.
-# remark: can be used to pick random subsets with replacements.
+# given a document as a hash ``$doc->{obs} = freq`` (one obs type only), returns a random subset of size ``$prop * size($doc)`` (non exact size).
 #
+# * the random extraction is by occurrence, not simply by observation.
+# * can be used to pick random subsets with replacements.
+#
+#/twdoc
 sub pickDocSubset {
     my ($doc, $propObsSubset, $logger) = @_;
     my %subset;
@@ -355,17 +397,19 @@ sub pickDocSubset {
 }
 
 
-# splitDocRandom(doc, nbBins, ?probas)
+#twdoc splitDocRandom($doc, $nbBins, ?probas, ?$logger)
 #
-# given a document as a hash: doc->{obs} = freq (one obs type only), splits the observations into nbBins subsets of size  size(doc)/nbBins.
-# The output is a list ref of size nbBins.
-# * probas is an optional parameter (hash ref index->proba): if supplied, every bin is picked according to the distribtuion described as values of the array. Its size must be equal to nbBins. If undefined, a uniform distribution is assumed.
+# given a document as a hash ``$doc->{obs} = freq`` (one obs type only), splits the observations into ``$nbBins`` subsets of size  ``size($doc)/$nbBins``.
+# The output is a list ref of size ``$nbBins``.
+#
+# * ``$probas`` is an optional hash ref ``$probas{index} = proba``: if supplied, every bin is picked according to the distribtuion described as values of the array. Its size must be equal to ``$nbBins``. If undefined, a uniform distribution is assumed.
 #
 # Warning: if the input document is small, it is possible that one of the bins is empty. In that case the corresponding subset is undef.
 #
-# remark: the random extraction is by occurrence, not simply by observation.
-# remark: can be used to pick random subsets without replacements.
+# * the random extraction is by occurrence, not simply by observation.
+# * can be used to pick random subsets without replacements.
 #
+#/twdoc
 sub splitDocRandom {
     my ($doc, $nbBins, $probas, $logger) = @_;
     my @subsets = (undef) x $nbBins;
@@ -381,12 +425,13 @@ sub splitDocRandom {
 }
 
 
-
+#twdoc splitDocRandomAvoidEmpty($nbAttempts, $doc, $nbBins, ?$probas, ?$logger)
 #
-# Calls splitDocRandom until every returned subset is non-empty, unless impossible within $nbAttempts attempts;
+# Calls ``splitDocRandom`` until every returned subset is non-empty, unless impossible within ``$nbAttempts`` attempts;
 #
-# * probas is an optional parameter (hash ref index->proba): if supplied, every bin is picked according to the distribtuion described as values of the array. Its size must be equal to nbBins. If undefined, a uniform distribution is assumed.
+# * ``$probas`` is an optional hash ref ``$probas{index} = proba``: if supplied, every bin is picked according to the distribtuion described as values of the array. Its size must be equal to ``$nbBins``. If undefined, a uniform distribution is assumed.
 #
+#/twdoc
 sub splitDocRandomAvoidEmpty {
     my ($nbAttempts, $doc, $nbBins, $probas, $logger) = @_;
 
@@ -402,22 +447,23 @@ sub splitDocRandomAvoidEmpty {
 }
 
 
-# averageByGroup($table, $params, $logger)
+
+#twdoc averageByGroup($table, $params, $logger)
 #
 #  groups together series of data which have the same values in certain columns, 
 #  and calculates the average of a given other column for each such group. 
 #
 # Caution: columns (and rows) are indexed from 0.
 #
-# * $table is a two dimensions array: values->[rowNo]->[colNo] = value
-# * $logger: optional
-# * $params is a hash which optionally defines:
+# * ``$table`` is a two dimensions array: ``values->[rowNo]->[colNo] = value``
+# * ``$logger``: optional
+# * ``$params`` is a hash which optionally defines:
 # ** valueArgNo: arg no for the value to use for the average. If undefined, 
 #    then the last arg is used (this is the default). 
 # ** groupByArgsNos: the args nos by which series of data should be   
 #    grouped, separated by commas. For example if groupByArgsNos="2,4" then   
 #    all lines with identical values in columns 2 and 4 are grouped together, 
-#    and the result for each group is <val arg2> <val arg4> <average value>.  
+#    and the result for each group is ``<val arg2> <val arg4> <average value>``.  
 #    If the option is defined but is the empty string, then the group consists
 #    in the whole data and the global average is the only output.
 #    Default value (if undefined): 0 (first column only).  
@@ -426,6 +472,7 @@ sub splitDocRandomAvoidEmpty {
 # ** expectedNumberByGroup: check that  there is the same number and this precise
 #     number in every group (implies checkSameNumberByGroup)
 #
+#/twdoc
 sub averageByGroup {
     my ($table, $params, $logger) = @_;
 
@@ -463,19 +510,17 @@ sub averageByGroup {
 
 
 #
-# scaleDoc($doc, $newSize, $logger)
+#twdoc scaleDoc($doc, $newSize, ?$oldSize, ?$logger, ?$noWarning)
 #
-# given a document as a hash: doc->{obs} = freq (one obs type only), scales it up or down by multiplying every frequency by $newSize / $oldSize
+# given a document as a hash ``$doc->{obs} = freq`` (one obs type only), scales it up or down by multiplying every frequency by ``$newSize / $oldSize``
 #
 # remark: the random extraction is by occurrence, not simply by observation.
 #
-# args:
-# * $doc
-# * $newSize
-# * $oldSize optional: if not provided the current size is calculated first (saves time if provided)
-# *logger optional
-# * noWarning optional
+# * ``$oldSize`` is optional: if not provided the current size is calculated first (saves time if provided)
+# * ``$logger`` optional
+# * ``$noWarning`` optional: by default a warning is raised if the doc is empty (``$oldSize`` is zero)
 #
+#/twdoc
 sub scaleDoc {
     my ($doc, $newSize, $oldSize, $logger, $noWarning) = @_;
 
@@ -503,17 +548,17 @@ sub scaleDoc {
 
 
 #
-# scaleUpMaxDocSize($docsList, $sizesList, $logger)
+#twdoc scaleUpMaxDocSize($docsList, ?$sizesList, ?$logger)
 #
-# given a list of documents as hash: doc->{obs} = freq (one obs type only), scales all of them to the size of the largest doc.
+# Given a list of documents as hash ``$docsList->[i]->{obs} = freq`` (one obs type only), scales all of them to the size of the largest doc.
 #
 # remark: the random extraction is by occurrence, not simply by observation.
-# args:
-# * $docsList
-# * $sizesList optional: list of the sizes
-# * $logger
-# * noWarning optional
+# 
+# * ``$sizesList`` optional: list of the sizes (saves time if supplied)
+# * ``$logger``
+# * ``$noWarning`` optional: by default a warning is raised if a doc is empty (its size is zero)
 #
+#/twdoc
 sub scaleUpMaxDocSize {
     my ($docsList, $sizesList, $logger, $noWarning) = @_;
 
@@ -535,14 +580,11 @@ sub scaleUpMaxDocSize {
 
 
 #
-# getDocsSizes($docsList)
+#twdoc getDocsSizes($docsList, ?$logger)
 #
-# given a list of documents as hash: doc->{obs} = freq (one obs type only), returns a list of their sizes in the same order.
+# Given a list of documents as hash ``$docsList->[i]->{obs} = freq`` (one obs type only), returns  a list of their sizes in the same order.
 #
-# args:
-# * $docsList
-# * $logger
-#
+#/twdoc
 sub getDocsSizes {
     my ($docsList, $logger) = @_;
 
@@ -560,11 +602,11 @@ sub getDocsSizes {
 
 
 #
-# getDocsSize($doc)
+#twdoc getDocsSize($doc, ?$logger)
 #
-# given a document as hash: doc->{obs} = freq (one obs type only), returns its size.
+# given a document as a hash ``$doc->{obs} = freq`` (one obs type only),  returns its size.
 #
-#
+#/twdoc
 sub getDocSize {
     my ($doc, $logger) = @_;
 
@@ -577,6 +619,11 @@ sub getDocSize {
 }
 
 
+#twdoc normalizeFreqDoc($doc, $total, ?$logger)
+#
+# given a document as a hash ``$doc->{obs} = freq`` (one obs type only),  normalizes the frequencies by dividing all of them by ``$total``.
+#
+#/twdoc
 sub normalizeFreqDoc {
     my ($doc, $total, $logger) = @_;
 

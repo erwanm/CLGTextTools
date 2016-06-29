@@ -1,8 +1,21 @@
 package CLGTextTools::DocProvider;
 
+#twdoc
+#
+# ``DocProvider`` is a wrapper for a document represented as an ``ObsCollection``, but which computes or loads the data only when needed (lazy loading).
+#
+# The computing/loading of the data is triggered  when the calling program calls ``getObservations()``, ``getNbObsDistinct()`` or ``getNbObsTotal()`` for the first time. 
+# If the option ``useCountFiles`` is false, the data can only be computed from the source document. If ``useCountFiles`` is true, then:
+#
+# * if the count file(s) exist(s) on disk, load from disk;
+# * if not, compute from the source document and then write the  count files to disk (for possible future use).
+#
+# Remark: if the data is loaded from the count files, then the underlying ``ObsCollection`` object is not actually used.
+#
+# ---
 # EM Oct 2015
 # 
-#
+#/twdoc
 
 
 use strict;
@@ -19,10 +32,10 @@ our @EXPORT_OK = qw//;
 
 
 
+#twdoc new($class, $params)
 #
-# a DocProvider is a wrapper for a document represented as an ObsCollection, but which loads the data only when needed (lazy loading)
+# ``$params``:
 #
-# $params:
 # * logging
 # the obs collection parameters are provided either as:
 # ** obsCollection: an ObsCollection object (initialized)
@@ -38,8 +51,7 @@ our @EXPORT_OK = qw//;
 # * forceCountFiles: optional. if useCountFiles is true and the count files already exist, they are not used and the source doc is re-analyzed, then the count files are overwritten.
 # * checkIfSourceDocExists: optional, default 1.
 #
-
-
+#/twdoc
 sub new {
 	my ($class, $params) = @_;
 	my $self;
@@ -73,13 +85,20 @@ sub new {
 
 
 
-
+#twdoc getFilename($self)
+#
+#
+#/twdoc
 sub getFilename {
     my $self = shift;
     return $self->{filename};
 }
 
 
+#twdoc getId($self)
+#
+#
+#/twdoc
 sub getId {
     my $self = shift;
     return $self->{id};
@@ -87,6 +106,11 @@ sub getId {
 
 
 
+#twdoc getCoutFileName($self, $obsType)
+#
+# returns the filename where observations are read/written if useCountFile is true.
+#
+#/twdoc
 sub getCountFileName {
     my $self = shift;
     my $obsType = shift;
@@ -96,6 +120,11 @@ sub getCountFileName {
 }
 
 
+#twdoc allCountFilesExist($self)
+#
+# returns true if the count files for all observations types exist on disk.
+#
+#/twdoc
 sub allCountFilesExist {
     my $self = shift;
 
@@ -107,11 +136,11 @@ sub allCountFilesExist {
 
 
 
-
+#twdoc populate($self, ?$obsType)
 #
-# forces populating the document (using count files or source file)
+# Forces populating the document (using count files or source doc).
 #
-#
+#/twdoc
 sub populate {
     my $self = shift;
     my $obsType = shift; # optional
@@ -140,6 +169,11 @@ sub populate {
 
 
 
+#twdoc obsTypeInList($self, $obsType)
+#
+# Returns true if ``$obsType`` belongs to the list of obs types.
+#
+#/twdoc
 sub obsTypeInList {
     my $self = shift;
     my $obsType = shift;
@@ -149,11 +183,11 @@ sub obsTypeInList {
 }
 
 
-
+#twdoc getObservations($self, ?$obsType)
 # 
-# returns observs->{obs} = freq
-# if $obsType is not specified, returns the whole collection: observs->{obsType}->{obs} = freq
+# returns a hash ``$observs``: ``$observs->{obs} = freq``. if ``$obsType`` is not specified, returns the whole collection: ``$observs->{obsType}->{obs} = freq``
 #
+#/twdoc
 sub getObservations {
     my $self = shift;
     my $obsType = shift;
@@ -170,6 +204,11 @@ sub getObservations {
 }
 
 
+#twdoc getObsTypesList($self)
+#
+# Returns the list of obs types
+#
+#/twdoc
 sub getObsTypesList {
     my $self = shift;
     return $self->{obsCollection}->getObsTypes();
@@ -177,11 +216,12 @@ sub getObsTypesList {
 
 
 
-# getNbObsDistinct($obsType)
+#twdoc getNbObsDistinct($self, ?$obsType)
 #
-# returns the number of distinct observations for this obs type.
-# if $obsType is not specified, returns the whole hash: res->{obsType} = nb
+# Returns the number of distinct observations for this obs type.
+# if ``$obsType`` is not specified, returns the whole hash: ``$res->{obsType} = nb``
 #
+#/twdoc
 sub getNbObsDistinct {
     my $self = shift;
     my $obsType = shift;
@@ -198,11 +238,12 @@ sub getNbObsDistinct {
 }
 
 
-# getNbObsDistinct($obsType)
+#twdoc getNbObsDistinct($self, $obsType)
 #
 # returns the total number of observations for this obs type.
-# if $obsType is not specified, returns the whole hash: res->{obsType} = nb
+# if ``$obsType`` is not specified, returns the whole hash: ``$res->{obsType} = nb``
 #
+#/twdoc
 sub getNbObsTotal {
     my $self = shift;
     my $obsType = shift;
@@ -219,7 +260,11 @@ sub getNbObsTotal {
 }
 
 
-
+#twdoc readCountFile($self, $obsType)
+#
+# Reads the count file for ``$obsType`` and stores the data in ``$self``.
+#
+#/twdoc
 sub readCountFile {
     my $self = shift;
     my $obsType = shift;
@@ -236,9 +281,11 @@ sub readCountFile {
 }
 
 
+#twdoc readCountFiles($self)
 #
+# Reads the count file for all the obs types and stores the data in ``$self``.
 #
-#
+#/twdoc
 sub readCountFiles {
     my $self = shift;
 
@@ -251,18 +298,23 @@ sub readCountFiles {
 
 
 
+#twdoc writeCountFiles($self, ?$columnObsType)
 #
-# writes <prefix>.<obs>.count and <prefix>.<obs>.total for every obs type
-# called from populate if useCountFiles=1; otherwise, must be used after calling getObservations()
+# writes ``<prefix>.<obs>.count`` and ``<prefix>.<obs>.total`` for every obs type.
+# called from populate if useCountFiles=1; otherwise, must be used after calling ``getObservations()``
 #
+# * ``$columnObsType``: if true,  prints the obs type first on each line if defined.
+#
+#/twdoc
 sub writeCountFiles {
     my $self = shift;
-    my $columnObsType = shift; # optional, prints the obs type first on each line if defined.
+    my $columnObsType = shift; # optional
 
     my $prefix = $self->{filename};
     $self->{logger}->debug("Writing count files to '$prefix.<obsType>.count'") if ($self->{logger});
     foreach my $obsType (@{$self->{obsTypesList}}) {
-	$self->{logger}->debug("Writing count file: '$prefix.$obsType.count'") if ($self->{logger});
+	my $f = $self->getCountFileName($obsType);
+	$self->{logger}->debug("Writing count file: '$f'") if ($self->{logger});
 	my $f = "$prefix.$obsType.count";
 	my $fh;
 	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
@@ -282,6 +334,11 @@ sub writeCountFiles {
 
 
 
+#twdoc readSourceDoc($self)
+#
+# Reads observations from the source document and stores the data in the object.
+#
+#/twdoc
 sub readSourceDoc {
     my $self = shift;
 
