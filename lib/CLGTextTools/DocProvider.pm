@@ -315,7 +315,6 @@ sub writeCountFiles {
     foreach my $obsType (@{$self->{obsTypesList}}) {
 	my $f = $self->getCountFileName($obsType);
 	$self->{logger}->debug("Writing count file: '$f'") if ($self->{logger});
-	my $f = "$prefix.$obsType.count";
 	my $fh;
 	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
 	my $observs = $self->{observs}->{$obsType};
