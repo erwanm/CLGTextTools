@@ -1,8 +1,13 @@
 package CLGTextTools::SimMeasures::MinMax;
 
+#twdoc
+#
+# Sim measure class which implements the min-max distance.
+#
+# ---
 # EM Oct 2015
 # 
-#
+#/twdoc
 #
 
 use strict;
@@ -16,7 +21,11 @@ use CLGTextTools::SimMeasures::Measure;
 our @ISA=qw/CLGTextTools::SimMeasures::Measure/;
 
 
-
+#twdoc new($class, $params)
+#
+# see parent, no additional parameter.
+#
+#/twdoc
 sub new {
     my ($class, $params) = @_;
      my $self = $class->SUPER::new($params, __PACKAGE__);
@@ -26,9 +35,11 @@ sub new {
 
 
 
+#twdoc compute($self, $doc1, $doc2)
 #
+# see parent.
 #
-#
+#/twdoc
 sub compute {
     my ($self, $doc1, $doc2) = @_;
 

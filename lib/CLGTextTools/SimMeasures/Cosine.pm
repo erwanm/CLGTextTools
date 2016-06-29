@@ -1,8 +1,13 @@
 package CLGTextTools::SimMeasures::Cosine;
 
+#twdoc
+#
+# Sim measure class which implements the cosine similarity.
+#
+# ---
 # EM Oct 2015
 # 
-#
+#/twdoc
 #
 
 use strict;
@@ -15,11 +20,13 @@ use CLGTextTools::Commons qw/readTextFileLines arrayToHash/;
 our @ISA=qw/CLGTextTools::SimMeasures::Measure/;
 
 
-
+#twdoc new($class, $params)
 #
-# $params:
-# * obsWeights->{obs} = weight (e.g. IDF); if obsWeights->{obs} is undefined, a warning is sent and the weight is assumed to be zero.
+# see parent. Additional parameters:
 #
+# * ``obsWeights``: ``obsWeights->{obs} = weight`` (e.g. IDF); if ``obsWeights->{obs}`` is undefined, a warning is sent and the weight is assumed to be zero.
+#
+#/twdoc
 sub new {
     my ($class, $params) = @_;
     my $self = $class->SUPER::new($params, __PACKAGE__);
@@ -30,9 +37,11 @@ sub new {
 
 
 
+#twdoc compute($self, $doc1, $doc2)
 #
+# see parent.
 #
-#
+#/twdoc
 sub compute {
     my ($self, $doc1, $doc2) = @_;
 

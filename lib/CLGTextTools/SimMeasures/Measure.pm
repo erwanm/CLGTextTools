@@ -1,8 +1,14 @@
 package CLGTextTools::SimMeasures::Measure;
 
+
+#twdoc
+#
+# Parent class for similarity measures between documents, where documents are "bags of observations" 
+#
+# ---
 # EM Oct 2015
 # 
-#
+#/twdoc
 
 
 use strict;
@@ -21,11 +27,15 @@ use base 'Exporter';
 our @EXPORT_OK = qw/createSimMeasureFromId/;
 
 
-
+#twdoc new($class, $params, $subclass)
 #
-# $params:
-# - logging
 #
+#
+# ``$params``:
+#
+# * logging
+#
+#/twdoc
 sub new {
     my ($class, $params, $subclass) = @_;
     my $self = {};
@@ -36,10 +46,15 @@ sub new {
 }
 
 
-
+#twdoc compute($self, $doc1, $doc2)
 #
-# input: two hash refs, $doc->{ obs } = freq
+# * ''abstract''
 #
+# returns the similarity score between the two documents.
+#
+# * input: two hash refs, ``$doc->{ obs } = freq``
+#
+#/twdoc
 sub compute {
     my ($self, $doc1, $doc2) = @_;
     confessLog($self->{logger}, "bug: calling an abstract method");
@@ -48,15 +63,14 @@ sub compute {
 
 
 #
-# normalizeCompute($doc1, $doc2, $obsTypeOrsize1, ?$size2 )
+#twdoc normalizeCompute($self, $doc1, $doc2, $obsTypeOrsize1, $size2)
 #
-# Normalizes the documents by scaling up the smallest one to the size of the largest, then computes the similarity score.
-# Can be used in two ways:
-# 1) 4 arguments: $docX is a hash of the form: $docX->{ obs } = freq; $obsTypeOrsize1 and $size2 are the total number of observations in each doc.
-# 2) 3 arguments: $docX is a DocProvider and $obsTypeOrsize1 is the obs type used for computing the similarity. The relevant sizes are read from the DocProvider objects.
-# Remark: the choice between the two ways depends entirely on the number of arguments.
+# returns the similarity score between the two documents after normalization (by computing relative frequencies).  Can be used in two distinct ways, determined by the number of arguments:
 #
+# * 4 arguments: ``$docX`` is a hash of the form: ``$docX->{ obs } = freq``; ``$obsTypeOrsize1`` and ``$size2`` are the total number of observations in each doc.
+# * 3 arguments: ``$docX`` is a ``DocProvider`` and ``$obsTypeOrsize1`` is the obs type used for computing the similarity. The relevant sizes are read from the ``DocProvider`` objects.
 #
+#/twdoc
 sub normalizeCompute {
     my ($self, $doc1, $doc2, $obsTypeOrsize1, $size2) = @_;
 
@@ -73,12 +87,16 @@ sub normalizeCompute {
 
 
 
+#twdoc createSimMeasureFromId($measureId, $params, ?$removeMeasureIdPrefix)
 #
-# static 'new' method which instantiates one of the non-abstract strategy classes.
-# The class is specified by a string id, but if measureId is a ref then it is assumed
-# to be an already initialized SimMeasure object; in this case $measureId is returned.
-# TODO: explanations unclear?
+# static 'new' method which instantiates one of the non-abstract measure classes.
+# The class is specified by a string id, but if ``$measureId`` is a ref then it is assumed
+# to be an already initialized ``SimMeasure`` object; in this case the object ``$measureId`` is simply returned.
+# The parameters for the measure are read from ``$params``.
 #
+# * ``$removeMeasureIdPrefix``: if specified, then only the parameters which start with this prefix are transmitted, after removing the prefix.
+#
+#/twdoc
 sub createSimMeasureFromId {
     my $measureId = shift;
     my $params = shift;

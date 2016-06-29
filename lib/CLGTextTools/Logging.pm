@@ -1,5 +1,14 @@
 package CLGTextTools::Logging;
 
+#twdoc
+#
+# Library containing logging-related functions, especially with Log4Perl.
+#
+#
+#/twdoc
+
+
+
 use strict;
 use warnings;
 use Log::Log4perl;
@@ -13,27 +22,17 @@ our @possibleLogLevels = qw/TRACE DEBUG INFO WARN ERROR FATAL OFF/;
 
 
 
-=head1 DESCRIPTION
-
-Provides simplified logging procedures.
-
-=cut
 
 
 
 
 
 
-
-
-=head2 createDefaultLogConfig($filename, $logLevel, $alsoToScreen, $synchronized)
-
-static.
-
-creates a simple log configuration for log4perl, usable with Log::Log4perl->init($config)
-
-=cut
-
+#twdoc createDefaultLogConfig($filename, $logLevel, $alsoToScreen, $synchronized)
+#
+# creates a simple log configuration for log4perl, usable with Log::Log4perl->init($config)
+#
+#/twdoc
 sub createDefaultLogConfig {
 	my ($filename, $logLevel,$alsoToScreen, $synchronized) = @_;
 	my $config = "";
@@ -67,17 +66,14 @@ log4perl.appender.LOGSCREEN.layout.ConversionPattern = %p> %m%n
 
 
 
-=head2 initLog($logConfigFileOrLevel, $logFilename, $alsoToScreen, $synchronized)
-
-static.
-
-initializes a log4perl object in the following way: if
-$logConfigFileOrLevel is a log level, then uses the default config
-(directed to $logFilename), otherwise $logConfigFileOrLevel is
-supposed to be the log4perl config file to be used.
-
-=cut
-
+#twdoc initLog($logConfigFileOrLevel, $logFilename, $alsoToScreen, $synchronized)
+#
+# initializes a log4perl object in the following way: if
+# ``$logConfigFileOrLevel`` is a log level, then uses the default config
+# (directed to ``$logFilename``), otherwise ``$logConfigFileOrLevel`` is
+# supposed to be the log4perl config file to be used.
+#
+#/twdoc
 sub initLog {
 	my ($logConfigFileOrLevel, $logFilename, $alsoToScreen, $synchronized) = @_;
   	my $logLevel = undef;
@@ -91,6 +87,11 @@ sub initLog {
 
 
 
+#twdoc confessLog($logger, $msg)
+#
+# if ``$logger`` is defined, calls Log4perl logconfess function with ``$msg``, otherwise uses the standard function confess.
+#
+#/twdoc
 sub confessLog {
     my ($logger, $msg) = @_;
 
@@ -102,6 +103,11 @@ sub confessLog {
 }
 
 
+#twdoc warnLog($logger, $msg)
+#
+# if ``$logger`` is defined, calls Log4perl logwarn function with ``$msg``, otherwise use the standard function warn.
+#
+#/twdoc
 sub warnLog {
     my ($logger, $msg) = @_;
     if (defined($logger)) {
@@ -114,6 +120,13 @@ sub warnLog {
 
 }
 
+
+
+#twdoc cluckLog($logger, $msg)
+#
+# if ``$logger`` is defined, calls Log4perl logcluck function with ``$msg``, otherwise use the standard function warn.
+#
+#/twdoc
 sub cluckLog {
     my ($logger, $msg) = @_;
     if (defined($logger)) {
