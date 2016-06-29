@@ -1,9 +1,9 @@
 package CLGTextTools::Observations::CharObsFamily;
 
-# EM June 2015
-# 
+#twdoc
 #
-
+# ObsFamily class for characters n-grams.
+#
 # * to avoid n-grams which span over two two sentences or documents,
 # use two distinct calls to addText: ``addText(sentence1);
 # addText(sentence2);``
@@ -15,6 +15,12 @@ package CLGTextTools::Observations::CharObsFamily;
 # * If the input is a text file with arbitrary line breaks, then
 # all the characters must be given in a single call to addText (i.e.
 # not line by line).
+#
+#
+# ---
+# EM June 2015
+#
+#/twdoc
 
 use strict;
 use warnings;
@@ -33,6 +39,12 @@ our $endLimitChar = "§";
 our $lineBreakChar="¤";
 our $tabChar="µ";
 
+
+#twdoc new($class, $params)
+#
+# see parent, no additional parameter.
+#
+#/twdoc
 sub new {
     my ($class, $params) = @_;
     my $self = $class->SUPER::new($params, __PACKAGE__);
@@ -40,6 +52,17 @@ sub new {
 }
 
 
+#twdoc addObsType($self, $obsType)
+#
+# Format of a char obs type: ``CHAR.[CS]+.lc[01].sl[01]``
+#
+# * Pattern:
+# ** C = character
+# ** S = skip
+# * ``lc`` = lowercase option
+# * ``sl`` = sentence limits option
+#
+#/twdoc
 sub addObsType {
     my $self = shift;
     my $obsType = shift;
@@ -81,9 +104,13 @@ sub addObsType {
 
 
 
-# addText($text)
+#twdoc addText($self, $text)
 #
+# see parent.
 #
+# * remark: line breaks and tabs are replaced with special characters.
+#
+#/twdoc
 sub addText {
     my $self = shift;
     my $text = shift;
@@ -103,6 +130,7 @@ sub addText {
 }
 
 
+# internal
 sub addNGramsObsType {
     my $self = shift;
     my $text = shift;
@@ -128,7 +156,7 @@ sub addNGramsObsType {
 }
 
 
-
+# internal
 sub addStartEndNGrams {
     my $self = shift;
     my $textCase = shift;

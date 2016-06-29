@@ -1,7 +1,9 @@
 package CLGTextTools::Observations::WordObsFamily;
 
-# EM June 2015
-# 
+#twdoc
+#
+# Obs family class for word n-grams observations.
+#
 #
 # * to avoid n-grams which span over two sentences or documents,
 # use two distinct calls to addText: ``addText(sentence1);
@@ -15,6 +17,10 @@ package CLGTextTools::Observations::WordObsFamily;
 # all the tokens must be given in a single call to addText (i.e.
 # not line by line).
 #
+# ---
+# EM June 2015
+# 
+#/twdoc
 
 use strict;
 use warnings;
@@ -33,6 +39,15 @@ our $startLimitToken = "#UNIT_START#";
 our $endLimitToken = "#UNIT_END#";
 our $unknownToken = "___";
 
+
+#twdoc new($class, $params)
+#  
+# See parent. Other parameters:    
+#
+# * ``wordTokenization``: if true, the text will be tokenized in a basic way (adding a space between word characters and other characters, typically punctuation)
+# * ``vocab``: a hash ``$params->{vocab}->{vocabId} = filename``, where ``filename`` is a file containing a list of "allowed" words (one by line). When using this vocabulary, words which are not in the list are replaced with a special token.
+#
+#/twdoc
 sub new {
     my ($class, $params) = @_;
     my $self = $class->SUPER::new($params, __PACKAGE__);
@@ -49,6 +64,18 @@ sub new {
 }
 
 
+#twdoc addObsType($self, $obsType)
+#
+# Format for a Word obs type: ``WORD.[TS]+.lc[01].sl[01](.<vocabClassId>)``
+#
+# * Pattern:
+# ** T = token
+# ** S = skip
+# * ``lc`` = lowercase option
+# * ``sl`` = sentence limits option
+# * ``vocabClassId`` (optional): keep only tokens which belong to the corresponding vocavulary, and replace others with the "unknown token" special symbol.
+#
+#/twdoc
 sub addObsType {
     my $self = shift;
     my $obsType = shift;
@@ -105,9 +132,13 @@ sub getVocab {
 
 
 
-# addText($text)
+#twdoc addText($self, $text)
 #
+# see parent.
 #
+# * if the option ``wordTokenization`` is true, the  text is tokenized. Otherwise it is assumed that the text was previously tokenized.
+#
+#/twdoc
 sub addText {
     my $self = shift;
     my $text = shift;
@@ -155,7 +186,7 @@ sub addText {
 }
 
 
-#
+# internal
 # TODO: possible efficiency issue? calling this method every time an ngram is added.
 # Do some time tests.
 #
@@ -174,6 +205,7 @@ sub _addNGram {
 }
 
 
+# internal
 sub addStartEndNGrams {
     my $self = shift;
     my $tokens = shift;

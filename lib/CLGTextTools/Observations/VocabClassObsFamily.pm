@@ -1,8 +1,17 @@
 package CLGTextTools::Observations::VocabClassObsFamily;
 
+#twdoc 
+#
+# Obs family class for "vocabulary-based" observations: every word is replaced with a category depending on some features of the word
+#
+# * morphology
+# * length
+# * Type-token ratio (special case, only one obs)
+#
+# ---
 # EM July 2015
 # 
-#
+#/twdoc
 
 
 use strict;
@@ -23,14 +32,17 @@ our $endLimitToken = "#END_SENTENCE#";
 our $unknownToken = "_";
 
 
+#twdoc new($class, $params)
 #
-# A length class is described as <maxLength_1:maxLength_2:...>. For instance '3:6:11' means that:
-# * length 1 to 3 are labelled as class 0,
-# * length 4 to 6 as class 1,
-# * length 7 to 11 as class 2,
-# * and any higher length as class 3.
+# See parent. Other parameters:
 #
-
+# * ``lengthClasses`` A hash of the form ``$params->{lengthClasses}->{classId} = length class``, where a length class is described as ``<maxLength_1:maxLength_2:...>``. For instance '3:6:11' means that:
+# ** length 1 to 3 are labelled as class 0,
+# ** length 4 to 6 as class 1,
+# ** length 7 to 11 as class 2,
+# ** and any higher length as class 3.
+#
+#/twdoc
 
 sub new {
     my ($class, $params) = @_;
@@ -49,6 +61,15 @@ sub new {
 }
 
 
+#twdoc addObsType($self, $obsType)
+#
+# Format a VocabClass obs type:
+#
+# * ``VOCABCLASS.MORPHO``: replaces every word with a category among: allLowerCase, allUpperCase, firstUpperCase, mixedCase, number, punct, misc
+# * ``VOCABCLASS.TTR``: Type token ratio
+# * ``VOCABCLASS.LENGTH[:<classId>]``: see ``new``
+#
+#/twdoc
 sub addObsType {
     my $self = shift;
     my $obsType = shift;
@@ -82,9 +103,11 @@ sub addObsType {
 
 
 
-# addText($text)
+#twdoc addText($self, $text)
 #
+# see parent
 #
+#/twdoc
 sub addText {
     my $self = shift;
     my $text = shift;
@@ -143,6 +166,7 @@ sub addText {
 }
 
 
+# 
 sub getMorphClass {
     my $token=  shift;
     if ($token =~ m/^\p{Alpha}+$/) { # all alpha

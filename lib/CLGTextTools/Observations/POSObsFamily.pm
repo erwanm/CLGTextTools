@@ -1,13 +1,15 @@
 package CLGTextTools::Observations::POSObsFamily;
 
+#twdoc
+#
+# Obs family class for POS observations.
+#
+# POS input is expected to be found in a file ``$file.POS`` containing the output in TreeTagger format (with lemma): ``<token> <POS tag> <lemma>``
+#
+# ---
 # EM July 2015
-# 
 #
-#
-#
-#
-#
-#
+#/twdoc
 
 use strict;
 use warnings;
@@ -26,6 +28,12 @@ our $startLimitToken = "#START_SENTENCE#";
 our $endLimitToken = "#END_SENTENCE#";
 our $sentenceEndPOSTag = "SENT";
 
+
+#twdoc new($class, $params)
+#
+# see parent, no additional parameters.
+#
+#/twdoc
 sub new {
     my ($class, $params) = @_;
     my $self = $class->SUPER::new($params, __PACKAGE__);
@@ -33,6 +41,18 @@ sub new {
 }
 
 
+#twdoc addObsType($self, $obsType)
+#
+# Format of a POS obs type: ``POS.[TSPL]+.sl[01]``
+#
+# * Pattern:
+# ** T = token
+# ** S = skip
+# ** P = POS tag
+# ** L = lemma
+# * ``sl`` = sentence limit option
+#
+#/twdoc
 sub addObsType {
     my $self = shift;
     my $obsType = shift;
@@ -73,11 +93,16 @@ sub addObsType {
 
 
 
-# addText($text)
+#twdoc addText($text)
 #
-# input: $tokens->{i}->{column} = ith token if column=0; POS tag for ith token if column=1; lemma for ith token if column=2
+# see parent.
 #
+# * Remark: in this class the ``$text`` input is an array ref ``$text->{i}->{column}`` with the following format:
+# ** ith token if column=0;
+# **  POS tag for ith token if column=1;
+# **  lemma for ith token if column=2
 #
+#/twdoc
 sub addText {
     my $self = shift;
     my $tokens = shift;
@@ -118,6 +143,7 @@ sub addText {
 
 
 
+# internal
 sub addNGramsObsType {
     my $self = shift;
     my $tokens = shift;
@@ -142,6 +168,7 @@ sub addNGramsObsType {
 
 
 
+# internal
 sub addStartEndNGrams {
     my $self = shift;
     my $tokens = shift;

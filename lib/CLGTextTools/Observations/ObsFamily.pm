@@ -22,11 +22,13 @@ use CLGTextTools::Logging qw/confessLog/;
 
 #twdoc new($class, $params, $subclass)
 #
-# $params:
-# - logging
-# - obsTypes (list)
-#
+# 
+# * ``$params``:
+# ** logging
+# ** obsTypes
+# * ``$subclass``: used only to initialize the logger object with the right package id 
 #/twdoc
+# 
 sub new {
 	my ($class, $params, $subclass) = @_;
 	my $self;
@@ -42,7 +44,13 @@ sub new {
 }
 
 
-
+#twdoc addObsType($self, $obsType)
+#
+# * ''Abstract''
+#
+# Adds an obs type to the current list of obs type (this must be done before populating the data).
+#
+#/twdoc
 sub addObsType {
     my $self = shift;
     $self->{logger}->logconfess("__PACKAGE__: cannot execute abstract method 'addObsTypes'.");
@@ -58,15 +66,23 @@ sub addObsType {
 #}
 
 
+#twdoc addText($self, $text)
 #
-# addText($text)
+# * ''Abstract''
 #
+# Adds the observations found in ``$text`` to the current sets of observations for every obs type in the family.
+#
+#/twdoc
 sub addText {
     my $self = shift;
     confessLog($self->{logger}, "__PACKAGE__: cannot execute abstract method 'addText'.");
 }
 
-
+#twdoc getNbDistinctNGrams($self, $obsType)    
+# 
+# Returns the number of distinct observations (i.e. not counting multiple occurrences) for ``$obsType``. 
+# 
+#/twdoc
 sub getNbDistinctNGrams {
     my $self = shift;
     my $obsType = shift;
@@ -74,6 +90,12 @@ sub getNbDistinctNGrams {
     return $self->{nbDistinctNGrams}->{$obsType};
 }
 
+
+#twdoc getNbTotalNGrams($self, $obsType)    
+# 
+# Returns the total number of observations (i.e. taking multiple occurrences into account) for ``$obsType``.
+#
+#/twdoc
 sub getNbTotalNGrams {
     my $self = shift;
     my $obsType = shift;
@@ -82,6 +104,13 @@ sub getNbTotalNGrams {
 }
 
 
+
+#twdoc getObservations($self, $obsType)
+#
+# Returns the observations for ``$obsType`` as a hash ref ``h->{obs} = freq``
+# (should be called only after the data has been populated/finalized)
+#
+#/twdoc
 sub getObservations {
     my $self = shift;
     my $obsType = shift;

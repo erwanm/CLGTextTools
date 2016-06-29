@@ -252,7 +252,7 @@ sub extractObsFromText {
 	    my $textLines = readTSVFileLinesAsArray("$filePrefix.POS", 3, $self->{logger});
 	    $self->{families}->{$family}->addText($textLines);
 	} else {
-	    confesLog($self->{logger}, "Bug: missing code for family '$family' ");
+	    confessLog($self->{logger}, "Bug: missing code for family '$family' ");
 	}
     }
     $self->finalize();
@@ -294,7 +294,7 @@ sub getNbDistinctNGrams {
     }
 }
 
-#twdoc getNbDistinctNGrams($self, $obsType)
+#twdoc getNbTotalNGrams($self, $obsType)
 #
 # Returns the total number of observations (i.e. taking multiple occurrences into account) for ``$obsType``.
 #
