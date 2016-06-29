@@ -121,6 +121,8 @@ Error message and password prompt
 
 <li>$:/DefaultTiddlers</li>
 
+<li>$:/Import</li>
+
 <li>$:/isEncrypted</li>
 
 <li>$:/SiteSubtitle</li>
@@ -135,6 +137,18 @@ Error message and password prompt
 
 <li>$:/state/tab/sidebar--1835078512</li>
 
+<li>$:/state/tag-manager/Implementation</li>
+
+<li>$:/state/tag-manager/Table of Contents</li>
+
+<li>$:/state/tag-manager/User Guide</li>
+
+<li>$:/state/toc/Table of Contents-User Guide-1680752989</li>
+
+<li>$:/state/toc/User Guide-ComparisonAgainstPAN15Version-1680752989</li>
+
+<li>$:/state/toc/User Guide-Implementation-1680752989</li>
+
 <li>$:/StoryList</li>
 
 <li>$:/temp/info-plugin</li>
@@ -145,9 +159,17 @@ Error message and password prompt
 
 <li>$:/themes/tiddlywiki/vanilla</li>
 
+<li>About</li>
+
+<li>CharObsFamily</li>
+
 <li>CLGTextTools</li>
 
 <li>ComparisonAgainstPAN15Version</li>
+
+<li>Documentation in progress...</li>
+
+<li>Implementation</li>
 
 <li>LineBreaks</li>
 
@@ -155,13 +177,31 @@ Error message and password prompt
 
 <li>NGramPatterns</li>
 
+<li>ObsCollection</li>
+
 <li>ObservationType</li>
 
+<li>ObsFamily</li>
+
 <li>OverlappingNGrams</li>
+
+<li>Requirements</li>
+
+<li>Scripts</li>
 
 <li>SentenceLimits</li>
 
 <li>SpeedTest</li>
+
+<li>Table of Contents</li>
+
+<li>TODO</li>
+
+<li>Usage</li>
+
+<li>User Guide</li>
+
+<li>WordObsFamily</li>
 
 </ul>
 </p>
@@ -5653,6 +5693,11 @@ Error message and password prompt
 <pre>CLGTextTools
 </pre>
 </div>
+<div status="complete" title="$:/Import">
+<pre>The following tiddlers were imported:
+
+# [[Scripts]]</pre>
+</div>
 <div title="$:/isEncrypted">
 <pre>no</pre>
 </div>
@@ -5665,16 +5710,34 @@ Error message and password prompt
 <div modified="20150616143520992" title="$:/state/showeditpreview">
 <pre>yes</pre>
 </div>
-<div modified="20151020151230226" title="$:/state/sidebar">
-<pre>no</pre>
+<div modified="20160627182335898" title="$:/state/sidebar">
+<pre>yes</pre>
 </div>
-<div modified="20150629173344183" title="$:/state/tab/moresidebar-401116514">
-<pre>$:/core/ui/MoreSideBar/All</pre>
+<div modified="20160628151719935" title="$:/state/tab/moresidebar-401116514">
+<pre>$:/core/ui/MoreSideBar/Tags</pre>
 </div>
-<div modified="20150629173342807" title="$:/state/tab/sidebar--1835078512">
+<div modified="20160628151718601" title="$:/state/tab/sidebar--1835078512">
 <pre>$:/core/ui/SideBar/More</pre>
 </div>
-<div list="ComparisonAgainstPAN15Version CLGTextTools SpeedTest" title="$:/StoryList">
+<div modified="20160628151803058" title="$:/state/tag-manager/Implementation">
+<pre>open</pre>
+</div>
+<div modified="20160628151749233" title="$:/state/tag-manager/Table of Contents">
+<pre>open</pre>
+</div>
+<div modified="20160628151755892" title="$:/state/tag-manager/User Guide">
+<pre>open</pre>
+</div>
+<div modified="20160628151543360" title="$:/state/toc/Table of Contents-User Guide-1680752989">
+<pre>open</pre>
+</div>
+<div modified="20160628151540880" title="$:/state/toc/User Guide-ComparisonAgainstPAN15Version-1680752989">
+<pre>close</pre>
+</div>
+<div modified="20160628151536287" title="$:/state/toc/User Guide-Implementation-1680752989">
+<pre>open</pre>
+</div>
+<div list="CLGTextTools" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -5691,7 +5754,7 @@ Error message and password prompt
     }
 }</pre>
 </div>
-<div created="20151019150324332" modified="20151019150333828" title="$:/temp/NewTagName">
+<div created="20151019150324332" modified="20160628151520860" title="$:/temp/NewTagName">
 <pre></pre>
 </div>
 <div author="JeremyRuston" core-version="&gt;=5.0.0" dependents="$:/themes/tiddlywiki/vanilla" description="Emphasises individual tiddlers" name="Snow White" plugin-type="theme" title="$:/themes/tiddlywiki/snowwhite" type="application/json" version="5.1.8">
@@ -5791,7 +5854,13 @@ Error message and password prompt
     }
 }</pre>
 </div>
-<div created="20150616143308071" modified="20151019151412442" tags="" title="CLGTextTools">
+<div bag="default" created="20160623135147967" modified="20160623135327364" revision="0" tags="TODO [[Table of Contents]]" title="About">
+<pre></pre>
+</div>
+<div created="20160627183944120" modified="20160627184009405" title="CharObsFamily">
+<pre>See [[CLGTextTools/Observations/CharObsFamily.pm]].</pre>
+</div>
+<div caption="Introduction" created="20150616143308071" modified="20160627182832560" tags="[[Table of Contents]]" title="CLGTextTools">
 <pre>! Overview
 
 ''CLGTextTools'' is a Perl library containing functions to analyze text documents and especially extract text features.
@@ -5803,9 +5872,14 @@ Error message and password prompt
 * Much more efficient than previous prototype scripts used in PAN'14 and PAN'15 competitions.
 * Allows loading observations (i.e. features, usually n-grams counts) from count files as well as parsing the documents directly.
 ** This feature can be used to extract n-grams features from text files even if the process is repeated multiple times, rather than storing them as text files (so as to reduce the time spent in i/o operations). See SpeedTest.
-* Logging possible with ``Log::Log4Perl``, but (fully) disabled by default because it can be very costly in crucial program parts.</pre>
+* Logging possible with ``Log::Log4Perl``, but (fully) disabled by default because it can be very costly in crucial program parts.
+
+! Contents
+
+{{Table of Contents}}
+</pre>
 </div>
-<div created="20151019150357610" modified="20151019151355611" title="ComparisonAgainstPAN15Version">
+<div created="20151019150357610" modified="20160627183722778" tags="[[User Guide]]" title="ComparisonAgainstPAN15Version">
 <pre>The library aims to improve on the clearly suboptimal prototype used in PAN'14 and PAN'15. To this end a test suite is provided in the directory `tests/comparison-against-pan-version`. 
 
 * The directory includes the implementation used in the old prototype.
@@ -5825,16 +5899,24 @@ source setup.sh
 ** measuring the duration of either version and of the either loading from count files or reading the documents. See also SpeedTest.
 </pre>
 </div>
-<div created="20150629172648960" modified="20150629173215955" tags="" title="LineBreaks">
+<div bag="default" created="20160522173938450" modified="20160522174243840" revision="0" tags="$:/tags/AboveStory" title="Documentation in progress...">
+<pre>@@color:red;
+This documentation is a work in progress...
+@@</pre>
+</div>
+<div color="#50a1eb" created="20160627201402195" modified="20160628151805376" tags="[[User Guide]]" title="Implementation">
+<pre>{{{[tag[Implementation]]}}}</pre>
+</div>
+<div created="20150629172648960" modified="20160627201449471" tags="Implementation" title="LineBreaks">
 <pre>Some ObsFamily instances can take line breaks into account (currently only in CharObsFamily). This possibility should be used only if line breaks are meaningful (see OverlappingNGrams and SentenceLimits); otherwise, its is best for the calling program to remove them first.
 
 Because it must be possible to write or read the list of n-grams to a file, to avoid any confusion the line break characters are actually replaced with a special character (``¤`` by default) in ``addText``.
 </pre>
 </div>
-<div created="20150629165102454" modified="20150629165421152" tags="" title="LowerCased">
+<div created="20150629165102454" modified="20160628151043461" tags="Implementation" title="LowerCased">
 <pre>The ``lc`` option, available currently with CharObsFamily and WordObsFamily, causes the input text to be lowercased. This way, words/characters are matched independently from their case. It is usually recommended for (word) token-based n-grams, but not particularly with character n-grams.</pre>
 </div>
-<div created="20150629180551784" modified="20150921160218108" title="NGramPatterns">
+<div created="20150629180551784" modified="20160628151111537" tags="Implementation" title="NGramPatterns">
 <pre>Several [[observation families|ObsFamily]] share a common parameter //&quot;pattern&quot;//:
 
 * WordObsFamily: ``[TS]+``
@@ -5853,8 +5935,11 @@ Because it must be possible to write or read the list of n-grams to a file, to a
 ** remark: the first and last character must not be ''S''.
 </pre>
 </div>
-<div created="20150629173317523" modified="20150629174900587" tags="" title="ObservationType">
-<pre>An ''observation'' can be any observable feature in a text. The most common kind is an n-gram (but observations are not restricted to n-grams). n-grams are stored as bag-of-words (or bag-of-characters), i.e. sequential order between distinct n-grams is not preserved (it is of course preserved //inside the n-gram//, by definition).
+<div created="20160628151253305" modified="20160628151405917" title="ObsCollection">
+<pre>See [[CLGTextTools/ObsCollection.pm]]</pre>
+</div>
+<div created="20150629173317523" modified="20160628151414743" tags="Implementation" title="ObservationType">
+<pre>An ''observation'' can be any observable feature in a text. The most common kind is n-grams, but observations are not restricted to n-grams. n-grams are stored as bag-of-words (or bag-of-characters), i.e. sequential order between distinct n-grams is not preserved (it is of course preserved //inside the n-gram//, by definition).
 
 Different kinds of observations can be taken into account (e.g. words bigrams, character 5-grams, POS trigrams, etc.).
 The different kinds of observations are distributed among different categories called [[observations families|ObsFamily]]. Each family can contain itself different sub-types. For example, words n-grams correspond to one family (WordObsFamily), and inside this family there can be multiple types of words n-grams, including length, skip-grams (see NGramPatterns) and other options like lowercasing.
@@ -5869,14 +5954,53 @@ The connection between an id and the family is done in ObsCollection. The encodi
 
 </pre>
 </div>
-<div created="20150629165443298" modified="20150629172002462" tags="" title="OverlappingNGrams">
-<pre>If the input text is provided in a form which supports the separation into multiple meaningful units (e.g. one sentence by line, or an additional line break between distinct paragraphs), it is best not to include n-grams which span over two distinct &quot;units&quot;
+<div created="20160627183832500" modified="20160628151019011" tags="" title="ObsFamily">
+<pre>See [[CLGTextTools/Observations/ObsFamily.pm]].</pre>
+</div>
+<div created="20150629165443298" modified="20160628151450307" tags="Implementation" title="OverlappingNGrams">
+<pre>If the input text is provided in a form which supports the separation into multiple meaningful units (e.g. one sentence by line, or an additional line break between distinct paragraphs), it is best not to include n-grams which span over two distinct &quot;units&quot;.
 
 This can be done using multiple calls to ObsFamily ``addText``. This way the specific instance ``addText`` function (for instance in CharObsFamily and WordObsFamily) cannot take such spanning n-grams into account. It is the calling program responsibility to deal with that, since it depends on the input format. For instance, if the line breaks are not meaningful (simple text justification), the input text should be passed all at once to ``addText``.
 
 See also SentenceLimits.</pre>
 </div>
-<div created="20150629164530497" modified="20150629172610219" tags="" title="SentenceLimits">
+<div created="20160627183001263" modified="20160627183218213" tags="[[Table of Contents]]" title="Requirements">
+<pre>! Installation
+
+The package itself is coded in Bash and Perl. No compilation is required. 
+The software has been tested only in a Linux environment, but it should be usable under any environment which supports these languages.
+
+
+!! Dependencies
+
+CLGTextTools requires the following dependencies to be installed. 
+
+The different dependencies can be installed using an in-house basic package manager called ''erw-pm''; see the ``erw-bash-commons`` documentation (part ''erw-pm'') to use it. Otherwise packages can be installed by setting up PATH and other environment variables manually (standard way).
+
+!! Third-party
+
+* Bash
+* Perl
+** Log::Log4perl
+** File::BOM
+** Data::Dumper
+** Data::Dumper::Simple
+
+!! In-house packages
+
+''TODO'' git repo location
+
+* erw-bash-commons
+* ~TreeTaggerWrapper
+
+</pre>
+</div>
+<div bag="default" created="20160623135401691" modified="20160627183609662" revision="0" tags="[[User Guide]]" title="Scripts">
+<pre>Every executable script has a ``-h`` option which prints a short description (inline help message). This section provides the content printed by every script in the package for convenience.
+
+{{{[tag[Scripts]]}}}</pre>
+</div>
+<div created="20150629164530497" modified="20160628151523240" tags="Implementation" title="SentenceLimits">
 <pre>The ``sl`` option, available currently in with CharObsFamily and WordObsFamily, adds &quot;special n-grams&quot; at the beginning and end of the text provided as input. This is typically used for sentence limits, that is, when the sentences are provided one at a time as input; but it can also be used with any other meaningful unit of text (e.g. paragraph, document). Of course, it should not be used for lines of text which do not correspond to sentences or any other meaningful separation.
 
 For example,  with this option the tokens-trigrams extracted from sentence &quot;Hello there !&quot; are: 
@@ -5894,8 +6018,7 @@ Without the option the only trigram would be ``Hello there !``.
 </pre>
 </div>
 <div created="20151019150343980" modified="20151020174431329" tags="ComparisonAgainstPAN15Version" title="SpeedTest">
-<pre>
-! Generating count files
+<pre>! Generating count files
 
 The process of reading the documents and generating the count files is dramatically improved compared to the PAN'15 version: with the 3 sample documents and the predefined set of obs types, the new version took less than 4.6s against 20s for the PAN'15 version.
 
@@ -5953,6 +6076,31 @@ The higher the minimum frequency threshold is, the lower the number of distinct 
 
 It is possible that a significantly higher number of observations types would make the &quot;read from count files&quot; version take comparatively more time than the &quot;analyze input docs&quot; version (assuming the most favorable setting for the other parameters, e.g. low min frequency): in this case there would be many counts files to read, whereas the new implementation is optimized by family of obs types. However it is not sure that this would be the case, and more importantly the usefulness of a high number of different obs types is dubious.
 </pre>
+</div>
+<div color="#50a1eb" created="20160627182731817" list="CLGTextTools Requirements Usage [[User Guide]] About" modified="20160628151726946" tags="$:/tags/SideBar" title="Table of Contents">
+<pre>&lt;div class=&quot;tc-table-of-contents&quot;&gt;
+
+&lt;&lt;toc-selective-expandable 'Table of Contents'&gt;&gt;
+
+&lt;/div&gt;
+</pre>
+</div>
+<div color="#d31212" created="20160628151731762" modified="20160628151731762" title="TODO">
+<pre></pre>
+</div>
+<div created="20160627183247055" modified="20160628151715725" tags="[[Table of Contents]] TODO" title="Usage">
+<pre>The programs in this package can be used in many different ways, although not all of them are properly tested and documented. The ``tests`` directory contains a few examples to use it.</pre>
+</div>
+<div bag="default" color="#50a1eb" created="20160623145317748" list="Scripts ComparisonAgainstPAN15Version" modified="20160628151757695" revision="0" tags="[[Table of Contents]]" title="User Guide">
+<pre>&lt;div class=&quot;tc-table-of-contents&quot;&gt;
+
+&lt;&lt;toc-selective-expandable 'User Guide'&gt;&gt;
+
+&lt;/div&gt;
+</pre>
+</div>
+<div created="20160627201500294" modified="20160628151426702" title="WordObsFamily">
+<pre>See [[CLGTextTools/Observations/WordObsFamily.pm]].</pre>
 </div>
 
 </div>
