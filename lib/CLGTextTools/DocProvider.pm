@@ -37,7 +37,7 @@ our @EXPORT_OK = qw//;
 # ``$params``:
 #
 # * logging
-# the obs collection parameters are provided either as:
+# * the obs collection parameters are provided either as:
 # ** obsCollection: an ObsCollection object (initialized)
 # ** all the parameters required to initiate a new ObsCollection object (see CLGTextTools::ObsCollection):
 # *** obsTypes (list or colon-separated string)
@@ -47,7 +47,7 @@ our @EXPORT_OK = qw//;
 # *** optional: if the obs collection has been finalized (i.e. has been populated), then the document is considered loaded regardless of the existence of corresponding count files.
 # * filename
 # * id (optional; filename will be used if undef)
-# * useCountFiles: if defined and not zero or empty string, then the instance will try to read observations counts from files filename.observations/<obs>.count; if these files don't exist, then the source document is read and the count files are written. If undef (or zero etc.), then no count file is ever read or written. 
+# * useCountFiles: if defined and not zero or empty string, then the instance will try to read observations counts from files ``filename.observations/<obs>.count``; if these files don't exist, then the source document is read and the count files are written. If undef (or zero etc.), then no count file is ever read or written. 
 # * forceCountFiles: optional. if useCountFiles is true and the count files already exist, they are not used and the source doc is re-analyzed, then the count files are overwritten.
 # * checkIfSourceDocExists: optional, default 1.
 #
