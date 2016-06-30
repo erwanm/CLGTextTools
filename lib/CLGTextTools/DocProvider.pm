@@ -47,7 +47,7 @@ our @EXPORT_OK = qw//;
 # *** optional: if the obs collection has been finalized (i.e. has been populated), then the document is considered loaded regardless of the existence of corresponding count files.
 # * filename
 # * id (optional; filename will be used if undef)
-# * useCountFiles: if defined and not zero or empty string, then the instance will try to read observations counts from files filename.<obs>.count; if these files don't exist, then the source document is read and the count files are written. If undef (or zero etc.), then no count file is ever read or written. 
+# * useCountFiles: if defined and not zero or empty string, then the instance will try to read observations counts from files filename.observations/<obs>.count; if these files don't exist, then the source document is read and the count files are written. If undef (or zero etc.), then no count file is ever read or written. 
 # * forceCountFiles: optional. if useCountFiles is true and the count files already exist, they are not used and the source doc is re-analyzed, then the count files are overwritten.
 # * checkIfSourceDocExists: optional, default 1.
 #
@@ -116,7 +116,8 @@ sub getCountFileName {
     my $obsType = shift;
     
     my $prefix = $self->{filename};
-    return "$prefix.".$obsType.".count";
+    mkdir "$prefix.observations" if (! -d "$prefix.observations");
+    return "$prefix.observations/$obsType.count";
 }
 
 
@@ -300,7 +301,7 @@ sub readCountFiles {
 
 #twdoc writeCountFiles($self, ?$columnObsType)
 #
-# writes ``<prefix>.<obs>.count`` and ``<prefix>.<obs>.total`` for every obs type.
+# writes ``<prefix>.observations/<obs type>.count`` and ``<prefix>.observations/<obs type>.count.total`` for every obs type.
 # called from populate if useCountFiles=1; otherwise, must be used after calling ``getObservations()``
 #
 # * ``$columnObsType``: if true,  prints the obs type first on each line if defined.
@@ -311,7 +312,7 @@ sub writeCountFiles {
     my $columnObsType = shift; # optional
 
     my $prefix = $self->{filename};
-    $self->{logger}->debug("Writing count files to '$prefix.<obsType>.count'") if ($self->{logger});
+    $self->{logger}->debug("Writing count files to '$prefix.observations/<obsType>.count'") if ($self->{logger});
     foreach my $obsType (@{$self->{obsTypesList}}) {
 	my $f = $self->getCountFileName($obsType);
 	$self->{logger}->debug("Writing count file: '$f'") if ($self->{logger});
@@ -324,7 +325,7 @@ sub writeCountFiles {
 	    printf $fh "%s\t%d\n", $key, $nb ;
 	}
 	close($fh);
-	$f = "$prefix.$obsType.count.total";
+	$f = "$f.total";
 	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
 	printf $fh "%d\t%d\n", $self->{nbObsDistinct}->{$obsType}, $self->{nbObsTotal}->{$obsType};
 	close($fh);

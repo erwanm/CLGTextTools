@@ -31,9 +31,9 @@ cat "$source" > "$d/source.txt"
 cmd="extract-observations.pl $obsTypes $d/source.txt"
 echo "$cmd"
 evalSafe "$cmd" "$0,$LINENO: "
-dieIfNoSuchFile "$d/source.txt.WORD.T.lc1.sl0.mf1.count" "$0,$LINENO: "
-nb1=$(sumFreqEtat  "$d"/source.txt.WORD.T.lc0.sl0.mf1.count)
-nb2=$(sumFreqEtat  "$d"/source.txt.WORD.T.lc1.sl0.mf1.count)
+dieIfNoSuchFile "$d/source.txt.observations/WORD.T.lc1.sl0.mf1.count" "$0,$LINENO: "
+nb1=$(sumFreqEtat  "$d"/source.txt.observations/WORD.T.lc0.sl0.mf1.count)
+nb2=$(sumFreqEtat  "$d"/source.txt.observations/WORD.T.lc1.sl0.mf1.count)
 if [ $nb1 -ne $nb2 ]; then
     echo "$0: test failed" 1>&2
     exit 1

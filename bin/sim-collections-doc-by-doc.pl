@@ -36,7 +36,8 @@ sub usage {
 	print $fh "  list of 'observation types' separated with ':' (see the\n";
 	print $fh "  documentation for a comprehensive list of obs types codes).\n";
 	print $fh "  The output is written to separate files named after each\n";
-	print $fh "  input file: <file1>.<obs-type>.count and <file1>.<obs-type>.total\n";
+	print $fh "  input file: <file1>.observations/<obs-type>.count and\n";
+	print $fh "  <file1>.observations/<obs-type>.total\n";
 	print $fh "  If POS observations are used, expects a file <file>.POS containing\n";
 	print $fh "  the output in TreeTagger format (with lemma): \n";
 	print $fh "   <token> <POS tag> <lemma>\n";
@@ -65,7 +66,8 @@ sub usage {
 	print $fh "     -p <file pattern> file pattern which gives the list of documents when located\n";
 	print $fh "        in the dataset path. Default: '*.txt'\n";
 	print $fh "     -g generate also count files for the whole dataset (sum of the counts); for\n";
-	print $fh "        every <obs type> the count file <dirname>/[global|doc-freq].<obs type>.count\n";
+	print $fh "        every <obs type> the count file\n";
+	print $fh "        <dirname>/[global|doc-freq].observations/<obs type>.count\n";
 	print $fh "        is generated. <dirname> is <path> if <path> is a directory, the directory\n";
 	print $fh "        contaning the list file otherwise.\n";
 	print $fh "     -f force writing output files even if they already exist (default: only if the.\n";

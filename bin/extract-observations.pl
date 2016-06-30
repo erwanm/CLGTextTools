@@ -32,7 +32,8 @@ sub usage {
 	print $fh "  list of 'observation types' separated with ':' (see the\n";
 	print $fh "  documentation for a comprehensive list of obs types codes).\n";
 	print $fh "  The output is written to separate files named after each\n";
-	print $fh "  input file: <file1>.<obs-type>.count and <file1>.<obs-type>.total\n";
+	print $fh "  input file: <file1>.observations/<obs-type>.count and\n";
+	print $fh "  <file1>.observations/<obs-type>.total\n";
 	print $fh "  If POS observations are used, expects a file <file>.POS containing\n";
 	print $fh "  the output in TreeTagger format (with lemma): \n";
 	print $fh "   <token> <POS tag> <lemma>\n";

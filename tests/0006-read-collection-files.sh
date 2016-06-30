@@ -50,14 +50,14 @@ time eval "$cmd"
 echo
 
 echo "### Time stamp count files (1)"
-stat -c '%n %y' "$d"/*count* > "$d"/timestamp1.txt 
+stat -c '%n %y' "$d"/*.observations/*count* > "$d"/timestamp1.txt 
 
 echo "### Pass 2: Reading count files for collection"
 time eval "$cmd"
 echo
 
 echo "### Time stamp count files (2)"
-stat -c '%n %y' "$d"/*count* > "$d"/timestamp2.txt 
+stat -c '%n %y' "$d"/*.observations/*count* > "$d"/timestamp2.txt 
 
 echo -n "### Comparing timestamps 1 and 2: "
 if cmp "$d"/timestamp1.txt  "$d"/timestamp2.txt; then
