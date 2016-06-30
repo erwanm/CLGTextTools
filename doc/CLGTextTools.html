@@ -129,7 +129,17 @@ Error message and password prompt
 
 <li>$:/SiteTitle</li>
 
+<li>$:/state/tab/sidebar--1835078512</li>
+
+<li>$:/state/toc/Implementation-Libraries-1859160479</li>
+
+<li>$:/state/toc/Table of Contents-User Guide-1680752989</li>
+
 <li>$:/state/toc/Table of Contents-User Guide-1859160479</li>
+
+<li>$:/state/toc/User Guide-Implementation-1680752989</li>
+
+<li>$:/state/toc/User Guide-Implementation-1859160479</li>
 
 <li>$:/StoryList</li>
 
@@ -245,6 +255,16 @@ Error message and password prompt
 
 <li>CLGTextTools/Logging.pm</li>
 
+<li>CLGTextTools/Logging.pm/cluckLog($logger, $msg)</li>
+
+<li>CLGTextTools/Logging.pm/confessLog($logger, $msg)</li>
+
+<li>CLGTextTools/Logging.pm/createDefaultLogConfig($filename, $logLevel, $alsoToScreen, $synchronized)</li>
+
+<li>CLGTextTools/Logging.pm/initLog($logConfigFileOrLevel, $logFilename, $alsoToScreen, $synchronized)</li>
+
+<li>CLGTextTools/Logging.pm/warnLog($logger, $msg)</li>
+
 <li>CLGTextTools/ObsCollection.pm</li>
 
 <li>CLGTextTools/ObsCollection.pm/addFinalizedObsType($self, $obsType, $observs)</li>
@@ -321,9 +341,25 @@ Error message and password prompt
 
 <li>CLGTextTools/SimMeasures/Cosine.pm</li>
 
+<li>CLGTextTools/SimMeasures/Cosine.pm/compute($self, $doc1, $doc2)</li>
+
+<li>CLGTextTools/SimMeasures/Cosine.pm/new($class, $params)</li>
+
 <li>CLGTextTools/SimMeasures/Measure.pm</li>
 
+<li>CLGTextTools/SimMeasures/Measure.pm/compute($self, $doc1, $doc2)</li>
+
+<li>CLGTextTools/SimMeasures/Measure.pm/createSimMeasureFromId($measureId, $params, ?$removeMeasureIdPrefix)</li>
+
+<li>CLGTextTools/SimMeasures/Measure.pm/new($class, $params, $subclass)</li>
+
+<li>CLGTextTools/SimMeasures/Measure.pm/normalizeCompute($self, $doc1, $doc2, $obsTypeOrsize1, $size2)</li>
+
 <li>CLGTextTools/SimMeasures/MinMax.pm</li>
+
+<li>CLGTextTools/SimMeasures/MinMax.pm/compute($self, $doc1, $doc2)</li>
+
+<li>CLGTextTools/SimMeasures/MinMax.pm/new($class, $params)</li>
 
 <li>CLGTextTools/Stats.pm</li>
 
@@ -382,6 +418,8 @@ Error message and password prompt
 <li>count-obs-dataset.sh</li>
 
 <li>Documentation in progress...</li>
+
+<li>Draft of 'Libraries'</li>
 
 <li>extract-observations-collection.pl</li>
 
@@ -6541,10 +6579,25 @@ Error message and password prompt
 <div bag="default" created="20150616143242966" modified="20150616143246489" revision="0" title="$:/SiteTitle">
 <pre>CLGTextTools</pre>
 </div>
-<div created="20160629171037908" modified="20160629171037908" title="$:/state/toc/Table of Contents-User Guide-1859160479">
+<div created="20160629184622890" modified="20160629184622890" title="$:/state/tab/sidebar--1835078512">
+<pre>Table of Contents</pre>
+</div>
+<div created="20160629184550083" modified="20160629184550083" title="$:/state/toc/Implementation-Libraries-1859160479">
 <pre>open</pre>
 </div>
-<div list="Libraries CLGTextTools" title="$:/StoryList">
+<div created="20160629184624468" modified="20160629184624468" title="$:/state/toc/Table of Contents-User Guide-1680752989">
+<pre>open</pre>
+</div>
+<div created="20160629184546291" modified="20160629184546291" title="$:/state/toc/Table of Contents-User Guide-1859160479">
+<pre>open</pre>
+</div>
+<div created="20160629184636348" modified="20160629184638309" title="$:/state/toc/User Guide-Implementation-1680752989">
+<pre>close</pre>
+</div>
+<div created="20160629184548681" modified="20160629184548681" title="$:/state/toc/User Guide-Implementation-1859160479">
+<pre>open</pre>
+</div>
+<div list="CLGTextTools Libraries" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -6691,7 +6744,7 @@ Error message and password prompt
 {{Table of Contents}}
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="Libraries" title="CLGTextTools/Commons.pm" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194528000" revision="0" tags="Libraries" title="CLGTextTools/Commons.pm" type="text/vnd.tiddlywiki">
 <pre>Misc functions library: common text file manipulations, common data structures manipulations, and a few more specific functions used in many places in the package.
 
 
@@ -6700,7 +6753,7 @@ Erwan Moreau, 2015-2016
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/arrayToHash($array)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194528000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/arrayToHash($array)" type="text/vnd.tiddlywiki">
 <pre>given an array ``[ a, b, c ]``, returns a hash ``{ a =&gt; 1, b =&gt; 1, c =&gt; 1 }``
 
 </pre>
@@ -6710,17 +6763,17 @@ Erwan Moreau, 2015-2016
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/containsUndef($list)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194528000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/containsUndef($list)" type="text/vnd.tiddlywiki">
 <pre>Returns 1 if ``$list`` is undefined or if it contains at least one undefined value, 0 otherwise.
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/getArrayValuesFromIndexes($array, $indexes)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194528000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/getArrayValuesFromIndexes($array, $indexes)" type="text/vnd.tiddlywiki">
 <pre>returns an array ref containing the values from ``$array`` found at indexes ``$indexes``.
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/hashKeysToArray($hash)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194528000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/hashKeysToArray($hash)" type="text/vnd.tiddlywiki">
 <pre>returns the kays of a hash as a ref to an array.
 
 </pre>
@@ -6747,7 +6800,7 @@ Using this function instead of simply opening the file directly guarantees that 
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/rankWithTies($parameters)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194528000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/rankWithTies($parameters)" type="text/vnd.tiddlywiki">
 <pre>Computes a ranking which takes ties into account, i.e. two identical values are assigned the same rank.
 The sum property is also fulfilled, i.e. the sum of all ranks is always 1+2+...+N (if first rank is 1). This implies
 that the rank assigned to several identical values is the average of the ranks they would have been assigned if ties were not taken into account.
@@ -6778,7 +6831,7 @@ If dontStoreRanking is true then nothing is returned.
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/readConfigFile($filename)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194528000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/readConfigFile($filename)" type="text/vnd.tiddlywiki">
 <pre>Reads a UTF8 text &quot;config&quot; file, i.e. with lines of the form ``paramName=value``. Comments (starting with #) and empty lines are ignored.
 
 * returns a hash ``res-&gt;{paramName} = value``
@@ -6790,7 +6843,7 @@ If dontStoreRanking is true then nothing is returned.
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/readObsTypesFromConfigHash($params)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194528000" revision="0" tags="CLGTextTools/Commons.pm" title="CLGTextTools/Commons.pm/readObsTypesFromConfigHash($params)" type="text/vnd.tiddlywiki">
 <pre>Specific for clg-authorship-analytics style config files. Returns the list of obs types found in the config, either from param ``obsTypes`` if defined or from individual boolean ``obsType.&lt;type&gt;`` parameters.
 
 </pre>
@@ -6838,7 +6891,7 @@ If dontStoreRanking is true then nothing is returned.
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="Libraries" title="CLGTextTools/DocCollection.pm" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="Libraries" title="CLGTextTools/DocCollection.pm" type="text/vnd.tiddlywiki">
 <pre>This class provides methods to process a set of documents (represented as ``DocProvider`` objects) together. Additional computations can be processed on the collection of documents, in particular about the document frequency (i.e. number of documents which contain a given observation) and global frequency (frequency in all documents).
 
 * Most methods have a static version (thus can be used without instantiating an object).
@@ -6849,12 +6902,12 @@ EM Oct 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/addDocProvider($self, $doc)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/addDocProvider($self, $doc)" type="text/vnd.tiddlywiki">
 <pre>adds a document to the collection.
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/applyMinDocFreq($self, $minDocFreq, $docFreqTable)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/applyMinDocFreq($self, $minDocFreq, $docFreqTable)" type="text/vnd.tiddlywiki">
 <pre>Removes all the observations which don't appear in at least ``$minDocFreq`` distinct documents according to $docFreqTable.
 
 * Caution: the observations are removed from the original ``DocProvider`` objects (and possibly underlying ObsCollection objects).
@@ -6890,7 +6943,7 @@ Generates a set of ``DocCollection`` objects based on the parameters passed as a
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/filterMinDocFreq($inputDoc, $minDocFreq, $minFreqTable, $deleteInOriginalDoc)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/filterMinDocFreq($inputDoc, $minDocFreq, $minFreqTable, $deleteInOriginalDoc)" type="text/vnd.tiddlywiki">
 <pre>* ''static''
 
 Returns a hash by obs type corresponding to ``$inputDoc`` but in which observations which don't appear in at least ``$minDocFreq`` distinct documents (according to ``$docFreqTable``) have been removed.
@@ -6906,7 +6959,7 @@ Parameters:
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/generateDocFreqTable($documents)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/generateDocFreqTable($documents)" type="text/vnd.tiddlywiki">
 <pre>* ''static''
 
 Returns a hash by obs type which gives for each observation ``obs`` the number of documents which contain at least one occurrence of ``obs``.
@@ -6918,52 +6971,52 @@ Returns a hash by obs type which gives for each observation ``obs`` the number o
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/getDocFreqCountDocProv($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/getDocFreqCountDocProv($self)" type="text/vnd.tiddlywiki">
 <pre>returns a ``DocProvider`` object contaning the counts for the doc frequency table obtained from this collection.
 the method writeCountFiles can then be used to write the counts to disk.
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/getDocFreqTable($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/getDocFreqTable($self)" type="text/vnd.tiddlywiki">
 <pre>returns the document frequency table of the collection: ``$res-&gt;{obsType}-&gt;{obs} = doc freq``. The doc frequencies are computed if the table wasn't defined already.
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/getDocsAsHash($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/getDocsAsHash($self)" type="text/vnd.tiddlywiki">
 <pre>returns the hash of docs in the collection (keys are the filenames).
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/getDocsAsList($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/getDocsAsList($self)" type="text/vnd.tiddlywiki">
 <pre>returns a list containing the ``DocProvider`` objects in the collection.
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/getGlobalCountDocProv($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/getGlobalCountDocProv($self)" type="text/vnd.tiddlywiki">
 <pre>returns a ``DocProvider`` object contaning the counts for the whole collection.
 the method writeCountFiles can then be used to write the counts to disk.
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/getMinDocFreq($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/getMinDocFreq($self)" type="text/vnd.tiddlywiki">
 <pre>returns the current min doc frequency for the collection.
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/new($class, $params)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/new($class, $params)" type="text/vnd.tiddlywiki">
 <pre>* logging
 * globalPath: optional; if specified, specifies the directory where the global count files and the doc freq count files are read from/written to. If undefined, the global/doc freq data is never read or written from files (i.e. always computed, if required).
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/populateAll($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocCollection.pm" title="CLGTextTools/DocCollection.pm/populateAll($self)" type="text/vnd.tiddlywiki">
 <pre>Useful only if writeCountFiles is true: forces parsing every document and writing count files.
 
 * remark: global counts and doc freq are not processed.
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="Libraries" title="CLGTextTools/DocProvider.pm" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="Libraries" title="CLGTextTools/DocProvider.pm" type="text/vnd.tiddlywiki">
 <pre>``DocProvider`` is a wrapper for a document represented as an ``ObsCollection``, but which computes or loads the data only when needed (lazy loading).
 
 The computing/loading of the data is triggered  when the calling program calls ``getObservations()``, ``getNbObsDistinct()`` or ``getNbObsTotal()`` for the first time.
@@ -6979,21 +7032,21 @@ EM Oct 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/allCountFilesExist($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/allCountFilesExist($self)" type="text/vnd.tiddlywiki">
 <pre>returns true if the count files for all observations types exist on disk.
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getCoutFileName($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getCoutFileName($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>returns the filename where observations are read/written if useCountFile is true.
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getFilename($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getFilename($self)" type="text/vnd.tiddlywiki">
 <pre>
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getId($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getId($self)" type="text/vnd.tiddlywiki">
 <pre>
 </pre>
 </div>
@@ -7003,7 +7056,7 @@ if ``$obsType`` is not specified, returns the whole hash: ``$res-&gt;{obsType} =
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getNbObsDistinct($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getNbObsDistinct($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>returns the total number of observations for this obs type.
 if ``$obsType`` is not specified, returns the whole hash: ``$res-&gt;{obsType} = nb``
 
@@ -7014,12 +7067,12 @@ if ``$obsType`` is not specified, returns the whole hash: ``$res-&gt;{obsType} =
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getObsTypesList($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getObsTypesList($self)" type="text/vnd.tiddlywiki">
 <pre>Returns the list of obs types
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/new($class, $params)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/new($class, $params)" type="text/vnd.tiddlywiki">
 <pre>``$params``:
 
 * logging
@@ -7039,7 +7092,7 @@ the obs collection parameters are provided either as:
 
 </pre>
 </div>
-<div bag="default" created="20160629181024000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/obsTypeInList($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/obsTypeInList($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>Returns true if ``$obsType`` belongs to the list of obs types.
 
 </pre>
@@ -7049,17 +7102,17 @@ the obs collection parameters are provided either as:
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/readCountFile($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/readCountFile($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>Reads the count file for ``$obsType`` and stores the data in ``$self``.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/readCountFiles($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/readCountFiles($self)" type="text/vnd.tiddlywiki">
 <pre>Reads the count file for all the obs types and stores the data in ``$self``.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/readSourceDoc($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/readSourceDoc($self)" type="text/vnd.tiddlywiki">
 <pre>Reads observations from the source document and stores the data in the object.
 
 </pre>
@@ -7072,10 +7125,41 @@ called from populate if useCountFiles=1; otherwise, must be used after calling `
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="Libraries" title="CLGTextTools/Logging.pm" type="text/vnd.tiddlywiki">
-<pre></pre>
+<div bag="default" created="20160629194526000" revision="0" tags="Libraries" title="CLGTextTools/Logging.pm" type="text/vnd.tiddlywiki">
+<pre>Library containing logging-related functions, especially with Log4Perl.
+
+
+</pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="Libraries" title="CLGTextTools/ObsCollection.pm" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/Logging.pm" title="CLGTextTools/Logging.pm/cluckLog($logger, $msg)" type="text/vnd.tiddlywiki">
+<pre>if ``$logger`` is defined, calls Log4perl logcluck function with ``$msg``, otherwise use the standard function warn.
+
+</pre>
+</div>
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/Logging.pm" title="CLGTextTools/Logging.pm/confessLog($logger, $msg)" type="text/vnd.tiddlywiki">
+<pre>if ``$logger`` is defined, calls Log4perl logconfess function with ``$msg``, otherwise uses the standard function confess.
+
+</pre>
+</div>
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/Logging.pm" title="CLGTextTools/Logging.pm/createDefaultLogConfig($filename, $logLevel, $alsoToScreen, $synchronized)" type="text/vnd.tiddlywiki">
+<pre>creates a simple log configuration for log4perl, usable with Log::Log4perl-&gt;init($config)
+
+</pre>
+</div>
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/Logging.pm" title="CLGTextTools/Logging.pm/initLog($logConfigFileOrLevel, $logFilename, $alsoToScreen, $synchronized)" type="text/vnd.tiddlywiki">
+<pre>initializes a log4perl object in the following way: if
+``$logConfigFileOrLevel`` is a log level, then uses the default config
+(directed to ``$logFilename``), otherwise ``$logConfigFileOrLevel`` is
+supposed to be the log4perl config file to be used.
+
+</pre>
+</div>
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/Logging.pm" title="CLGTextTools/Logging.pm/warnLog($logger, $msg)" type="text/vnd.tiddlywiki">
+<pre>if ``$logger`` is defined, calls Log4perl logwarn function with ``$msg``, otherwise use the standard function warn.
+
+</pre>
+</div>
+<div bag="default" created="20160629194526000" revision="0" tags="Libraries" title="CLGTextTools/ObsCollection.pm" type="text/vnd.tiddlywiki">
 <pre>This class represents a collection of observations from different observations types, these being themselves organized into different observations families.
 The class deals with calling the right family function to extract observations from a raw text (possibly using additional resources), in a way as efficient as possible (for intance,
 by avoiding reading the source document several times for each obs type or family).
@@ -7088,7 +7172,7 @@ EM June 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/addFinalizedObsType($self, $obsType, $observs)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/addFinalizedObsType($self, $obsType, $observs)" type="text/vnd.tiddlywiki">
 <pre>Adds a set of observations for one obs type to the collection. The data is considered &quot;finalized&quot;.
 ``$self-&gt;{nbNGramsTotal}`` is updated accordingly.
 
@@ -7096,7 +7180,7 @@ EM June 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/addObsType($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/addObsType($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>Adds an obs type to the list of obs types to process. The obs type string is parsed:
 
 # the min freq suffix ``.mf&lt;N&gt;`` is removed to be taken care of later;
@@ -7105,13 +7189,13 @@ EM June 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/addText($self, $text)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/addText($self, $text)" type="text/vnd.tiddlywiki">
 <pre>Adds the observations found in ``$text`` to the current sets of observations for every obs type.
 
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/extractObsFromText($self, $filePrefix)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/extractObsFromText($self, $filePrefix)" type="text/vnd.tiddlywiki">
 <pre>* Reads a raw text file ``$filePrefix`` with one of the following types of formatting:
 ** no formatting at all: $formattingOption = 0 or undef or empty string
 ** line breaks as meaningful units (e.g. sentences): $formattingOption = singleLineBreak
@@ -7128,49 +7212,49 @@ After extracting all the observations, the data is &quot;finalized&quot;, which 
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/filterMinFreq($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/filterMinFreq($self)" type="text/vnd.tiddlywiki">
 <pre>For every obs type ``XXX.mf&lt;minFreq&gt;``, filters out thr observations which do not appear at least ``&lt;minFreq&gt;`` times.
 
 * Called when the data is finalized.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/finalize($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/finalize($self)" type="text/vnd.tiddlywiki">
 <pre>* Must be called after all data has been populated, in order to initialize 'finalized data' (e.g. apply frequency minima)
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/getNbDistinctNGrams($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/getNbDistinctNGrams($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>Returns the number of distinct observations (i.e. not counting multiple occurrences) for ``$obsType``.
 
 * Remark: the reported number is always the original one, no matter the min frequency
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/getNbTotalNGrams($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/getNbTotalNGrams($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>Returns the total number of observations (i.e. taking multiple occurrences into account) for ``$obsType``.
 
 * Remark: the reported number is always the original one, no matter the min frequency
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/getObservations($self, $obsTypesList)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/getObservations($self, $obsTypesList)" type="text/vnd.tiddlywiki">
 <pre>Returns the observations for a list of obs types as a hash ref ``h-&gt;{obsType}-&gt;{ngram} = frequency``
 (should be called only after ``extractObsFromText``, i.e. after the data has been finalized)
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/getObsTypes($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/getObsTypes($self)" type="text/vnd.tiddlywiki">
 <pre>Returns the list of obs types.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/isFinalized($self)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/isFinalized($self)" type="text/vnd.tiddlywiki">
 <pre>returns true if and only if the obs collection has been populated and finalized
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/new($class, $params)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/new($class, $params)" type="text/vnd.tiddlywiki">
 <pre>
 ``$params``:
 
@@ -7188,7 +7272,7 @@ After extracting all the observations, the data is &quot;finalized&quot;, which 
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/newFinalized($class, $params)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194526000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/newFinalized($class, $params)" type="text/vnd.tiddlywiki">
 <pre>Creates a pre-populated obs collection object. To be used with ``addFinalizedObsType()``. Used only in a few specific cases (see ``DocCollection``).
 
 
@@ -7199,7 +7283,7 @@ $params:
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="Libraries" title="CLGTextTools/Observations/CharObsFamily.pm" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="Libraries" title="CLGTextTools/Observations/CharObsFamily.pm" type="text/vnd.tiddlywiki">
 <pre>ObsFamily class for characters n-grams.
 
 * to avoid n-grams which span over two two sentences or documents,
@@ -7220,7 +7304,7 @@ EM June 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Observations/CharObsFamily.pm" title="CLGTextTools/Observations/CharObsFamily.pm/addObsType($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194528000" revision="0" tags="CLGTextTools/Observations/CharObsFamily.pm" title="CLGTextTools/Observations/CharObsFamily.pm/addObsType($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>Format of a char obs type: ``CHAR.[CS]+.lc[01].sl[01]``
 
 * Pattern:
@@ -7231,19 +7315,19 @@ EM June 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Observations/CharObsFamily.pm" title="CLGTextTools/Observations/CharObsFamily.pm/addText($self, $text)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194528000" revision="0" tags="CLGTextTools/Observations/CharObsFamily.pm" title="CLGTextTools/Observations/CharObsFamily.pm/addText($self, $text)" type="text/vnd.tiddlywiki">
 <pre>see parent.
 
 * remark: line breaks and tabs are replaced with special characters.
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Observations/CharObsFamily.pm" title="CLGTextTools/Observations/CharObsFamily.pm/new($class, $params)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194528000" revision="0" tags="CLGTextTools/Observations/CharObsFamily.pm" title="CLGTextTools/Observations/CharObsFamily.pm/new($class, $params)" type="text/vnd.tiddlywiki">
 <pre>see parent, no additional parameter.
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="Libraries" title="CLGTextTools/Observations/ObsFamily.pm" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="Libraries" title="CLGTextTools/Observations/ObsFamily.pm" type="text/vnd.tiddlywiki">
 <pre>Parent class for obs family classes.
 
 ---
@@ -7251,37 +7335,37 @@ EM June 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/addObsType($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/addObsType($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>* ''Abstract''
 
 Adds an obs type to the current list of obs type (this must be done before populating the data).
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/addText($self, $text)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/addText($self, $text)" type="text/vnd.tiddlywiki">
 <pre>* ''Abstract''
 
 Adds the observations found in ``$text`` to the current sets of observations for every obs type in the family.
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/getNbDistinctNGrams($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/getNbDistinctNGrams($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>Returns the number of distinct observations (i.e. not counting multiple occurrences) for ``$obsType``.
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/getNbTotalNGrams($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/getNbTotalNGrams($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>Returns the total number of observations (i.e. taking multiple occurrences into account) for ``$obsType``.
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/getObservations($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/getObservations($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>Returns the observations for ``$obsType`` as a hash ref ``h-&gt;{obs} = freq``
 (should be called only after the data has been populated/finalized)
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/new($class, $params, $subclass)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/new($class, $params, $subclass)" type="text/vnd.tiddlywiki">
 <pre>
 * ``$params``:
 ** logging
@@ -7289,7 +7373,7 @@ Adds the observations found in ``$text`` to the current sets of observations for
 * ``$subclass``: used only to initialize the logger object with the right package id
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="Libraries" title="CLGTextTools/Observations/POSObsFamily.pm" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="Libraries" title="CLGTextTools/Observations/POSObsFamily.pm" type="text/vnd.tiddlywiki">
 <pre>Obs family class for POS observations.
 
 POS input is expected to be found in a file ``$file.POS`` containing the output in TreeTagger format (with lemma): ``&lt;token&gt; &lt;POS tag&gt; &lt;lemma&gt;``
@@ -7299,7 +7383,7 @@ EM July 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Observations/POSObsFamily.pm" title="CLGTextTools/Observations/POSObsFamily.pm/addObsType($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/POSObsFamily.pm" title="CLGTextTools/Observations/POSObsFamily.pm/addObsType($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>Format of a POS obs type: ``POS.[TSPL]+.sl[01]``
 
 * Pattern:
@@ -7311,7 +7395,7 @@ EM July 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181026000" revision="0" tags="CLGTextTools/Observations/POSObsFamily.pm" title="CLGTextTools/Observations/POSObsFamily.pm/addText($text)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/POSObsFamily.pm" title="CLGTextTools/Observations/POSObsFamily.pm/addText($text)" type="text/vnd.tiddlywiki">
 <pre>see parent.
 
 * Remark: in this class the ``$text`` input is an array ref ``$text-&gt;{i}-&gt;{column}`` with the following format:
@@ -7321,12 +7405,12 @@ EM July 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Observations/POSObsFamily.pm" title="CLGTextTools/Observations/POSObsFamily.pm/new($class, $params)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/POSObsFamily.pm" title="CLGTextTools/Observations/POSObsFamily.pm/new($class, $params)" type="text/vnd.tiddlywiki">
 <pre>see parent, no additional parameters.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="Libraries" title="CLGTextTools/Observations/VocabClassObsFamily.pm" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="Libraries" title="CLGTextTools/Observations/VocabClassObsFamily.pm" type="text/vnd.tiddlywiki">
 <pre>Obs family class for &quot;vocabulary-based&quot; observations: every word is replaced with a category depending on some features of the word
 
 * morphology
@@ -7338,7 +7422,7 @@ EM July 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Observations/VocabClassObsFamily.pm" title="CLGTextTools/Observations/VocabClassObsFamily.pm/addObsType($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/VocabClassObsFamily.pm" title="CLGTextTools/Observations/VocabClassObsFamily.pm/addObsType($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>Format a VocabClass obs type:
 
 * ``VOCABCLASS.MORPHO``: replaces every word with a category among: allLowerCase, allUpperCase, firstUpperCase, mixedCase, number, punct, misc
@@ -7347,12 +7431,12 @@ EM July 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Observations/VocabClassObsFamily.pm" title="CLGTextTools/Observations/VocabClassObsFamily.pm/addText($self, $text)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/VocabClassObsFamily.pm" title="CLGTextTools/Observations/VocabClassObsFamily.pm/addText($self, $text)" type="text/vnd.tiddlywiki">
 <pre>see parent
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Observations/VocabClassObsFamily.pm" title="CLGTextTools/Observations/VocabClassObsFamily.pm/new($class, $params)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/VocabClassObsFamily.pm" title="CLGTextTools/Observations/VocabClassObsFamily.pm/new($class, $params)" type="text/vnd.tiddlywiki">
 <pre>See parent. Other parameters:
 
 * ``lengthClasses`` A hash of the form ``$params-&gt;{lengthClasses}-&gt;{classId} = length class``, where a length class is described as ``&lt;maxLength_1:maxLength_2:...&gt;``. For instance '3:6:11' means that:
@@ -7363,7 +7447,7 @@ EM July 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="Libraries" title="CLGTextTools/Observations/WordObsFamily.pm" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="Libraries" title="CLGTextTools/Observations/WordObsFamily.pm" type="text/vnd.tiddlywiki">
 <pre>Obs family class for word n-grams observations.
 
 
@@ -7384,7 +7468,7 @@ EM June 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Observations/WordObsFamily.pm" title="CLGTextTools/Observations/WordObsFamily.pm/addObsType($self, $obsType)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/WordObsFamily.pm" title="CLGTextTools/Observations/WordObsFamily.pm/addObsType($self, $obsType)" type="text/vnd.tiddlywiki">
 <pre>Format for a Word obs type: ``WORD.[TS]+.lc[01].sl[01](.&lt;vocabClassId&gt;)``
 
 * Pattern:
@@ -7396,14 +7480,14 @@ EM June 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Observations/WordObsFamily.pm" title="CLGTextTools/Observations/WordObsFamily.pm/addText($self, $text)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/WordObsFamily.pm" title="CLGTextTools/Observations/WordObsFamily.pm/addText($self, $text)" type="text/vnd.tiddlywiki">
 <pre>see parent.
 
 * if the option ``wordTokenization`` is true, the  text is tokenized. Otherwise it is assumed that the text was previously tokenized.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Observations/WordObsFamily.pm" title="CLGTextTools/Observations/WordObsFamily.pm/new($class, $params)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Observations/WordObsFamily.pm" title="CLGTextTools/Observations/WordObsFamily.pm/new($class, $params)" type="text/vnd.tiddlywiki">
 <pre>See parent. Other parameters:
 
 * ``wordTokenization``: if true, the text will be tokenized in a basic way (adding a space between word characters and other characters, typically punctuation)
@@ -7411,16 +7495,89 @@ EM June 2015
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="Libraries" title="CLGTextTools/SimMeasures/Cosine.pm" type="text/vnd.tiddlywiki">
-<pre></pre>
+<div bag="default" created="20160629194527000" revision="0" tags="Libraries" title="CLGTextTools/SimMeasures/Cosine.pm" type="text/vnd.tiddlywiki">
+<pre>Sim measure class which implements the cosine similarity.
+
+---
+EM Oct 2015
+
+</pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="Libraries" title="CLGTextTools/SimMeasures/Measure.pm" type="text/vnd.tiddlywiki">
-<pre></pre>
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/SimMeasures/Cosine.pm" title="CLGTextTools/SimMeasures/Cosine.pm/compute($self, $doc1, $doc2)" type="text/vnd.tiddlywiki">
+<pre>see parent.
+
+</pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="Libraries" title="CLGTextTools/SimMeasures/MinMax.pm" type="text/vnd.tiddlywiki">
-<pre></pre>
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/SimMeasures/Cosine.pm" title="CLGTextTools/SimMeasures/Cosine.pm/new($class, $params)" type="text/vnd.tiddlywiki">
+<pre>see parent. Additional parameters:
+
+* ``obsWeights``: ``obsWeights-&gt;{obs} = weight`` (e.g. IDF); if ``obsWeights-&gt;{obs}`` is undefined, a warning is sent and the weight is assumed to be zero.
+
+</pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="Libraries" title="CLGTextTools/Stats.pm" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="Libraries" title="CLGTextTools/SimMeasures/Measure.pm" type="text/vnd.tiddlywiki">
+<pre>Parent class for similarity measures between documents, where documents are &quot;bags of observations&quot;
+
+---
+EM Oct 2015
+
+</pre>
+</div>
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/SimMeasures/Measure.pm" title="CLGTextTools/SimMeasures/Measure.pm/compute($self, $doc1, $doc2)" type="text/vnd.tiddlywiki">
+<pre>* ''abstract''
+
+returns the similarity score between the two documents.
+
+* input: two hash refs, ``$doc-&gt;{ obs } = freq``
+
+</pre>
+</div>
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/SimMeasures/Measure.pm" title="CLGTextTools/SimMeasures/Measure.pm/createSimMeasureFromId($measureId, $params, ?$removeMeasureIdPrefix)" type="text/vnd.tiddlywiki">
+<pre>static 'new' method which instantiates one of the non-abstract measure classes.
+The class is specified by a string id, but if ``$measureId`` is a ref then it is assumed
+to be an already initialized ``SimMeasure`` object; in this case the object ``$measureId`` is simply returned.
+The parameters for the measure are read from ``$params``.
+
+* ``$removeMeasureIdPrefix``: if specified, then only the parameters which start with this prefix are transmitted, after removing the prefix.
+
+</pre>
+</div>
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/SimMeasures/Measure.pm" title="CLGTextTools/SimMeasures/Measure.pm/new($class, $params, $subclass)" type="text/vnd.tiddlywiki">
+<pre>
+
+``$params``:
+
+* logging
+
+</pre>
+</div>
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/SimMeasures/Measure.pm" title="CLGTextTools/SimMeasures/Measure.pm/normalizeCompute($self, $doc1, $doc2, $obsTypeOrsize1, $size2)" type="text/vnd.tiddlywiki">
+<pre>returns the similarity score between the two documents after normalization (by computing relative frequencies).  Can be used in two distinct ways, determined by the number of arguments:
+
+* 4 arguments: ``$docX`` is a hash of the form: ``$docX-&gt;{ obs } = freq``; ``$obsTypeOrsize1`` and ``$size2`` are the total number of observations in each doc.
+* 3 arguments: ``$docX`` is a ``DocProvider`` and ``$obsTypeOrsize1`` is the obs type used for computing the similarity. The relevant sizes are read from the ``DocProvider`` objects.
+
+</pre>
+</div>
+<div bag="default" created="20160629194527000" revision="0" tags="Libraries" title="CLGTextTools/SimMeasures/MinMax.pm" type="text/vnd.tiddlywiki">
+<pre>Sim measure class which implements the min-max distance.
+
+---
+EM Oct 2015
+
+</pre>
+</div>
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/SimMeasures/MinMax.pm" title="CLGTextTools/SimMeasures/MinMax.pm/compute($self, $doc1, $doc2)" type="text/vnd.tiddlywiki">
+<pre>see parent.
+
+</pre>
+</div>
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/SimMeasures/MinMax.pm" title="CLGTextTools/SimMeasures/MinMax.pm/new($class, $params)" type="text/vnd.tiddlywiki">
+<pre>see parent, no additional parameter.
+
+</pre>
+</div>
+<div bag="default" created="20160629194526000" revision="0" tags="Libraries" title="CLGTextTools/Stats.pm" type="text/vnd.tiddlywiki">
 <pre>Library containing various statistics-related functions.
 
 ---
@@ -7428,13 +7585,13 @@ Erwan Moreau 2015-2016
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/aggregateVector(@$values, $aggregType, $naStr)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/aggregateVector(@$values, $aggregType, $naStr)" type="text/vnd.tiddlywiki">
 <pre>returns the value corresponding to the statistic described by $aggregType: 'median', 'arithm', 'geom', 'harmo' for the array ref @$values.
 $naStr is used instead of undef if it is defined.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/averageByGroup($table, $params, $logger)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/averageByGroup($table, $params, $logger)" type="text/vnd.tiddlywiki">
 <pre>groups together series of data which have the same values in certain columns,
 and calculates the average of a given other column for each such group.
 
@@ -7459,7 +7616,7 @@ number in every group (implies checkSameNumberByGroup)
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/geomMean(@$values, $naStr)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/geomMean(@$values, $naStr)" type="text/vnd.tiddlywiki">
 <pre>returns the geometric mean of the values, not taking into account undefined values, and returns undef in no defined values at all.
 $naStr is used instead of undef if it is defined.
 
@@ -7475,38 +7632,38 @@ $naStr is used instead of undef if it is defined.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/harmoMean(@$values, $naStr)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/harmoMean(@$values, $naStr)" type="text/vnd.tiddlywiki">
 <pre>returns the harmonic mean of the values, not taking into account undefined values, and returns undef in no defined values at all.
 $naStr is used instead of undef if it is defined.
 Zero values are not ignored: if there is a zero value, the result is undef (or $naStr)
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/max(@$values, $naStr)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/max(@$values, $naStr)" type="text/vnd.tiddlywiki">
 <pre>returns the maximum value of the vector, ignoring undef values.
 $naStr is used instead of undef if it is defined.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/mean(@$values, $naStr)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/mean(@$values, $naStr)" type="text/vnd.tiddlywiki">
 <pre>returns the arithmetic mean of the values, not taking into account undefined values, and returns undef in no defined values at all.
 $naStr is used instead of undef if it is defined.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/means(@$values, $naStr)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/means(@$values, $naStr)" type="text/vnd.tiddlywiki">
 <pre>returns the arithmetic, geometric and harmonic mean of the values (following the exceptions defined form each function) in a hash.
 $naStr is used instead of undef if it is defined.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/median(@$values, $naStr)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/median(@$values, $naStr)" type="text/vnd.tiddlywiki">
 <pre>returns the median of the values, not taking into account undefined values, and returns undef in no defined values at all.
 $naStr is used instead of undef if it is defined.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/min(@$values, $naStr)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/min(@$values, $naStr)" type="text/vnd.tiddlywiki">
 <pre>returns the minimum value of the vector, ignoring undef values.
 $naStr is used instead of undef if it is defined.
 
@@ -7525,33 +7682,33 @@ $naStr is used instead of undef if it is defined.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/pickIndex(@$list)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/pickIndex(@$list)" type="text/vnd.tiddlywiki">
 <pre>picks an index randomly in a list, i.e. simply returns an integer between 0 and n-1, where n is the size of the input list.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/pickInList(@$list)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/pickInList(@$list)" type="text/vnd.tiddlywiki">
 <pre>picks randomly a value in a list.
 Uniform probability distribution over cells (thus a value occuring twice is twice more likely to get picked than a value occuring only once).
 Fatal error if the array is empty.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/pickInListProbas(%$hash)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/pickInListProbas(%$hash)" type="text/vnd.tiddlywiki">
 <pre>picks a random value among (keys %$hash) following, giving each key a probability proportional to $hash-&gt;{key} w.r.t to all values in (values %$hash)
 Remark: method is equivalent to scaling the sum of the values (values %$hash) to 1, as if these represented a stochastic vector of probabilities.
 Fatal error if the array is empty.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/pickNIndexesAmongMExactly($n, $m)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/pickNIndexesAmongMExactly($n, $m)" type="text/vnd.tiddlywiki">
 <pre>randomly picks ``$n`` (unique) indexes from the list of indexes ``[0,..,$m-1]``. This function can be significantly slower than ``pickNIndexesAmongMSloppy``.
 
 * An error is raised if ``$n&gt;$m``.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/pickNIndexesAmongMSloppy($n, $m)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/pickNIndexesAmongMSloppy($n, $m)" type="text/vnd.tiddlywiki">
 <pre>randomly picks ``$n`` (unique) indexes from the list of indexes ``[0,..,$m-1]``, but not exactly.
 In fact, the method returns a list of &quot;statistical size&quot; ``$n``: every element in the list
 has a chance ``$n / $m`` to be picked.
@@ -7559,7 +7716,7 @@ Remark: if ``$n&gt;=$m``, returns all elements from the list.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/pickNSloppy($n, $list)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/pickNSloppy($n, $list)" type="text/vnd.tiddlywiki">
 <pre>randomly picks ``$n`` (unique) elements from the list, but not exactly.
 In fact, the method returns a list of &quot;statistical size&quot; ``$n``: every element in the list
 has a chance ``$n / size($list)`` to be picked.
@@ -7609,13 +7766,13 @@ Warning: if the input document is small, it is possible that one of the bins is 
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/stdDev(@$values, $naStr)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/stdDev(@$values, $naStr)" type="text/vnd.tiddlywiki">
 <pre>returns the std dev of the values, not taking into account undefined values, and returns undef in no defined values at all.
 $naStr is used instead of undef if it is defined.
 
 </pre>
 </div>
-<div bag="default" created="20160629181025000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/sum(@$values, $naStr)" type="text/vnd.tiddlywiki">
+<div bag="default" created="20160629194527000" revision="0" tags="CLGTextTools/Stats.pm" title="CLGTextTools/Stats.pm/sum(@$values, $naStr)" type="text/vnd.tiddlywiki">
 <pre>returns the sum of the values, ignoring undefined values, and returns 0 if no values at all.
 $naStr is used instead of undef if it is defined. If not, perl will complain about undef values.
 
@@ -7666,6 +7823,9 @@ source setup.sh
 <pre>@@color:red;
 This documentation is a work in progress...
 @@</pre>
+</div>
+<div modified="20160629184621060" title="Draft of 'Libraries'">
+<pre></pre>
 </div>
 <div bag="default" created="20160629180715000" revision="0" tags="Scripts" title="extract-observations-collection.pl" type="text/plain">
 <pre>Usage: extract-observations-collection.pl [options] &lt;obs types&gt; &lt;path1&gt; [&lt;path2&gt; ...] ]
@@ -7757,7 +7917,7 @@ This documentation is a work in progress...
 <div bag="default" color="#50a1eb" created="20160627201402195" modified="20160628151805376" revision="0" tags="[[User Guide]]" title="Implementation">
 <pre>{{{[tag[Implementation]]}}}</pre>
 </div>
-<div created="20160629171043428" modified="20160629171110141" tags="Implementation" title="Libraries">
+<div bag="default" created="20160629171043428" modified="20160629184620898" revision="0" tags="[[User Guide]]" title="Libraries">
 <pre>{{{[tag[Libraries]]}}}</pre>
 </div>
 <div bag="default" created="20150629172648960" modified="20160627201449471" revision="0" tags="Implementation" title="LineBreaks">
