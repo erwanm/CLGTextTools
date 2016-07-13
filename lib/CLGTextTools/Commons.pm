@@ -401,7 +401,7 @@ sub assignDefaultAndWarnIfUndef {
     my $logger = shift; # optional
 
     if (!defined($value)) {
-	warnLog($logger, "No value provided for parameter '$paramId', using default '$default'");
+	cluckLog($logger, "No value provided for parameter '$paramId', using default '$default'");
 	$value = $default;
     }
     return $value;

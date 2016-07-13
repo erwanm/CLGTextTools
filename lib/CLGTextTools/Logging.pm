@@ -12,7 +12,7 @@ package CLGTextTools::Logging;
 use strict;
 use warnings;
 use Log::Log4perl;
-use Carp;
+use Carp qw/cluck/;
 use Data::Dumper;
 
 use base 'Exporter';
@@ -132,7 +132,7 @@ sub cluckLog {
     if (defined($logger)) {
 	$logger->logcluck($msg);
     } else {
-	warn($msg);
+	cluck($msg);
     }
 
 }

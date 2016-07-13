@@ -124,6 +124,17 @@ sub getDocsAsList {
 }
 
 
+#twdoc getNbDocs($self)
+#
+# returns the number of ``DocProvider`` objects in the collection.
+#
+#/twdoc
+sub getNbDocs {
+    my $self = shift;
+    return scalar(keys %{$self->{docs}});
+}
+
+
 
 #twdoc applyMinDocFreq($self, $minDocFreq, $docFreqTable)
 # 
@@ -338,7 +349,7 @@ sub getGlobalCountDocProv {
 	if (defined($self->{globalPath})) {
 	    $filename = $self->{globalPath}."/$filePrefixGlobalCount";
 	    $self->{logger}->debug("globalPath is defined, looking for global count file under name '$filename'; init obsColl and DocProv") if ($self->{logger});
-	    my $globalCountObsColl =  CLGTextTools::ObsCollection->new({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}) }) ;
+	    my $globalCountObsColl =  CLGTextTools::ObsCollection->new({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}), "formatting" => 0, "wordTokenization" => 1 }) ;
 	    $self->{globalCountDocProv} = CLGTextTools::DocProvider->new({ "logging" => defined($self->{logger}), "obsCollection" => $globalCountObsColl, "filename" => $filename, "checkIfSourceDocExists" => 0 });
 	    $self->{logger}->debug("global count files exist?") if ($self->{logger});
 	    if ($self->{globalCountDocProv}->allCountFilesExist()) {
@@ -354,7 +365,7 @@ sub getGlobalCountDocProv {
 	    $self->{logger}->debug("Generating counts at collection level") if ($self->{logger});
 	    $self->{logger}->trace("obs types list = (".join(",", @$obsTypes).")") if ($self->{logger});
 	    $self->{logger}->debug("Initializing obs coll with finalized data") if ($self->{logger});
-	    my $globalCountObsColl =  CLGTextTools::ObsCollection->newFinalized({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}) }) ;
+	    my $globalCountObsColl =  CLGTextTools::ObsCollection->newFinalized({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}), "formatting" => 0, "wordTokenization" => 1 }) ;
 	    my $allDocs = $self->getDocsAsList();
 	    $self->{logger}->debug("Reading all docs data") if ($self->{logger});
 	    foreach my $doc (@$allDocs) {
@@ -392,7 +403,7 @@ sub getDocFreqCountDocProv {
 	if (defined($self->{globalPath})) {
 	    $filename = $self->{globalPath}."/$filePrefixDocFreqCount";
 	    $self->{logger}->debug("globalPath is defined, looking for doc freq count file under name '$filename'; init obsColl and DocProv") if ($self->{logger});
-	    my $docFreqCountObsColl =  CLGTextTools::ObsCollection->new({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}) }) ;
+	    my $docFreqCountObsColl =  CLGTextTools::ObsCollection->new({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}), "formatting" => 0, "wordTokenization" => 1 }) ;
 	    $self->{docFreqCountDocProv} = CLGTextTools::DocProvider->new({ "logging" => defined($self->{logger}), "obsCollection" => $docFreqCountObsColl, "filename" => $filename, "checkIfSourceDocExists" => 0 });
 	    $self->{logger}->debug("doc freq count files exist?") if ($self->{logger});
 	    if ($self->{docFreqCountDocProv}->allCountFilesExist()) {
@@ -413,7 +424,7 @@ sub getDocFreqCountDocProv {
 	    }
 	    my $docFreqTable = generateDocFreqTable(\@docsObservs, $self->{logger});
 	    $self->{logger}->debug("Initializing obs coll with finalized data") if ($self->{logger});
-	    my $docFreqCountObsColl =  CLGTextTools::ObsCollection->newFinalized({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}) }) ;
+	    my $docFreqCountObsColl =  CLGTextTools::ObsCollection->newFinalized({ "obsTypes" => $obsTypes, "logging" => defined($self->{logger}), "formatting" => 0, "wordTokenization" => 1 }) ;
 	    my ($obsType, $observsObsType);
 	    while (($obsType, $observsObsType) = each %$docFreqTable) {
 		$docFreqCountObsColl->addFinalizedObsType($obsType, $observsObsType);
