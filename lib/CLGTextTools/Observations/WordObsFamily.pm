@@ -45,7 +45,9 @@ our $unknownToken = "___";
 # See parent. Other parameters:    
 #
 # * ``wordTokenization``: if true, the text will be tokenized in a basic way (adding a space between word characters and other characters, typically punctuation)
-# * ``vocab``: a hash ``$params->{vocab}->{vocabId} = filename``, where ``filename`` is a file containing a list of "allowed" words (one by line). When using this vocabulary, words which are not in the list are replaced with a special token.
+# * ``vocab``: When using this vocabulary, words which are not in the list are replaced with a special token;
+# ** if ``$params->{vocab}->{vocabId}->{data}`` is defined, it contains a hash: $params->{vocab}->{vocabId}->{data}->{word} = 1`` for every word in the vocabulary
+# ** if ``$params->{vocab}->{vocabId}->{data}`` is not defined, the words are read from a source file ``$params->{vocab}->{vocabId}->{filename} = filename``, where ``filename`` is a file containing a list of "allowed" words (one by line). When the file is loaded, the hash is stored in ``$params->{vocab}->{vocabId}->{data}`` as specified above, so that the data can be reused later.
 #
 #/twdoc
 sub new {
@@ -53,12 +55,9 @@ sub new {
     my $self = $class->SUPER::new($params, __PACKAGE__);
     $self->{wordTokenization} = assignDefaultAndWarnIfUndef("wordTokenization", $params->{wordTokenization}, 1, $self->{logger});
     if (defined($params->{vocab})) {
-	$self->{logger}->debug("vocab resources parameter found: ".$params->{vocab}) if ($self->{logger});
-	$self->{logger}->trace("Vocab hash content = ".Dumper($params->{vocab})) if ($self->{logger});
-	foreach my $vocabId (keys %{$params->{vocab}}) {
-	    $self->{logger}->trace("adding vocab entry for key:'$vocabId', file:'".$params->{vocab}->{$vocabId}."'") if ($self->{logger});
-	    $self->{vocab}->{$vocabId}->{filename} = $params->{vocab}->{$vocabId};
-	}
+	$self->{vocab} = $params->{vocab};
+	$self->{logger}->debug("vocab resources parameter found: ".$self->{vocab}) if ($self->{logger});
+	$self->{logger}->trace("Vocab hash content = ".Dumper($self->{vocab})) if ($self->{logger});
     }
     return $self;
 }
