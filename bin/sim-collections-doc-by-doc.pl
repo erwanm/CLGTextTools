@@ -119,7 +119,7 @@ if ($opt{r}) {
     foreach my $pair (@resourcesPairs) {
 	my ($id, $file) = split (":", $pair);
 #	print STDERR "DEBUG pair = $pair ; id,file = $id,$file\n";
-	$vocabResources->{$id} = $file;
+	$vocabResources->{$id}->{filename} = $file;
     }
 }
 

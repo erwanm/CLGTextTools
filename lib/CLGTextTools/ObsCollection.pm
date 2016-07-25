@@ -41,8 +41,9 @@ our $decimalDigits = 12;
 # * logging
 # * obsTypes (list, or colon-separated string, or as individual keys: obsType.XXX = 1)
 # * wordTokenization = 1 by default; set to 0 if the text is already tokenized (with spaces); applies only to WordFamily observations (POSFamily uses pre-tokenized input, one token by line)
-# * wordVocab: vocabulary resources for word class obs types, as a hash; ``params->{wordVocab}->{resourceId} = resourceValue`` (usually the value is the source file).
+# * wordVocab: vocabulary resources for word class obs types, as a hash; ``params->{wordVocab}->{resourceId} = resource`` 
 # ** or as individual keys: wordVocab.resourceId = resourceValue
+# ** remark: the actual data corresponding to the resources are going to be returned in the value of the parameter (see WordObsFamily).
 # * formatting
 # ** no formatting at all: formatting = 0 or undef or empty string
 # ** line breaks as meaningful units (e.g. sentences): formatting = singleLineBreak
@@ -61,7 +62,8 @@ sub new {
 	$self->{families} = {};
 	$self->{typesByFamily} = {};
 	$self->{mapObsTypeToFamily} = {};
-	$self->{wordVocab} = (ref($params->{wordVocab}) eq "HASH") ? $params->{wordVocab} : readParamGroupAsHashFromConfig($params, "wordVocab");
+	$params->{wordVocab} = readParamGroupAsHashFromConfig($params, "wordVocab") if (ref($params->{wordVocab}) ne "HASH"); # this way the resources will be loaded in the hash
+	$self->{wordVocab} =  $params->{wordVocab} ;
 	bless($self, $class);
 	my $obsTypes = (defined($params->{obsTypes}) && ref($params->{obsTypes}) eq "ARRAY") ? $params->{obsTypes} : readObsTypesFromConfigHash($params);
 	foreach my $obsType (@$obsTypes) {
