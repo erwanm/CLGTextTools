@@ -12,7 +12,7 @@ package CLGTextTools::Logging;
 use strict;
 use warnings;
 use Log::Log4perl;
-use Carp qw/cluck/;
+use Carp qw/cluck confess/;
 use Data::Dumper;
 
 use base 'Exporter';
