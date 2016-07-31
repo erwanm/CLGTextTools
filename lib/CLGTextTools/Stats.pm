@@ -503,7 +503,7 @@ sub averageByGroup {
 	    }
 	}
 	my $avg = $sumByGroup{$groupId} / $nbByGroup{$groupId};
-	print "$groupId\t$avg";
+	print "$groupId\t$avg\n";
     }
 
 }
