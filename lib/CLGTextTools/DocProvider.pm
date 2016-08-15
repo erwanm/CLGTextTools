@@ -70,6 +70,8 @@ sub new {
 	    foreach my $obsType (@{$self->{obsTypesList}}) {
 		$self->{nbObsDistinct}->{$obsType} = $self->{obsCollection}->getNbDistinctNGrams($obsType);
 		$self->{nbObsTotal}->{$obsType} = $self->{obsCollection}->getNbTotalNGrams($obsType);
+		confessLog($self->{logger}, "Error: nb distinct obs not defined for finalized obs coll") if (!defined($self->{nbObsDistinct}->{$obsType}));
+		confessLog($self->{logger}, "Error: nb total obs not defined for finalized obs coll") if (!defined($self->{nbObsTotal}->{$obsType}));
 	    }
 	} else {
 	    if ($self->{checkIfSourceDocExists}) {

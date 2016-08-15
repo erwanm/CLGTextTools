@@ -41,11 +41,23 @@ function tokAndPOS {
     local language="$1"
     local filesList="$2"
 
+    line=1
     cat "$filesList" | while read f; do
+	if [ ! -f "$f" ]; then
+	    echo "BUG: line $line: f=" 1>&2
+	    echo "$f" 1>&2
+	    echo "line extracted from file=" 1>&2
+	    head -n $line "$filesList" | tail -n 1 1>&2
+	    echo "basename(f) found at line:" 1>&2
+	    grep -n $(basename "$f") "$filesList" 1>&2
+	    exit 3
+	fi
 	if [ $force -ne 0 ] || [ ! -s "$f.POS" ]; then
+#	    echo "DEBUG tree-tagger-tokenizer-wrapper.sh $language <\"$f\" >\"$f.tok\""
 	    evalSafe "tree-tagger-tokenizer-wrapper.sh $language <\"$f\" >\"$f.tok\""  "$progName: "
 	    evalSafe "tree-tagger-POS-wrapper.sh $language <\"$f.tok\" >\"$f.POS\""  "$progName: "
 	fi
+	line=$(( $line + 1 ))
     done
     if [ $? -ne 0 ]; then
 	echo "$progName: an error happened in 'tokAndPOS', aborting." 1>&2

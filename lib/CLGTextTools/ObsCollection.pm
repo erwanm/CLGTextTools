@@ -90,9 +90,14 @@ sub newFinalized {
 	my ($class, $params) = @_;
 	my $self;
 	$self->{logger} = Log::Log4perl->get_logger(__PACKAGE__) if ($params->{logging});
+	$self->{logger}->debug("new finalized ObsCollection") if ($self->{logger});
 	my $obsTypes = (defined($params->{obsTypes}) && ref($params->{obsTypes}) eq "ARRAY") ? $params->{obsTypes} : readObsTypesFromConfigHash($params);
+	$self->{finalizedData} = {};
 	foreach my $obsType (@$obsTypes) {
+	    $self->{logger}->debug("adding obs type $obsType to finalized obs collection") if ($self->{logger});
 	    $self->{mapObsTypeToFamily}->{$obsType} = 1; # dummy value (mapObsTypeToFamily must be initialized in order to store obs types and return them through getObsTypes)
+	    $self->{finalizedData}->{$obsType} = {};
+	    $self->{nbNGramsTotal}->{$obsType} = 0;  # special for finalized version!!
 	}
 	# these parameters and data structures are not needed and should not be used
 	$self->{wordTokenization} = undef;
@@ -100,8 +105,6 @@ sub newFinalized {
 	$self->{families} = {};
 	$self->{typesByFamily} = {};
 	$self->{wordVocab} = undef;
-	$self->{finalizedData} = {};
-	$self->{nbNGramsTotal} = {}; # special for finalized version!!
 	bless($self, $class);
 	$self->{logger}->trace("initiallized new object: ".Dumper($self)) if ($self->{logger});
 	return $self; 	
@@ -121,6 +124,7 @@ sub addFinalizedObsType {
     my $obsType = shift;
     my $observs = shift;
     
+    $self->{logger}->debug("adding ".scalar(keys %$observs)." observations to finalized obs type '$obsType'") if ($self->{logger});
     my ($obs, $freq);
     while (($obs, $freq) = each %$observs) {
 	$self->{finalizedData}->{$obsType}->{$obs} += $freq;
@@ -288,6 +292,7 @@ sub addText {
 sub getNbDistinctNGrams {
     my $self = shift;
     my $obsType = shift;
+    
     if (defined($self->{nbNGramsTotal})) { # special case for pre-populated obs collection
 	return scalar(keys %{$self->{finalizedData}->{$obsType}});
     } else {
@@ -340,6 +345,7 @@ sub getObservations {
     my %res;
     confessLog($self->{logger}, "Error: obs collection has not been finalized yet.") if (!defined($self->{finalizedData}));
     foreach my $obsType (@$obsTypesList) {
+	$self->{logger}->trace("Obtaining observations for obs type '$obsType'") if ($self->{logger});
 	$res{$obsType} = $self->{finalizedData}->{$obsType};
 	confessLog($self->{logger}, "Error: invalid observation type '$obsType'; no such type found in the collection.") if (!defined($res{$obsType}));
     }
@@ -350,7 +356,7 @@ sub getObservations {
 
 #twdoc filterMinFreq($self)
 #
-# For every obs type ``XXX.mf<minFreq>``, filters out thr observations which do not appear at least ``<minFreq>`` times.
+# For every obs type ``XXX.mf<minFreq>``, filters out the observations which do not appear at least ``<minFreq>`` times.
 #
 # * Called when the data is finalized.
 #
