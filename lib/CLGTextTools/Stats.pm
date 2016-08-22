@@ -627,6 +627,7 @@ sub getDocSize {
 sub normalizeFreqDoc {
     my ($doc, $total, $logger) = @_;
 
+    confessLog($logger, "Error: 'total' not initialized in 'normalizeFreqDoc'") if (!defined($total));
     my %res;
     my ($obs, $nb);
     while (($obs, $nb) = each %$doc) {
