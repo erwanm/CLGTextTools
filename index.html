@@ -131,6 +131,8 @@ Error message and password prompt
 
 <li>$:/SiteTitle</li>
 
+<li>$:/state/sidebar</li>
+
 <li>$:/state/tab/sidebar--1835078512</li>
 
 <li>$:/state/toc/Table of Contents-MakingOf-1680752989</li>
@@ -8178,16 +8180,19 @@ Error message and password prompt
 <div bag="default" created="20150616143242966" modified="20150616143246489" revision="0" title="$:/SiteTitle">
 <pre>CLGTextTools</pre>
 </div>
-<div created="20160921190449068" modified="20160921190449068" title="$:/state/tab/sidebar--1835078512">
+<div created="20160922162307039" modified="20160922162307039" title="$:/state/sidebar">
+<pre>no</pre>
+</div>
+<div created="20160921190449068" modified="20160922162140387" title="$:/state/tab/sidebar--1835078512">
 <pre>Table of Contents</pre>
 </div>
-<div created="20160921190450869" modified="20160921190809303" title="$:/state/toc/Table of Contents-MakingOf-1680752989">
-<pre>close</pre>
+<div created="20160921190450869" modified="20160922161910210" title="$:/state/toc/Table of Contents-MakingOf-1680752989">
+<pre>open</pre>
 </div>
 <div created="20160921190810260" modified="20160921190810260" title="$:/state/toc/Table of Contents-Usage-1680752989">
 <pre>open</pre>
 </div>
-<div list="CLGTextTools" title="$:/StoryList">
+<div list="DocGenerationCommand CLGTextTools Requirements" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -9453,8 +9458,10 @@ source setup.sh
 <div bag="default" color="#50a1eb" created="20160627201402195" modified="20160630190152070" revision="0" tags="Usage" title="Definitions">
 <pre></pre>
 </div>
-<div bag="default" created="20160912184013406" modified="20160921190519012" revision="0" tags="MakingOf" title="DocGenerationCommand">
-<pre>```
+<div bag="default" created="20160912184013406" modified="20160922162516176" revision="0" tags="MakingOf" title="DocGenerationCommand">
+<pre>This documentation is partly generated with [[tw-doc|https://github.com/erwanm/tw-doc]] using the following command:
+
+```
 ls bin/*sh | generate-tw-doc-exec-h.sh -t Scripts index.html
 find lib/ -name &quot;*.pm&quot; | generate-tw-doc-lib.sh -t Libraries -r lib/  index.html
 ```
