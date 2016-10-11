@@ -77,7 +77,8 @@ sub usage {
 	print $fh "     -S <sim measure params> specifiy a particular sim measure id instead of the\n";
 	print $fh "        default '$simMeasureId'\n";
 	print $fh "     -R <prefix> remove <prefix> from the filename for every doc id in the sim output\n";
-	print $fh "         file (only for <file2> since the probe files are not written).\n";
+	print $fh "         file (only for <file2> since the probe files are not written). If the special\n";
+	print $fh "         value 'BASENAME' is used, the path (dirname) is removed.\n";
 	print $fh "\n";
 }
 
