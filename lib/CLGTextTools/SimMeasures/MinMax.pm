@@ -2,9 +2,7 @@ package CLGTextTools::SimMeasures::MinMax;
 
 #twdoc
 #
-# Sim measure class which implements the min-max distance.
-# The opposite value of the distance is returned, in order to make it behave like a similarity.
-# As a consequence, the scores are negative values.
+# Sim measure class which implements the min-max similarity.
 #
 # ---
 # EM Oct 2015
@@ -72,8 +70,7 @@ sub compute {
     } else {
 	$self->{logger}->debug("final similarity score: ".($min / $max)) if ($self->{logger});
 
-	# IMPORTANT: returning the opposite of the value, in order to make this distance a similarity measure
-	return - $min / $max; 
+	return $min / $max; 
     }
 }
 
