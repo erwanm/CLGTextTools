@@ -7,12 +7,8 @@ source file-lib.sh
 
 progName=$(basename "$BASH_SOURCE")
 
-apiKeyFile="$HOME/.my-google-API-key.txt"
-if [ ! -f  "$apiKeyFile" ]; then
-    echo "Error: file $HOME/.my-google-API-key.txt not found." 1>&2
-    exit 1
-fi
-myAPIKey=$(cat "$apiKeyFile")
+myAPIKey=
+
 
 minNbWordsDoc=100
 minNbWordsParag=25
@@ -48,6 +44,17 @@ function usage {
 
 
 
+function initAPIKey {
+    apiKeyFile="$HOME/.my-google-API-key.txt"
+    if [ ! -f  "$apiKeyFile" ]; then
+	echo "Error: file $HOME/.my-google-API-key.txt not found." 1>&2
+	exit 1
+    fi
+    myAPIKey=$(cat "$apiKeyFile")
+}
+
+
+
 OPTIND=1
 while getopts 'hp:s:' option ; do 
     case $option in
@@ -74,6 +81,7 @@ query="$2"
 nbDocs="$3"
 outputPrefix="$4"
 
+initAPIKey
 index=1
 echo -n "Google query '$query'; index and progress:"
 while [ $nbDocs -gt 0 ]; do
