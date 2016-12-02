@@ -96,7 +96,7 @@ fi
 
 
 if [ -z "$readFromFile" ]; then
-    listFile=$(mktemp "$progName.XXXXXXXX")
+    listFile=$(mktemp --tmpdir "$progName.XXXXXXXX")
     while read inputDocFile; do
 	echo "$inputDocFile"
     done > "$listFile"
