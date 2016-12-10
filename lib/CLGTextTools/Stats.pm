@@ -56,7 +56,7 @@ sub min {
     my $min=undef;
     foreach my $v (@$values) {
 	if ( defined($v) && ( !defined($naStr) || ($v ne $naStr) ) ) {
-	    $min = $v if (!defined($min) || ($v>$min));
+	    $min = $v if (!defined($min) || ($v<$min));
 	}
     }
     return (defined($min)) ? $min : ( defined($naStr) ? $naStr : undef );
@@ -227,7 +227,7 @@ sub means {
 
 #twdoc aggregateVector(@$values, $aggregType, $naStr)
 # 
-# returns the value corresponding to the statistic described by $aggregType: 'median', 'arithm', 'geom', 'harmo' for the array ref @$values.
+# returns the value corresponding to the statistic described by $aggregType: 'median', 'arithm' or 'mean', 'geom', 'harmo', 'min', 'max', 'stdDev', 'Q1', 'Q3' for the array ref @$values.
 # $naStr is used instead of undef if it is defined.
 # 
 #/twdoc
@@ -238,12 +238,26 @@ sub aggregateVector {
     
     if ($aggregType eq "median") {
 	return median($values, $naStr);
-    } elsif ($aggregType eq "arithm") {
+    } elsif (($aggregType eq "arithm") || ($aggregType eq "mean")) {
 	return mean($values, $naStr);
     } elsif ($aggregType eq "geom") {
 	return geomMean($values, $naStr);
     } elsif ($aggregType eq "harmo") {
 	return harmoMean($values, $naStr);
+    } elsif ($aggregType eq "min") {
+	return min($values, $naStr);
+    } elsif ($aggregType eq "max") {
+	return max($values, $naStr);
+    } elsif ($aggregType eq "stdDev") {
+	return stdDev($values, $naStr);
+    } elsif ($aggregType eq "Q1") {
+	my @sorted = sort { $a <=> $b } @$values;
+	my $quants = distribQuantiles(\@sorted, [0.25]);
+	return $quants->[0];
+    } elsif ($aggregType eq "Q3") {
+	my @sorted = sort { $a <=> $b } @$values;
+	my $quants = distribQuantiles(\@sorted, [0.75]);
+	return $quants->[0];
     } else {
 	die "Error: invalid value '$aggregType' as 'aggregType' in aggregateVector";
     }
