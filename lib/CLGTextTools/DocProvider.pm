@@ -61,6 +61,7 @@ sub new {
  	$self->{filename} = $params->{filename};
  	$self->{id} = (defined($params->{id})) ? $params->{id} : $params->{filename};
 	$self->{useCountFiles} = defined($params->{useCountFiles}) ? 1 : 0;
+	$self->{forceCountFiles} = defined($params->{forceCountFiles}) ? 1 : 0;
 	$self->{checkIfSourceDocExists} = defined($params->{checkIfSourceDocExists}) ? $params->{checkIfSourceDocExists} : 1 ;
 	$self->{obsCollection} = (defined($params->{obsCollection})) ? $params->{obsCollection} : CLGTextTools::ObsCollection->new($params) ;
 	$self->{obsTypesList} = $self->{obsCollection}->getObsTypes();
