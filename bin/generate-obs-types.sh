@@ -18,7 +18,7 @@ lcChar="0 1"
 slChar="1"
 patternsPOS="P PP PPP PPPP PPPPP L LSL LSSL TST PSP TP PT TTP PTT TPP PPT PPST TSPP"
 slPOS="1"
-patternsVocabClass="MORPHO PUNCT"
+patternsVocabClass="MORPHO PUNCT TTR"
 lengthParams="2,4,6,9,14"
 
 function usage {
