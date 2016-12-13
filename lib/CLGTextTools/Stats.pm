@@ -17,6 +17,7 @@ use Carp;
 use CLGTextTools::Logging qw/confessLog warnLog/;
 use CLGTextTools::Commons qw/containsUndef/;
 #use Math::Round;
+use Data::Dumper;
 
 use base 'Exporter';
 our @EXPORT_OK = qw/sum min max mean median stdDev geomMean harmoMean means aggregateVector pickIndex pickInList pickInListProbas pickNSloppy  pickNIndexesAmongMSloppy pickNIndexesAmongMExactly  pickDocSubset splitDocRandom splitDocRandomAvoidEmpty averageByGroup scaleDoc scaleUpMaxDocSize getDocsSizes getDocSize normalizeFreqDoc distribQuantiles obsDistribByKey obsDistribByRelFreq freqBins/;
@@ -251,13 +252,21 @@ sub aggregateVector {
     } elsif ($aggregType eq "stdDev") {
 	return stdDev($values, $naStr);
     } elsif ($aggregType eq "Q1") {
-	my @sorted = sort { $a <=> $b } @$values;
-	my $quants = distribQuantiles(\@sorted, [0.25]);
-	return $quants->[0];
+	if (!containsUndef($values) && (scalar(@$values) > 0)) {
+	    my @sorted = sort { $a <=> $b } @$values;
+	    my $quants = distribQuantiles(\@sorted, [0.25]);
+	    return $quants->[0];
+	} else {
+	    return defined($naStr) ? $naStr : undef;
+	}
     } elsif ($aggregType eq "Q3") {
-	my @sorted = sort { $a <=> $b } @$values;
-	my $quants = distribQuantiles(\@sorted, [0.75]);
-	return $quants->[0];
+	if (!containsUndef($values) && (scalar(@$values) > 0)) {
+	    my @sorted = sort { $a <=> $b } @$values;
+	    my $quants = distribQuantiles(\@sorted, [0.75]);
+	    return $quants->[0];
+	} else {
+	    return defined($naStr) ? $naStr : undef;
+	}
     } else {
 	die "Error: invalid value '$aggregType' as 'aggregType' in aggregateVector";
     }
@@ -699,11 +708,14 @@ sub obsDistribByRelFreq {
 # for example, if the array contains only one value ``v``, any quantile value should be ``v``, but the function will return the propotion ``q`` of ``v`` (indeed the first cell does not have a 
 # previous cell, so it is assumed to start from 0).
 #
+# * Fatal error if ``$sortedDistrib`` is empty.
+#
 #/twdoc
 sub distribQuantiles {
     my ($sortedDistrib, $quantilesLimits, $cumulated, $logger) = @_;
 
     my $length = scalar(@$sortedDistrib);
+    confessLog($logger, "Error: empty sortedDistrib in distribQuantiles") if ($length == 0);
     my @values;
     my $lastIndex = -1; # for cumulated only
     my $accu = 0;  # for cumulated only
