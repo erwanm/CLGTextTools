@@ -32,15 +32,16 @@ my $printDistribHighestFirst;
 my $printCumulDistrib;
 my $printNbCommonObs;
 # todo options
-my $printRelFreqMostCommon = 0;
+my $printRelFreqMostCommon = 1;
 my $printDocDetails = 1;
 my $printStatSummary = 1;
+my $printOnlyGlobal = 1;
 
 sub usage {
 	my $fh = shift;
 	$fh = *STDOUT if (!defined $fh);
 	print $fh "\n"; 
-	print $fh "Usage: $progname [options] <obs types> <path1> [<path2> ...] ]\n";
+	print $fh "Usage: $progname [options] <obs types> [<id1>:]<path1> [[<id2>:]<path2> ...] ]\n";
 	print $fh "\n";
 	print $fh "  Performs a profile analysis for a set of collections of text files.\n";
 	print $fh "  The type of features is specified with <obs types>, which is a\n";
@@ -75,7 +76,8 @@ sub usage {
 	print $fh "        (applies only to WORD observations).\n";
 	print $fh "     -r <resourceId1:filename2[;resourceId2:filename2;...]> vocab resouces files\n";
 	print $fh "        with their ids.\n";
-	print $fh "     -m <min doc freq> discard observations with doc freq lower than <min doc freq>.\n";
+	print $fh "     -m <min doc freq> discard observations with doc freq lower than <min doc freq>;\n";
+	print $fh "        Interpreted as relative freq (wrt number of docs) if the value is lower than 1.\n";
 	print $fh "     -p <file pattern> file pattern which gives the list of documents when located\n";
 	print $fh "        in the dataset path. Default: '*.txt'\n";
 #	print $fh "     -g generate also count files for the whole dataset (sum of the counts); for\n";
@@ -86,7 +88,7 @@ sub usage {
 	print $fh "     -f force writing count files even if they already exist (default: only if the\n";
 	print $fh "        files don't exist yet.\n";
 	print $fh "     -o <quantiles>:<highestFirst>:<cumulatedDistrib>:<nbMostCommonObs>\n";
-	print $fh "        Options for printed summary. Default=''\n";
+	print $fh "        Options for printed summary. Default='$summaryOptions'\n";
 	print $fh "\n";
 }
 
@@ -128,17 +130,21 @@ sub globalSummary {
 	    my $docObservs = $docs->{$docId}->getObservations($obsType);
 	    my $total = $docs->{$docId}->getNbObsTotal($obsType);
 	    foreach my $obs (keys %commonObs) {
-		push(@{$commonObsValues{$obs}}, $docObservs->{$obs} / $total );
+		my $val = defined($docObservs->{$obs}) ? $docObservs->{$obs} : 0;
+		push(@{$commonObsValues{$obs}}, $val / $total );
 	    }
 	}
 	$metaStatsDataset{$datasetId} = aggregate(\%meta, \%commonObsValues);
     }
   
     globalCommonSummary(\%metaStatsDataset, \%commonObs);
-    foreach my $datasetId (keys %$data) {
-	print "\n\n**** $obsType, dataset '$datasetId'\n";
-	datasetSummary($statsDataset{$datasetId}, $metaStatsDataset{$datasetId});
-   }
+
+    if (!$printOnlyGlobal) {
+	foreach my $datasetId (keys %$data) {
+	    print "\n\n**** $obsType, dataset '$datasetId'\n";
+	    datasetSummary($statsDataset{$datasetId}, $metaStatsDataset{$datasetId});
+	}
+    }
     
 }
 
@@ -150,10 +156,14 @@ sub docStats {
     my %stats;
     $stats{totalDistinctRatioHappax} = [ $docProv->getNbObsTotal($obsType) , $docProv->getNbObsDistinct($obsType),  $docProv->getNbObsDistinct($obsType) / $docProv->getNbObsTotal($obsType), undef ];
     my $doc = $docProv->getObservations($obsType);
-    $stats{distribs} = obsDistribByRelFreq($doc, $stats{totalDistinctRatioHappax}->[0], 1, $logger); # highest first
-    $stats{quantValuesCumul} = distribQuantiles($stats{distribs}->[1], \@printDistribQuantileLimits, 1, $logger);
-    $stats{nbByFreq} = freqBins($doc, $logger);
-    $stats{totalDistinctRatioHappax}->[3] = $stats{nbByFreq}->{1} / $stats{totalDistinctRatioHappax}->[0]; # happax 
+    if (scalar(keys %$doc) == 0) {
+	$stats{empty} = 1;
+    } else {
+	$stats{distribs} = obsDistribByRelFreq($doc, $stats{totalDistinctRatioHappax}->[0], 1, $logger); # highest first
+	$stats{quantValuesCumul} = distribQuantiles($stats{distribs}->[1], \@printDistribQuantileLimits, 1, $logger);
+	$stats{nbByFreq} = freqBins($doc, $logger);
+	$stats{totalDistinctRatioHappax}->[3] = defined($stats{nbByFreq}->{1}) ?  $stats{nbByFreq}->{1} / $stats{totalDistinctRatioHappax}->[0] : "NaN"; # happax 
+    }
 
 
     return \%stats;
@@ -244,10 +254,14 @@ sub datasetSummary {
 #    for (my $i=0;  ($i < scalar(@{$stats->{$docId}->{distribs}->[0]})) && ($i<$printNbCommonObs); $i++) {
 	printf("%7.7s", $i+1);
 	foreach my $docId (keys %$stats) {
-	    if ($printRelFreqMostCommon) {
-		printf("\t%10.10s (%7.5f)", $stats->{$docId}->{distribs}->[0]->[$i], $stats->{$docId}->{distribs}->[1]->[$i]);
+	    if ($i < scalar(@{$stats->{$docId}->{distribs}->[0]})) {
+		if ($printRelFreqMostCommon) {
+		    printf("\t%10.10s (%7.5f)", $stats->{$docId}->{distribs}->[0]->[$i], $stats->{$docId}->{distribs}->[1]->[$i]);
+		} else {
+		    printf("\t%20.20s", $stats->{$docId}->{distribs}->[0]->[$i]);
+		}
 	    } else {
-		printf("\t%20.20s", $stats->{$docId}->{distribs}->[0]->[$i]);
+		printf("\t%20.20s", "-");
 	    }
 	    
 	}
@@ -268,7 +282,7 @@ sub globalCommonSummary {
     foreach my $datasetId (keys %$stats) {
 	printf("%20.20s | ", $datasetId);
     }
-    print "\n".("-" x 31)."|".(("-" x 22)."|" x scalar(keys %$stats))."\n";
+    print "\n".("-" x 31)."|".(("-" x 23) x scalar(keys %$stats))."\n";
     foreach my $obs (keys %$commonObs) {
 	foreach my $aggregType ("min", "Q1", "median", "Q3", "max") {
 	    printf("%20.20s   %7.7s | ", "$obs", "$aggregType");
@@ -277,7 +291,7 @@ sub globalCommonSummary {
 	    }
 	    print "\n";
 	}
-	print "".("-" x 31)."|".(("-" x 22)."|" x scalar(keys %$stats))."\n";
+	print "".("-" x 31)."|".(("-" x 23) x scalar(keys %$stats))."\n";
     }
     
 }
@@ -286,7 +300,7 @@ sub globalCommonSummary {
 
 # PARSING OPTIONS
 my %opt;
-getopts('ihl:L:t:r:s:m:p:f', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
+getopts('ihl:L:t:r:s:m:p:fo:', \%opt ) or  ( print STDERR "Error in options" &&  usage(*STDERR) && exit 1);
 usage(*STDOUT) && exit 0 if $opt{h};
 print STDERR "at least 1 argument expected but ".scalar(@ARGV)." found: ".join(" ; ", @ARGV)  && usage(*STDERR) && exit 1 if (scalar(@ARGV) < 1);
 my $obsTypesList = shift(@ARGV);
