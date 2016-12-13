@@ -330,6 +330,7 @@ sub writeCountFiles {
 	close($fh);
 	$f = "$f.total";
 	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
+	$self->{logger}->debug("Writing distinct/total observations for obs type '$obsType' = ".$self->{nbObsDistinct}->{$obsType}." / ".$self->{nbObsTotal}->{$obsType}) if ($self->{logger});
 	printf $fh "%d\t%d\n", $self->{nbObsDistinct}->{$obsType}, $self->{nbObsTotal}->{$obsType};
 	close($fh);
     }
