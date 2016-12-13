@@ -81,7 +81,10 @@ sub addObsType {
 	if ($obsType =~ m/^VOCABCLASS\.MORPHO$/) {
 	    $self->{params}->{$obsType}->{type} = "morpho";
 	    $self->{logger}->debug("Adding obs type '$obsType': morpho") if ($self->{logger});
-	} elsif ($obsType =~ m/^VOCABCLASS\.TTR$/) { # no min freq
+	} elsif ($obsType =~ m/^VOCABCLASS\.PUNCT$/) {
+	    $self->{params}->{$obsType}->{type} = "punct";
+	    $self->{logger}->debug("Adding obs type '$obsType': punct") if ($self->{logger});
+	} elsif ($obsType =~ m/^VOCABCLASS\.TTR$/) { # no min freq 
 	    $self->{params}->{$obsType}->{type} = "TTR";
 	    $self->{logger}->debug("Adding obs type '$obsType': TTR") if ($self->{logger});
 	} elsif ($obsType =~ m/^VOCABCLASS\.LENGTH/) {
@@ -143,6 +146,8 @@ sub addText {
 		my $class;
 		if ($type eq "morpho") {
 		    $class = getMorphClass($word);
+		} elsif ($type eq "punct") {
+		    $class = getPunctClass($word);
 		} elsif ($type eq "length") {
 		    my $l = length($word); # default class (no length classes supplied)
 		    if (defined($lengthClasses)) {
@@ -161,7 +166,7 @@ sub addText {
 	    }
 	}
 	$self->{nbDistinctNGrams}->{$obsType} = scalar(keys %{$self->{observs}->{$obsType}});
-	$self->{nbTotalNGrams}->{$obsType} = $nbTokens;
+	$self->{nbTotalNGrams}->{$obsType} += $nbTokens;
     }
 }
 
@@ -185,6 +190,18 @@ sub getMorphClass {
         return "punct";
     } else {
         return "misc";
+    }
+
+}
+
+
+ 
+sub getPunctClass {
+    my $token=  shift;
+    if ($token =~ m/^\p{Alnum}+$/) {
+	return "ALPHANUM";
+    } else {
+        return "$token";
     }
 
 }
