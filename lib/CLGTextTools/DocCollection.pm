@@ -148,13 +148,25 @@ sub getNbDocs {
 # Parameters:
 # * ``$minDocFreq``: the minimum doc frequency (nothing is done if the current min doc freq, default 0, is higher or equal to this parameter)
 # * ``$docFreqTable``: ``$docFreqTable->{obsType}->{obs} = doc freq`` ; if undef, uses the object doc freq table (if undef as well, computes the doc freq table based on the collection of documents itself)
+# * ``$nbDocs``: required only if ``$minDocFreq`` is a relative freq (<1) and ``$docFreqTable`` is provided (i.e. the collection itself is not the reference), since in this case we need the total number of documents to calculate the absolute threshold.
 #
 #/twdoc
 sub applyMinDocFreq {
     my $self = shift;
     my $minDocFreq = shift;
     my $docFreqTable = shift;
+    my $nbDocs = shift;
 
+    if ($minDocFreq < 1) {
+	if (defined($docFreqTable)) {
+	    confessLog($self->{logger}, "Error: cannot have docFreqTable defined and nbDocs undefined with relative frequency.") if (!defined($nbDocs));
+	} else {
+	    $nbDocs = scalar(keys %{$self->{docs}});
+	}
+	my $absMinFreq = $minDocFreq * $nbDocs; # if min doc freq < 1, interpret as relative frequency wrt to number of docs in the collection
+	$self->{logger}->debug("applyMinDocFreq: relative frequency $minDocFreq corresponds to absolute frequency $absMinFreq") if ($self->{logger});
+	$minDocFreq = $absMinFreq;
+    }
     my %res;
     if ($minDocFreq > $self->{minDocFreq}) {
 	if (!defined($docFreqTable)) {
@@ -162,6 +174,7 @@ sub applyMinDocFreq {
 	    $docFreqTable = $self->getDocFreqTable();
 	} 
 	foreach my $docKey (keys %{$self->{docs}}) {
+	    $self->{logger}->debug("applyMinDocFreq: applying min doc freq=$minDocFreq to doc '$docKey'") if ($self->{logger});
 	    my $allObservsDoc = $self->{docs}->{$docKey}->getObservations();
 	    filterMinDocFreq($allObservsDoc, $minDocFreq, $docFreqTable, 1);
 	}
@@ -302,7 +315,6 @@ sub createDatasetsFromParams {
 	}
 	my $nbDocs = scalar(keys %{$docColl->{docs}});
 	warnLog($logger, "Warning: dataset '$datasetId' is empty!") if ($nbDocs == 0);
-	$minDocFreq *= $nbDocs if ($minDocFreq < 1); # if min doc freq < 1, interpret as relative frequency wrt to number of docs in the collection
 	$docColl->applyMinDocFreq($minDocFreq);
 	$docColls{$datasetId} = $docColl;
     }
