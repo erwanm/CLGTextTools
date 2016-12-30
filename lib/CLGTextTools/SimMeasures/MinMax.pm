@@ -60,8 +60,10 @@ sub compute {
     }
     my ($obs2, $freq2);  
     while (($obs2, $freq2) = each %$doc2) {
-	$self->{logger}->trace("  obs = '$obs2'; freq1 = 0; freq2 = $freq2") if ($self->{logger});
-        $max += $freq2 if (!defined($doc1->{$obs2}));
+	if (!defined($doc1->{$obs2})) {
+	    $self->{logger}->trace("  obs = '$obs2'; freq1 = 0; freq2 = $freq2") if ($self->{logger});
+	    $max += $freq2 ;
+	}
     }
 
     if (!defined($min) || (!defined($max)) || ($max == 0)) {
