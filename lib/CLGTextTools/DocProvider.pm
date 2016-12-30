@@ -61,6 +61,7 @@ sub new {
  	$self->{filename} = $params->{filename};
  	$self->{id} = (defined($params->{id})) ? $params->{id} : $params->{filename};
 	$self->{useCountFiles} = defined($params->{useCountFiles}) ? 1 : 0;
+	$self->{forceCountFiles} = defined($params->{forceCountFiles}) ? 1 : 0;
 	$self->{checkIfSourceDocExists} = defined($params->{checkIfSourceDocExists}) ? $params->{checkIfSourceDocExists} : 1 ;
 	$self->{obsCollection} = (defined($params->{obsCollection})) ? $params->{obsCollection} : CLGTextTools::ObsCollection->new($params) ;
 	$self->{obsTypesList} = $self->{obsCollection}->getObsTypes();
@@ -317,11 +318,10 @@ sub writeCountFiles {
     $self->{logger}->debug("Writing count files to '$prefix.observations/<obsType>.count'") if ($self->{logger});
     foreach my $obsType (@{$self->{obsTypesList}}) {
 	my $f = $self->getCountFileName($obsType);
-	$self->{logger}->debug("Writing count file: '$f'") if ($self->{logger});
 	my $fh;
 	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
 	my $observs = $self->{observs}->{$obsType};
-	$self->{logger}->debug("Writing observations for obs type '$obsType'") if ($self->{logger});
+	$self->{logger}->debug("Writing observations for obs type '$obsType';  count file: '$f'") if ($self->{logger});
 	while (my ($key, $nb) = each %$observs) {
 	    print $fh "$obsType\t" if ($columnObsType);
 	    printf $fh "%s\t%d\n", $key, $nb ;
@@ -329,6 +329,7 @@ sub writeCountFiles {
 	close($fh);
 	$f = "$f.total";
 	open($fh, ">:encoding(utf-8)", $f) or confessLog($self->{logger}, "Cannot open file '$f' for writing");
+	$self->{logger}->debug("Writing distinct/total observations for obs type '$obsType' = ".$self->{nbObsDistinct}->{$obsType}." / ".$self->{nbObsTotal}->{$obsType}) if ($self->{logger});
 	printf $fh "%d\t%d\n", $self->{nbObsDistinct}->{$obsType}, $self->{nbObsTotal}->{$obsType};
 	close($fh);
     }

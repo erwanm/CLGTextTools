@@ -22,7 +22,7 @@ use  CLGTextTools::DocProvider;
 
 use CLGTextTools::SimMeasures::Cosine;
 use CLGTextTools::SimMeasures::MinMax;
-
+use CLGTextTools::SimMeasures::ChiSquare;
 use base 'Exporter';
 our @EXPORT_OK = qw/createSimMeasureFromId/;
 
@@ -117,6 +117,8 @@ sub createSimMeasureFromId {
 	    $res = CLGTextTools::SimMeasures::MinMax->new($myParams);
 	} elsif ($measureId eq "cosine") {
 	    $res = CLGTextTools::SimMeasures::Cosine->new($myParams);
+	} elsif ($measureId eq "chisquare") {
+	    $res = CLGTextTools::SimMeasures::ChiSquare->new($myParams);
 	} else {
 	    confess("Error: invalid measure id '$measureId', cannot instanciate Measure class.");
 	}

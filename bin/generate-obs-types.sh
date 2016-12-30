@@ -10,15 +10,16 @@ printAsParamValue=""
 patternsWord="T TT TTT"
 lcWord="1"
 slWord="1"
-patternsStopWords="TTT TTTT TTTTT TTTTTT"
+patternsStopWords="T TT TTT TTTT TTTTT TTTTTT"
 lcStopWords="1"
 slStopWords="1"
-patternsChar="CC CCC CCCC"
-lcChar="0"
+patternsChar="C CC CCC CCCC"
+lcChar="0 1"
 slChar="1"
-patternsPOS="P PP PPP PPPP L LSL LSSL TST PSP TP PT TTP PTT TPP PPT PPST TSPP"
+patternsPOS="P PP PPP PPPP PPPPP L LSL LSSL TST PSP TP PT TTP PTT TPP PPT PPST TSPP"
 slPOS="1"
-patternsVocabClass="MORPHO TTR LENGTH.2,4,6,9,14"
+patternsVocabClass="MORPHO PUNCT TTR"
+lengthParams="2,4,6,9,14"
 
 function usage {
   echo
@@ -30,6 +31,8 @@ function usage {
   echo
   echo "  Options:"
   echo "    -h this help"
+  echo "     -l <length params> word length classes (spaces separated);"
+  echo "        default: '$lengthParams'"
   echo "    -p <value> print as config parameters: 'obsType.<obs type>=<value>'"
   echo
 }
@@ -46,11 +49,12 @@ function printObsType {
 
 
 OPTIND=1
-while getopts 'hp:' option ; do 
+while getopts 'hp:l:' option ; do 
     case $option in
 	"h" ) usage
  	      exit 0;;
 	"p" ) printAsParamValue="$OPTARG";;
+	"l" ) lengthParams="$OPTARG";;
 	"?" ) 
 	    echo "Error, unknow option." 1>&2
             printHelp=1;;
@@ -105,5 +109,9 @@ for minFreq in $minFreqs; do
 
     for p in $patternsVocabClass; do
 	printObsType "VOCABCLASS.$p.mf$minFreq"
+    done
+
+    for p in $lengthParams; do
+	printObsType "VOCABCLASS.LENGTH.$lengthParams.mf$minFreq"
     done
 done

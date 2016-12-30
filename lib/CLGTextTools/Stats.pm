@@ -16,9 +16,11 @@ use Log::Log4perl;
 use Carp;
 use CLGTextTools::Logging qw/confessLog warnLog/;
 use CLGTextTools::Commons qw/containsUndef/;
+#use Math::Round;
+use Data::Dumper;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/sum min max mean median stdDev geomMean harmoMean means aggregateVector pickIndex pickInList pickInListProbas pickNSloppy  pickNIndexesAmongMSloppy pickNIndexesAmongMExactly  pickDocSubset splitDocRandom splitDocRandomAvoidEmpty averageByGroup scaleDoc scaleUpMaxDocSize getDocsSizes getDocSize normalizeFreqDoc/;
+our @EXPORT_OK = qw/sum min max mean median stdDev geomMean harmoMean means aggregateVector pickIndex pickInList pickInListProbas pickNSloppy  pickNIndexesAmongMSloppy pickNIndexesAmongMExactly  pickDocSubset splitDocRandom splitDocRandomAvoidEmpty averageByGroup scaleDoc scaleUpMaxDocSize getDocsSizes getDocSize normalizeFreqDoc distribQuantiles obsDistribByKey obsDistribByRelFreq freqBins/;
 
 
 
@@ -55,7 +57,7 @@ sub min {
     my $min=undef;
     foreach my $v (@$values) {
 	if ( defined($v) && ( !defined($naStr) || ($v ne $naStr) ) ) {
-	    $min = $v if (!defined($min) || ($v>$min));
+	    $min = $v if (!defined($min) || ($v<$min));
 	}
     }
     return (defined($min)) ? $min : ( defined($naStr) ? $naStr : undef );
@@ -226,7 +228,7 @@ sub means {
 
 #twdoc aggregateVector(@$values, $aggregType, $naStr)
 # 
-# returns the value corresponding to the statistic described by $aggregType: 'median', 'arithm', 'geom', 'harmo' for the array ref @$values.
+# returns the value corresponding to the statistic described by $aggregType: 'median', 'arithm' or 'mean', 'geom', 'harmo', 'min', 'max', 'stdDev', 'Q1', 'Q3' for the array ref @$values.
 # $naStr is used instead of undef if it is defined.
 # 
 #/twdoc
@@ -237,12 +239,34 @@ sub aggregateVector {
     
     if ($aggregType eq "median") {
 	return median($values, $naStr);
-    } elsif ($aggregType eq "arithm") {
+    } elsif (($aggregType eq "arithm") || ($aggregType eq "mean")) {
 	return mean($values, $naStr);
     } elsif ($aggregType eq "geom") {
 	return geomMean($values, $naStr);
     } elsif ($aggregType eq "harmo") {
 	return harmoMean($values, $naStr);
+    } elsif ($aggregType eq "min") {
+	return min($values, $naStr);
+    } elsif ($aggregType eq "max") {
+	return max($values, $naStr);
+    } elsif ($aggregType eq "stdDev") {
+	return stdDev($values, $naStr);
+    } elsif ($aggregType eq "Q1") {
+	if (!containsUndef($values) && (scalar(@$values) > 0)) {
+	    my @sorted = sort { $a <=> $b } @$values;
+	    my $quants = distribQuantiles(\@sorted, [0.25]);
+	    return $quants->[0];
+	} else {
+	    return defined($naStr) ? $naStr : undef;
+	}
+    } elsif ($aggregType eq "Q3") {
+	if (!containsUndef($values) && (scalar(@$values) > 0)) {
+	    my @sorted = sort { $a <=> $b } @$values;
+	    my $quants = distribQuantiles(\@sorted, [0.75]);
+	    return $quants->[0];
+	} else {
+	    return defined($naStr) ? $naStr : undef;
+	}
     } else {
 	die "Error: invalid value '$aggregType' as 'aggregType' in aggregateVector";
     }
@@ -636,6 +660,144 @@ sub normalizeFreqDoc {
     return \%res;
 
 
+}
+
+
+
+
+#twdoc obsDistribByRelFreq($%doc, $total, ?$highestFirst, ?$logger) 
+#
+# Given a documents as a hash ``$doc->{obs} = freq`` (one obs type only), returns the distribution by relative frequency as an array ``[ @observ, @relFreq ]``, where
+# ``@observ`` is the array containing the observations (keys) sorted by (relative) frequency, and
+# ``@relFreq`` is the array containing the corresponding relative frequencies.
+#
+# * ``$total`` is the total number of observations
+# * ``highestFirst`` in order to sort by descending order, ``highestFirst`` should be defined and non zero  
+#
+#
+#/twdoc
+sub obsDistribByRelFreq {
+    my ($doc, $total, $highestFirst, $logger) = @_;
+
+    confessLog($logger, "Error: total number of occurrences is zero.") if ($total == 0);
+    my @sorted;
+    if ($highestFirst) {
+	@sorted = sort { $doc->{$b} <=> $doc->{$a} } (keys %$doc);
+    } else {
+	@sorted = sort { $doc->{$a} <=> $doc->{$b} } (keys %$doc);
+    }
+    my @relFreq = map { $doc->{$_} / $total } @sorted;
+
+    return [ \@sorted, \@relFreq ];
+    
+}
+
+
+
+#twdoc distribQuantiles($sortedDistrib, $quantilesLimits, ?$cumulated, ?$logger)
+#
+# Given a sorted distribution ``$sortedDistrib`` (sorted array), returns an array of quantile values. Example: if the value is ``v`` for quantile limit ``q``, it means that ``q*100`` % of the values are lower or equal to ``v``.
+# 
+# If applied to the result of ``obsDistribByRelFreq``, the quantile value ``v`` represents the maximum relative frequency for the proportion ``q`` of distinct observations.
+#
+# * ``$quantilesLimits``: sorted array of quantile limits, e.g. ``[0.25,0.5,0.75]`` (quartiles)
+# * ``$cumulated``: if defined and non zero, the quantile values are accumulated. Example for the result of ``obsDistribByRelFreq``: ``v*100`` % of the least frequent distinct words account for ``q*100`` % of the occurrences.
+#
+# ''IMPORTANT'': this function assumes a "pseudo-continous" distribution, i.e. interprets the value in each cell as divisible: it can take a proportion of the value in a cell at index ``i`` by
+# considering that the cell represents a linear function from the value at index ``i-1`` to its own value. As a consequence the function does not strictly follow the definition of quantiles; 
+# for example, if the array contains only one value ``v``, any quantile value should be ``v``, but the function will return the propotion ``q`` of ``v`` (indeed the first cell does not have a 
+# previous cell, so it is assumed to start from 0).
+#
+# * Fatal error if ``$sortedDistrib`` is empty.
+#
+#/twdoc
+sub distribQuantiles {
+    my ($sortedDistrib, $quantilesLimits, $cumulated, $logger) = @_;
+
+    my $length = scalar(@$sortedDistrib);
+    confessLog($logger, "Error: empty sortedDistrib in distribQuantiles") if ($length == 0);
+    my @values;
+    my $lastIndex = -1; # for cumulated only
+    my $accu = 0;  # for cumulated only
+    for (my $i = 0; $i<scalar(@$quantilesLimits); $i++) {
+	confessLog($logger, "Error: invalid value for quantile limit: ".$quantilesLimits->[$i]) if (($quantilesLimits->[$i]<0) || ($quantilesLimits->[$i]>1));
+	$logger->trace("distribQuantiles: i=$i, quantile=".$quantilesLimits->[$i]) if ($logger);
+	my $floatIndex = $length * $quantilesLimits->[$i] -1;
+	my $intIndex = int($floatIndex);
+	if ($intIndex < 0) {
+	    $values[$i] = $sortedDistrib->[0] * (1 + $intIndex); # example: if intIndex=-0.2, we want a proportion 1-0.2 = 0.8 of $sortedDistrib[0].
+	    $logger->trace("distribQuantiles: negative intIndex. floatindex=$floatIndex;intIndex=$intIndex; value=$values[$i]") if ($logger);
+	} else { # intIndex is at least 0
+	    $logger->trace("distribQuantiles: positive intIndex. floatindex=$floatIndex;intIndex=$intIndex") if ($logger);
+	    my $valueAtIndex = $sortedDistrib->[$intIndex];
+	    $logger->trace("distribQuantiles: value at index $intIndex = $valueAtIndex") if ($logger);
+	    my $value;
+	    if ($cumulated) {
+		while ($lastIndex<$intIndex) {
+		    $lastIndex++;
+		    $accu += $sortedDistrib->[$lastIndex];
+		    $logger->trace("distribQuantiles: cumulating, lastIndex=$lastIndex; accu=$accu") if ($logger);
+		}
+		$value = $accu;
+	    } else {
+		$value = $valueAtIndex;
+	    }
+	    $logger->trace("distribQuantiles: before 'between cells'; valueAtIndex=$valueAtIndex; value=$value") if ($logger);
+	    if (($intIndex+1 < $length) && ($intIndex < $floatIndex)) { # between two cells
+		$value += ($sortedDistrib->[$intIndex+1] - $valueAtIndex) * ($floatIndex - $intIndex);
+	    }
+	    $logger->trace("distribQuantiles: final value=$value") if ($logger);
+	    $values[$i] = $value;
+	}
+    }
+    return \@values;
+}
+
+
+
+#twdoc obsDistribByRelFreq($doc, $total, ?$selectedKeys, ?$logger) 
+#
+# Given a documents as a hash ``$doc->{obs} = freq`` (one obs type only), returns the distribution sorted by keys (observations) ``[ @observ, @relFreq ]``, where
+# ``@observ`` is the sorted array containing the observations (keys), and
+# ``@relFreq`` is the array containing the corresponding relative frequencies.
+#
+# * ``$total`` is the total number of observations
+# * ``$selectedKeys`` if defined, array containing the keys to take into account; other observations are ignored.
+#
+#
+#/twdoc
+sub obsDistribByKey {
+    my ($doc, $total, $selectedKeys, $logger) = @_;
+
+    my @sorted;
+    if (!defined $selectedKeys) {
+	@sorted = sort (keys %$doc);
+    } else {
+	@sorted = sort (@$selectedKeys);
+    }
+    my @relFreq  = map {  (defined($doc->{$_})) ? $doc->{$_} / $total : 0 } @sorted;
+    return [ \@sorted, \@relFreq ];
+    
+}
+
+
+
+
+#twdoc freqBins($doc, ?$logger)
+#
+# given a document as a hash ``$doc->{obs} = freq`` (one obs type only),  returns a hash ``bins`` such that ``bin{n}`` is the number of observations with frequency n.
+#
+#/twdoc
+sub freqBins {
+    my ($doc, $logger) = @_;
+
+    my %bins;
+    my ($obs, $nb);
+    while (($obs, $nb) = each %$doc) {
+	$bins{$nb}++;
+    }
+    return \%bins;
+    
 }
 
 

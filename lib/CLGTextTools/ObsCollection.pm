@@ -250,7 +250,9 @@ sub extractObsFromText {
 		    $textUnits = [ join(" ", @$textLines) ];
 		}
 	    }
+	    $self->{logger}->debug("Read all text, ".scalar(@$textUnits)." units found.") if ($self->{logger});
 	    foreach my $unit (@$textUnits) {
+		$self->{logger}->trace("Adding unit '$unit'") if ($self->{logger});
 		$self->{families}->{$family}->addText($unit);
 	    }
 	} elsif ($family eq "POS") {

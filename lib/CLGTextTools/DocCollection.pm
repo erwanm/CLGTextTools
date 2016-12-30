@@ -45,7 +45,7 @@ sub new {
 	$self->{globalPath} =  $params->{globalPath};
 	$self->{docs} = {};
 	$self->{docFreqTable} = undef;
-	$self->{minDocFreq} = 1;
+	$self->{minDocFreq} = 0;
 	$self->{globalCountDocProv} = undef;
 	$self->{docFreqCountDocProv} = undef;
  	bless($self, $class);
@@ -146,15 +146,27 @@ sub getNbDocs {
 # * There is little sense using this method if the DocProvider objects have not been initialized with the same obs types list.
 #
 # Parameters:
-# * ``$minDocFreq``: the minimum doc frequency (nothing is done if the current min doc freq, default 1, is higher or equal than this parameter)
+# * ``$minDocFreq``: the minimum doc frequency (nothing is done if the current min doc freq, default 0, is higher or equal to this parameter)
 # * ``$docFreqTable``: ``$docFreqTable->{obsType}->{obs} = doc freq`` ; if undef, uses the object doc freq table (if undef as well, computes the doc freq table based on the collection of documents itself)
+# * ``$nbDocs``: required only if ``$minDocFreq`` is a relative freq (<1) and ``$docFreqTable`` is provided (i.e. the collection itself is not the reference), since in this case we need the total number of documents to calculate the absolute threshold.
 #
 #/twdoc
 sub applyMinDocFreq {
     my $self = shift;
     my $minDocFreq = shift;
     my $docFreqTable = shift;
+    my $nbDocs = shift;
 
+    if ($minDocFreq < 1) {
+	if (defined($docFreqTable)) {
+	    confessLog($self->{logger}, "Error: cannot have docFreqTable defined and nbDocs undefined with relative frequency.") if (!defined($nbDocs));
+	} else {
+	    $nbDocs = scalar(keys %{$self->{docs}});
+	}
+	my $absMinFreq = $minDocFreq * $nbDocs; # if min doc freq < 1, interpret as relative frequency wrt to number of docs in the collection
+	$self->{logger}->debug("applyMinDocFreq: relative frequency $minDocFreq corresponds to absolute frequency $absMinFreq") if ($self->{logger});
+	$minDocFreq = $absMinFreq;
+    }
     my %res;
     if ($minDocFreq > $self->{minDocFreq}) {
 	if (!defined($docFreqTable)) {
@@ -162,6 +174,7 @@ sub applyMinDocFreq {
 	    $docFreqTable = $self->getDocFreqTable();
 	} 
 	foreach my $docKey (keys %{$self->{docs}}) {
+	    $self->{logger}->debug("applyMinDocFreq: applying min doc freq=$minDocFreq to doc '$docKey'") if ($self->{logger});
 	    my $allObservsDoc = $self->{docs}->{$docKey}->getObservations();
 	    filterMinDocFreq($allObservsDoc, $minDocFreq, $docFreqTable, 1);
 	}
@@ -256,7 +269,7 @@ sub generateDocFreqTable {
 # * ``$mapIdToPath`` is either:
 # ** a hash such that ``$mapIdToPath->{id} = path``, where ``path`` points to a directory contaning the files to include in the dataset; alternatively, if path points to a file, this file contains the list of all documents to include (one by line).
 # ** a string ``path``, which points to a directory where datasets directories named 'id' are expected, i.e. a dataset ``x`` is located in ``path/x/``
-# * ``$minDocFreq`` (optional): min doc frequency threshold; if >1, the collection is entirely populated (can take long) in order to generate the doc freq table. (currently can only be used with the collection itself as reference for doc freq)
+# * ``$minDocFreq`` (optional): min doc frequency threshold; if >0, the collection is entirely populated (can take long) in order to generate the doc freq table. (currently can only be used with the collection itself as reference for doc freq). Interpreted as relative freq (wrt number of docs) if the value is lower than 1.
 # * ``$filePattern`` is optional: if specified, only files which satisfy the pattern are included in the dataset (the default value is ``*.txt``).
 # * ``$logger`` (optional)
 # * ``$removePrefix``: optional, path prefix to remove from the doc id. If using special value "BASENAME", then the file basename is used.
@@ -269,7 +282,7 @@ sub createDatasetsFromParams {
     $logger->debug("Creating list of DocCollection objects from parameters") if ($logger);
     warnLog($logger, "Warning: no dataset provided (empty list)!") if (scalar(@$datasetsIdsList) == 0);
     $filePattern= "*.txt" if (!defined($filePattern));
-    $minDocFreq = 1 if (!defined($minDocFreq));
+    $minDocFreq = 0 if (!defined($minDocFreq));
     my %docColls;
     foreach my $datasetId (@$datasetsIdsList) {
 	my $path = (ref($mapIdToPath)) ? $mapIdToPath->{$datasetId} : "$mapIdToPath/$datasetId/" ;
@@ -300,7 +313,8 @@ sub createDatasetsFromParams {
 	    my $doc = CLGTextTools::DocProvider->new(\%paramsThis);
 	    $docColl->addDocProvider($doc);
 	}
-	warnLog($logger, "Warning: dataset '$datasetId' is empty!") if (scalar(keys %{$docColl->{docs}}) == 0);
+	my $nbDocs = scalar(keys %{$docColl->{docs}});
+	warnLog($logger, "Warning: dataset '$datasetId' is empty!") if ($nbDocs == 0);
 	$docColl->applyMinDocFreq($minDocFreq);
 	$docColls{$datasetId} = $docColl;
     }
