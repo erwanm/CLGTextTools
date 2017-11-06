@@ -31,7 +31,7 @@ function usage {
   echo
   echo "  Options:"
   echo "    -h this help"
-  echo "     -l <length params> word length classes (spaces separated);"
+  echo "    -l <length params> word length classes (':' separated);"
   echo "        default: '$lengthParams'"
   echo "    -p <value> print as config parameters: 'obsType.<obs type>=<value>'"
   echo
@@ -54,7 +54,7 @@ while getopts 'hp:l:' option ; do
 	"h" ) usage
  	      exit 0;;
 	"p" ) printAsParamValue="$OPTARG";;
-	"l" ) lengthParams="$OPTARG";;
+	"l" ) lengthParams=$(echo "$OPTARG" | tr ':' ' ');;
 	"?" ) 
 	    echo "Error, unknow option." 1>&2
             printHelp=1;;
@@ -72,7 +72,6 @@ fi
 
 minFreqs="$1"
 stopWordsIds="$2"
-
 
 for minFreq in $minFreqs; do
     for p in $patternsWord; do
@@ -112,6 +111,6 @@ for minFreq in $minFreqs; do
     done
 
     for p in $lengthParams; do
-	printObsType "VOCABCLASS.LENGTH.$lengthParams.mf$minFreq"
+	printObsType "VOCABCLASS.LENGTH.$p.mf$minFreq"
     done
 done
