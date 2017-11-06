@@ -131,6 +131,10 @@ Error message and password prompt
 
 <li>$:/SiteTitle</li>
 
+<li>$:/state/showeditpreview</li>
+
+<li>$:/state/sidebar</li>
+
 <li>$:/state/tab/sidebar--1835078512</li>
 
 <li>$:/state/toc/Table of Contents-Usage-1680752989</li>
@@ -432,6 +436,8 @@ Error message and password prompt
 <li>google-query.sh</li>
 
 <li>Libraries</li>
+
+<li>License</li>
 
 <li>LineBreaks</li>
 
@@ -8182,16 +8188,22 @@ Error message and password prompt
 <div bag="default" created="20150616143242966" modified="20150616143246489" revision="0" title="$:/SiteTitle">
 <pre>CLGTextTools</pre>
 </div>
+<div created="20171106190830898" modified="20171106190830898" title="$:/state/showeditpreview">
+<pre>yes</pre>
+</div>
+<div created="20171106190829011" modified="20171106191039348" title="$:/state/sidebar">
+<pre>yes</pre>
+</div>
 <div created="20161220212054849" modified="20161220212054849" title="$:/state/tab/sidebar--1835078512">
 <pre>Table of Contents</pre>
 </div>
-<div created="20161220212057943" modified="20161220212057943" title="$:/state/toc/Table of Contents-Usage-1680752989">
-<pre>open</pre>
+<div created="20161220212057943" modified="20171106190806147" title="$:/state/toc/Table of Contents-Usage-1680752989">
+<pre>close</pre>
 </div>
 <div created="20161220212103368" modified="20161220212103368" title="$:/state/toc/Usage-Definitions-1680752989">
 <pre>open</pre>
 </div>
-<div list="ObservationType ObsFamily NGramPatterns LowerCased CLGTextTools" title="$:/StoryList">
+<div list="License About CLGTextTools" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -8317,20 +8329,24 @@ Error message and password prompt
     }
 }</pre>
 </div>
-<div bag="default" created="20160623135147967" email="erwan.more@gmail.com" gitrepo="TODO" issues="TODO" modified="20160921180200959" revision="0" tags="[[Table of Contents]] MakingOf" title="About">
+<div bag="default" created="20160623135147967" email="erwan.more@gmail.com" gitrepo="https://github.com/erwanm/CLGTextTools" issues="https://github.com/erwanm/CLGTextTools/issues" modified="20171106191034389" revision="0" tags="[[Table of Contents]] MakingOf" title="About">
 <pre>    ''CLGTextTools'': Perl library containing functions to analyze text documents and especially extract text features.
-
-    Copyright (C) 2016 Erwan Moreau
-
-''LICENSE TODO''
 
 * Official repository: {{!!gitrepo}}
 * Bug reports and feature requests: {{!!issues}}
 * Contact the author: &lt;code&gt;{{!!email}}&lt;/code&gt;
 
+''Copyright (C) 2016-2017 Trinity College Dublin, Adapt Centre and Erwan Moreau''
+
+{{License}}
+
+
+
+
 ---
 
-[[TiddlyWiki|http://www.tiddlywiki.com]] is Copyright (C) Jeremy Ruston 2004-2007 Copyright (C) ~UnaMesa Association 2007-2016. [[See full license|https://github.com/Jermolene/TiddlyWiki5/blob/master/licenses/copyright.md]].
+[[TiddlyWiki|http://www.tiddlywiki.com]] is used for this documentation. ~TiddlyWiki is Copyright (C) Jeremy Ruston 2004-2007 Copyright (C) ~UnaMesa Association 2007-2016. [[See full license|https://github.com/Jermolene/TiddlyWiki5/blob/master/licenses/copyright.md]].
+
 </pre>
 </div>
 <div bag="default" created="20160627183944120" modified="20160627184009405" revision="0" title="CharObsFamily">
@@ -8670,12 +8686,10 @@ EM Oct 2015
 </pre>
 </div>
 <div bag="default" created="20161123185924000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getFilename($self)" type="text/vnd.tiddlywiki">
-<pre>
-</pre>
+<pre></pre>
 </div>
 <div bag="default" created="20161123185924000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getId($self)" type="text/vnd.tiddlywiki">
-<pre>
-</pre>
+<pre></pre>
 </div>
 <div bag="default" created="20161123185924000" revision="0" tags="CLGTextTools/DocProvider.pm" title="CLGTextTools/DocProvider.pm/getNbObsDistinct($self, ?$obsType)" type="text/vnd.tiddlywiki">
 <pre>Returns the number of distinct observations for this obs type.
@@ -8882,8 +8896,7 @@ After extracting all the observations, the data is &quot;finalized&quot;, which 
 </pre>
 </div>
 <div bag="default" created="20161123185924000" revision="0" tags="CLGTextTools/ObsCollection.pm" title="CLGTextTools/ObsCollection.pm/new($class, $params)" type="text/vnd.tiddlywiki">
-<pre>
-``$params``:
+<pre>``$params``:
 
 * logging
 * obsTypes (list, or colon-separated string, or as individual keys: obsType.XXX = 1)
@@ -8994,8 +9007,7 @@ Adds the observations found in ``$text`` to the current sets of observations for
 </pre>
 </div>
 <div bag="default" created="20161123185924000" revision="0" tags="CLGTextTools/Observations/ObsFamily.pm" title="CLGTextTools/Observations/ObsFamily.pm/new($class, $params, $subclass)" type="text/vnd.tiddlywiki">
-<pre>
-* ``$params``:
+<pre>* ``$params``:
 ** logging
 ** obsTypes
 * ``$subclass``: used only to initialize the logger object with the right package id
@@ -9173,9 +9185,7 @@ The parameters for the measure are read from ``$params``.
 </pre>
 </div>
 <div bag="default" created="20161123185924000" revision="0" tags="CLGTextTools/SimMeasures/Measure.pm" title="CLGTextTools/SimMeasures/Measure.pm/new($class, $params, $subclass)" type="text/vnd.tiddlywiki">
-<pre>
-
-``$params``:
+<pre>``$params``:
 
 * logging
 
@@ -9623,6 +9633,13 @@ find lib/ -name &quot;*.pm&quot; | generate-tw-doc-lib.sh -t Libraries -r lib/  
 </div>
 <div bag="default" color="#50a1eb" created="20160629171043428" modified="20160630190908705" revision="0" tags="Usage" title="Libraries">
 <pre></pre>
+</div>
+<div created="20171106191041066" modified="20171106191130125" tags="MakingOf" title="License">
+<pre>CLGTextTools is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see &lt;http://www.gnu.org/licenses/&gt;. </pre>
 </div>
 <div bag="default" created="20150629172648960" modified="20160630185239580" revision="0" tags="Definitions" title="LineBreaks">
 <pre>Some ObsFamily instances can take line breaks into account (currently only in CharObsFamily). This possibility should be used only if line breaks are meaningful (see OverlappingNGrams and SentenceLimits); otherwise, its is best for the calling program to remove them first.
