@@ -53,9 +53,15 @@ function tokAndPOS {
 	    exit 3
 	fi
 	if [ $force -ne 0 ] || [ ! -s "$f.POS" ]; then
-#	    echo "DEBUG tree-tagger-tokenizer-wrapper.sh $language <\"$f\" >\"$f.tok\""
-	    evalSafe "tree-tagger-tokenizer-wrapper.sh $language <\"$f\" >\"$f.tok\""  "$progName: "
-	    evalSafe "tree-tagger-POS-wrapper.sh $language <\"$f.tok\" >\"$f.POS\""  "$progName: "
+	    if [ -s "$f" ] && grep . "$f">/dev/null; then # check that $f is not empty
+		#	    echo "DEBUG tree-tagger-tokenizer-wrapper.sh $language <\"$f\" >\"$f.tok\""
+		evalSafe "tree-tagger-tokenizer-wrapper.sh $language <\"$f\" >\"$f.tok\""  "$progName: "
+		evalSafe "tree-tagger-POS-wrapper.sh $language <\"$f.tok\" >\"$f.POS\""  "$progName: "
+	    else
+		# create empty .tok and .POS files
+		touch "$f.tok"
+		touch "$f.POS"
+	    fi
 	fi
 	line=$(( $line + 1 ))
     done
