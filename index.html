@@ -8195,8 +8195,8 @@ Error message and password prompt
 <div created="20171106190830898" modified="20171106190830898" title="$:/state/showeditpreview">
 <pre>yes</pre>
 </div>
-<div created="20171106190829011" modified="20171106191039348" title="$:/state/sidebar">
-<pre>yes</pre>
+<div created="20171106190829011" modified="20220125194955957" title="$:/state/sidebar">
+<pre>no</pre>
 </div>
 <div created="20161220212054849" modified="20161220212054849" title="$:/state/tab/sidebar--1835078512">
 <pre>Table of Contents</pre>
@@ -8204,13 +8204,13 @@ Error message and password prompt
 <div created="20171106201649028" modified="20171106215923856" title="$:/state/toc/Table of Contents-MakingOf-1680752989">
 <pre>close</pre>
 </div>
-<div created="20161220212057943" modified="20171106190806147" title="$:/state/toc/Table of Contents-Usage-1680752989">
-<pre>close</pre>
+<div created="20161220212057943" modified="20220125194949601" title="$:/state/toc/Table of Contents-Usage-1680752989">
+<pre>open</pre>
 </div>
 <div created="20161220212103368" modified="20161220212103368" title="$:/state/toc/Usage-Definitions-1680752989">
 <pre>open</pre>
 </div>
-<div list="TODO Requirements CLGTextTools" title="$:/StoryList">
+<div list="NGramPatterns CLGTextTools" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -9668,7 +9668,7 @@ Because it must be possible to write or read the list of n-grams to a file, to a
 <div bag="default" color="#50a1eb" created="20160630185308857" modified="20160630191049094" revision="0" tags="Usage" title="Misc">
 <pre>{{{[tag[Misc]]}}}</pre>
 </div>
-<div bag="default" created="20150629180551784" modified="20161220223959886" revision="0" tags="Definitions" title="NGramPatterns">
+<div bag="default" created="20150629180551784" modified="20220125195959906" revision="0" tags="Definitions" title="NGramPatterns">
 <pre>Several [[observation families|ObsFamily]] share a common parameter //&quot;pattern&quot;//:
 
 * WordObsFamily: ``[TS]+``
@@ -9689,7 +9689,11 @@ Because it must be possible to write or read the list of n-grams to a file, to a
 ** ``T`` is for //token//, ``S`` for //skip//, ``P`` for POS tag and ``L`` for lemma.
 ** POS obs types can be used only if ``.POS`` files are present (typically pre-computed with ~TreeTagger).
 ** remark: the first and last character must not be ''S''.
-</pre>
+* `VOCABCLASS` is for special mappings of tokens into other categories:
+** `VOCABCLASS.MORPHO` maps tokens to categories such `number`, `punct`, `AllUpperCase`, etc.
+** `VOCABCLASS.LENGTH.&lt;vector&gt;` maps tokens to their length, binning the length based on the argument `&lt;vector&gt;`
+*** Example: `VOCABCLASS.LENGTH.2,4,6,9,14` means that tokens of length 1 and 2 are mapped into the first bin, tokens of length 3 and 4 are mapped to the second bin, etc.
+** `VOCABCLASS.TTR` is an even more special case which just returns the token-type ratio instead of frequency values.</pre>
 </div>
 <div bag="default" created="20160628151253305" modified="20160628151405917" revision="0" title="ObsCollection">
 <pre>See [[CLGTextTools/ObsCollection.pm]]</pre>
