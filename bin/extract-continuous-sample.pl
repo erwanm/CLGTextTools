@@ -43,23 +43,31 @@ while (<INPUT>)  {
 close(INPUT);
 
 my $totalSize = scalar(@data);
-my $startLine =  int(rand($totalSize - $sampleSize));
-my $endLine = $startLine + $sampleSize;
-my ($startLine0, $endLine0) = ($startLine, $endLine);
-if ($onlyCompleteParags) {
-    while (( $startLine<$endLine) && ($data[$startLine] !~ m/^\s*$/)) { # skip non empty lines
-	$startLine++;
+my $startLine;
+my $endLine;
+if ($totalSize <= $sampleSize) {
+    warn "Warning: not enough data in '$filename': $totalSize lines vs. $sampleSize required. Printing the full content.";
+    $startLine = 0;
+    $endLine = $totalSize-1;
+} else {
+    $startLine =  int(rand($totalSize - $sampleSize));
+    $endLine = $startLine + $sampleSize;
+    my ($startLine0, $endLine0) = ($startLine, $endLine);
+    if ($onlyCompleteParags) {
+	while (( $startLine<$endLine) && ($data[$startLine] !~ m/^\s*$/)) { # skip non empty lines
+	    $startLine++;
+	}
+	while (($data[$startLine] =~ m/^\s*$/)) { # go to next non empty line
+	    $startLine++;
+	}
+	confess("Error: no blank line found in the sample from line $startLine0") if ($startLine>=$endLine);
+	
+	while (( $startLine<$endLine) && ($data[$endLine--] !~ m/^\s*$/)) { # skip non empty lines
+	    $endLine--;
+	}
+	confess("Error: no blank line found in the sample between line $startLine and line $endLine0") if ($startLine >$endLine);
+	$endLine++;
     }
-    while (($data[$startLine] =~ m/^\s*$/)) { # go to next non empty line
-	$startLine++;
-    }
-    confess("Error: no blank line found in the sample from line $startLine0") if ($startLine>=$endLine);
-    
-    while (( $startLine<$endLine) && ($data[$endLine--] !~ m/^\s*$/)) { # skip non empty lines
-	$endLine--;
-    }
-    confess("Error: no blank line found in the sample between line $startLine and line $endLine0") if ($startLine >$endLine);
-    $endLine++;
 }
 for (my $line=$startLine; $line<$endLine; $line++) { # print sample
     print "$data[$line]\n";
